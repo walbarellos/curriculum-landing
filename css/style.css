@@ -16,23 +16,6 @@ html, body {
 
 /* Ajustes no texto principal */
 /* Melhorando a visibilidade do texto */
-.text-lg.italic {
-  font-size: 1.5rem;
-  color: #ffffff; /* Cor do texto: branco para contraste com fundo escuro */
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7); /* Aumenta a sombra para destacar mais */
-  font-style: italic;
-  letter-spacing: 0.5px;
-  background-color: rgba(0, 0, 0, 0.4); /* Fundo semitransparente preto para contraste */
-  padding: 0.25rem 0.5rem; /* Adiciona padding ao redor do texto */
-  border-radius: 0.25rem; /* Bordas arredondadas */
-}
-
-/* Responsividade para celular */
-@media (max-width: 768px) {
-  .text-lg.italic {
-    font-size: 1.2rem; /* Ajuste para dispositivos móveis */
-  }
-}
 
 /* === CARD === */
 .card-css {
