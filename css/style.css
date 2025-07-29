@@ -224,22 +224,27 @@ p {
 }
 
 /* Ajustes no texto principal */
+/* Ajustes no texto principal */
 .text-lg.italic {
   font-size: 1.5rem;
-  color: transparent; /* Cor do texto como transparente para aplicar o gradiente */
-  background-image: linear-gradient(90deg, #00b38f, #aea724, #00cba0); /* Gradiente suave */
-  background-clip: text; /* Aplica o gradiente ao texto */
+  background-image: linear-gradient(90deg, #00b38f, #00cba0, #aea724); /* Gradiente mais suave */
+  background-clip: text;
   -webkit-background-clip: text; /* Para navegadores Webkit */
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7); /* Aumenta a sombra para destacar mais */
+  color: transparent; /* Tornar o texto transparente para o gradiente ser visível */
+  
+  /* Fundo atrás do texto */
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente preto */
+  
+  /* Sombra do texto */
+  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.6); /* Sombra escura para destacar mais */
+  
   font-style: italic;
   letter-spacing: 0.5px;
-  background-color: rgba(0, 0, 0, 0.4); /* Fundo semitransparente preto para contraste */
-  padding: 0.25rem 0.5rem; /* Adiciona padding ao redor do texto */
-  border-radius: 0.25rem; /* Bordas arredondadas */
-  display: inline-block;  /* Restrige o fundo ao tamanho do texto */
+  display: inline-block; /* Restrige o fundo ao tamanho do texto */
   max-width: 100%; /* Limita a largura do elemento ao seu conteúdo */
 }
-
 
 .tree {
   place-self: center;
