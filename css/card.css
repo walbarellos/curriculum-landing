@@ -1,0 +1,51 @@
+.card-css {
+    background-color: #0f172a;
+    background-image:
+    repeating-linear-gradient(
+        45deg,
+        rgba(0,255,180,0.05) 0px,
+                              rgba(0,255,180,0.05) 1px,
+                              transparent 1px,
+                              transparent 5px
+    ),
+    radial-gradient(circle at top left, rgba(0,255,180,0.15), transparent),
+    radial-gradient(circle at bottom right, rgba(0,255,255,0.1), transparent);
+    background-size: 200% 200%;
+    animation: bgFlow 15s linear infinite;
+    border: 1px solid rgba(0, 255, 180, 0.2);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    overflow: hidden;
+    transition: transform var(--transition-fast), box-shadow var(--transition-spring);
+    box-shadow:
+    0 0 12px rgba(0, 255, 180, 0.3),
+    inset 0 0 6px rgba(0, 255, 180, 0.1);
+    position: relative;
+}
+
+.card-css::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #10b981, #3b82f6, #10b981);
+    animation: moveLine 3s linear infinite;
+    box-shadow: 0 0 8px #10b981;
+}
+
+.card-css:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 20px rgba(0, 255, 180, 0.3);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+    text-shadow: 0 0 4px rgba(0, 255, 180, 0.25);
+}
+
+.card-body {
+    font-size: 0.875rem;
+    color: #d1d5db;
+}
