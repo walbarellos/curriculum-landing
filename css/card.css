@@ -3,24 +3,29 @@
     background-image:
     repeating-linear-gradient(
         45deg,
-        rgba(0,255,180,0.05) 0px,
-                              rgba(0,255,180,0.05) 1px,
-                              transparent 1px,
-                              transparent 5px
+        rgba(0, 255, 180, 0.03) 0px,   /* Diminui a opacidade do verde neon */
+        rgba(0, 255, 180, 0.03) 1px,   /* Diminui a opacidade do verde neon */
+        transparent 1px,
+        transparent 5px
     ),
-    radial-gradient(circle at top left, rgba(0,255,180,0.15), transparent),
-    radial-gradient(circle at bottom right, rgba(0,255,255,0.1), transparent);
+    radial-gradient(circle at top left, rgba(0, 255, 180, 0.1), transparent),   /* Menos forte o efeito */
+    radial-gradient(circle at bottom right, rgba(0, 255, 255, 0.05), transparent); /* Menos saturação */
     background-size: 200% 200%;
-    animation: bgFlow 15s linear infinite;
-    border: 1px solid rgba(0, 255, 180, 0.2);
+    animation: bgFlow 30s linear infinite;   /* Aumenta o tempo da animação para suavizar */
+    border: 1px solid rgba(0, 255, 180, 0.1);   /* Diminuir o efeito de borda neon */
     border-radius: var(--radius-xl);
     padding: 1.5rem;
     overflow: hidden;
     transition: transform var(--transition-fast), box-shadow var(--transition-spring);
     box-shadow:
-    0 0 12px rgba(0, 255, 180, 0.3),
-    inset 0 0 6px rgba(0, 255, 180, 0.1);
+        0 0 8px rgba(0, 255, 180, 0.2),   /* Reduz o brilho da sombra externa */
+        inset 0 0 4px rgba(0, 255, 180, 0.1);   /* Reduz o brilho da sombra interna */
     position: relative;
+}
+
+@keyframes bgFlow {
+    0% { background-position: 0 0; }
+    100% { background-position: 100% 100%; }
 }
 
 .card-css::before {
@@ -28,21 +33,26 @@
     position: absolute;
     top: 0; left: 0; right: 0; height: 3px;
     background: linear-gradient(90deg, #10b981, #3b82f6, #10b981);
-    animation: moveLine 3s linear infinite;
-    box-shadow: 0 0 8px #10b981;
+    animation: moveLine 4s linear infinite;   /* Aumenta o tempo para suavizar o movimento */
+    box-shadow: 0 0 4px #10b981;   /* Reduz o brilho do efeito da linha */
+}
+
+@keyframes moveLine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 .card-css:hover {
     transform: scale(1.03);
-    box-shadow: 0 0 20px rgba(0, 255, 180, 0.3);
+    box-shadow: 0 0 12px rgba(0, 255, 180, 0.2);   /* Ajusta o brilho ao passar o mouse */
 }
 
 .card-title {
     font-size: 1.25rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: #ffffff;
-    text-shadow: 0 0 4px rgba(0, 255, 180, 0.25);
+    color: #ffffff;  /* Branco puro */
+    text-shadow: 0 0 2px rgba(0, 255, 180, 0.1);  /* Menos brilho */
 }
 
 .card-body {
