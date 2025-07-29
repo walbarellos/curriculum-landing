@@ -337,7 +337,7 @@ transform: translateX(4px);
 
 /* Hover mágico */
 .social-icon:hover .icon-img {
-  transform: scale(1.2);
+  transform: scale(1.1);
   filter: invert(52%) sepia(78%) saturate(640%) hue-rotate(114deg) brightness(93%) contrast(96%);
 }
 
