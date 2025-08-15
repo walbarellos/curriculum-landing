@@ -1,0 +1,19 @@
+.subtitle {
+  font-size: 1.4rem;
+  text-align: center;
+  font-style: italic;
+  color: #00bcd4;
+  margin-bottom: 1rem;
+  animation: subtitle-glide 1.2s ease-in-out forwards;
+}
+
+@keyframes subtitle-glide {
+  from {
+    opacity: 0;
+    transform: translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
