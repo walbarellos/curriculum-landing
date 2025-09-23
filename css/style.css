@@ -395,12 +395,18 @@ p {
   position: relative;
   top: 1px;
 }
+
 .ritual-moldura {
-  padding: 4px;
-  border-radius: 1rem; /* borda arredondada elegante */
-  background: rgba(255, 255, 255, 0.08); /* vidro fosco */
-  box-shadow:
-    0 0 12px rgba(0, 255, 180, 0.25),
-    inset 0 0 6px rgba(255, 255, 255, 0.1);
-  transition: all 0.4s ease-in-out;
+  display: inline-block;
+  border-radius: 1rem;
+  padding: 6px;
+  background: linear-gradient(90deg, #1dd1a1, #48dbfb);
+  box-shadow: 0 0 15px rgba(72, 219, 251, 0.25);
+}
+.ritual-moldura img {
+  display: block;
+  border-radius: 1rem;
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
 }
