@@ -1,41 +1,85 @@
-<!-- CARDS: Projetos Profissionais -->
-<div class="grid md:grid-cols-2 gap-6 text-center">
+<!-- PROJETOS EM DESTAQUE -->
+<h2 class="text-3xl font-bold gradient-text border-b border-gray-700 pb-2 mt-16 mb-6">
+  🔭 Projetos em Destaque
+</h2>
 
-  <div class="card-css">
-    <p class="card-title">Sistema ERP Moderno</p>
-    <p class="card-body">
-      Desenvolvimento sênior de um ERP modular de nova geração, com arquitetura de microserviços baseada em <strong>FastAPI</strong>, <strong>PostgreSQL</strong> e <strong>Redis</strong>, aliado a frontend híbrido em <strong>React + Tauri</strong>. Operação offline, importação inteligente de dados e dashboards analíticos garantem performance local e insights de vendas em tempo real, reduzindo custos e aumentando a eficiência de redes comerciais.
-    </p>
-  </div>
-
-  <div class="card-css">
-    <p class="card-title">Primeira Loja Maçônica Virtual</p>
-    <p class="card-body">
-      Criação técnica e simbólica de um templo interativo <strong>2D/3D</strong> inédito no mundo, fiel ao Rito Escocês Antigo e Aceito (REAA). Integra gamificação, economia simbólica e ambientes de contemplação ritual, unindo fidelidade histórica, precisão pedagógica e arquitetura tecnológica robusta para experiências imersivas e autênticas.
-    </p>
-  </div>
-
-  <div class="card-css">
-    <p class="card-title">UPA: Sobreviva na Espera</p>
-    <p class="card-body">
-      Jogo satírico em pixel art que transporta o jogador para o cotidiano desafiador de um hospital público brasileiro. Desenvolvido em <strong>Godot 4.x</strong>, combina humor ácido, gestão estratégica de tempo e escolhas narrativas de impacto, no estilo <em>Punch Club</em>, explorando paciência, burocracia e improviso como mecânicas centrais.
-    </p>
-  </div>
-
-  <div class="card-css">
-    <p class="card-title">Projeto Urbz & Projeto Agroverso</p>
-    <p class="card-body">
-      Desenvolvimento de ecossistemas digitais e identidades visuais para negócios urbanos e agrícolas com impacto social real. Estrutura modular com <strong>sites responsivos</strong>, <strong>plataformas de gestão</strong> e <strong>design estratégico</strong> aplicando o Método Caracol e os princípios de Sabedoria, Força e Beleza, potencializando alcance e conversão.
-    </p>
-  </div>
-
-  <div class="card-css">
-    <p class="card-title">Jogo Narrativo Textual</p>
-    <p class="card-body">
-      Game interativo de narrativa simbólica e escolhas morais, com sistema episódico, múltiplos caminhos e finais ramificados. HUD adaptativa e mecânicas internas dinâmicas oferecem uma experiência imersiva e em constante evolução, preservando aspectos confidenciais do design para manter o elemento de descoberta do jogador.
-    </p>
-  </div>
-
+<div class="overflow-x-auto">
+  <table class="min-w-full border border-gray-700 rounded-xl overflow-hidden">
+    <thead class="bg-gray-800">
+      <tr>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-emerald-400">Nome</th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-emerald-400">Descrição</th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-emerald-400">Tech</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-700">
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/Erp-Caracol" class="text-emerald-300 hover:underline">ERP Caracol-Sommerville</a></td>
+        <td class="px-4 py-3 text-gray-300">ERP modular orientado por simbologia viva, com stack moderno e visão ética.</td>
+        <td class="px-4 py-3 text-gray-400">FastAPI, PostgreSQL, React, Tauri</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/sus-survival" class="text-emerald-300 hover:underline">SUS Survival Club</a></td>
+        <td class="px-4 py-3 text-gray-300">Jogo em pixel art satírico sobre espera em hospitais públicos brasileiros.</td>
+        <td class="px-4 py-3 text-gray-400">Godot 4.x, PixelArt, ECS</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/text-game" class="text-emerald-300 hover:underline">Pedra (Narrativa Simbólica)</a></td>
+        <td class="px-4 py-3 text-gray-300">Jogo narrativo moral com builds introspectivos e HUD simbólica.</td>
+        <td class="px-4 py-3 text-gray-400">HTML, JSON, Vanilla JS</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/shomer-OSINT" class="text-emerald-300 hover:underline">Shomer OSINT</a></td>
+        <td class="px-4 py-3 text-gray-300">Ferramenta para análise e vigilância ética de comentários públicos.</td>
+        <td class="px-4 py-3 text-gray-400">FastAPI, SQLite, JSON, OSINT</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/wAEngine" class="text-emerald-300 hover:underline">wAEngine (Game ECS Engine)</a></td>
+        <td class="px-4 py-3 text-gray-300">Engine experimental baseada em ECS, voltada a jogos 2D com máxima performance.</td>
+        <td class="px-4 py-3 text-gray-400">C++, ECS, SFML</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/curriculum-landing" class="text-emerald-300 hover:underline">Currículo Landing Page</a></td>
+        <td class="px-4 py-3 text-gray-300">Site de currículo interativo para desenvolvedores e freelancers.</td>
+        <td class="px-4 py-3 text-gray-400">HTML, Tailwind, Responsivo</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/nails-designer" class="text-emerald-300 hover:underline">Nails Designer</a></td>
+        <td class="px-4 py-3 text-gray-300">Sistema de agendamento e gestão para designers de unhas.</td>
+        <td class="px-4 py-3 text-gray-400">JS, LocalStorage, Frontend puro</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/AutoAgent" class="text-emerald-300 hover:underline">AutoAgent</a></td>
+        <td class="px-4 py-3 text-gray-300">Agente local automatizador para tarefas com GPT em Python.</td>
+        <td class="px-4 py-3 text-gray-400">Python, CLI, Automações</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/Llama-On-The-Brows" class="text-emerald-300 hover:underline">Llama On The Brows</a></td>
+        <td class="px-4 py-3 text-gray-300">Projeto com LLaMA embarcado em browser.</td>
+        <td class="px-4 py-3 text-gray-400">JS, WebLLM, AI no navegador</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/Acre-Processos-Licitatorios" class="text-emerald-300 hover:underline">Acre Licitações</a></td>
+        <td class="px-4 py-3 text-gray-300">Ferramenta para análise de dados de licitação no estado do Acre.</td>
+        <td class="px-4 py-3 text-gray-400">Python, Scraping, Dados Públicos</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/HTML2MD" class="text-emerald-300 hover:underline">HTML2MD</a></td>
+        <td class="px-4 py-3 text-gray-300">Conversor leve e local de HTML para Markdown.</td>
+        <td class="px-4 py-3 text-gray-400">Python, Regex</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/Youtube-Transcript" class="text-emerald-300 hover:underline">YouTube Transcript</a></td>
+        <td class="px-4 py-3 text-gray-300">Transcrição e análise rápida de vídeos do YouTube.</td>
+        <td class="px-4 py-3 text-gray-400">Python, API, NLP</td>
+      </tr>
+      <tr>
+        <td class="px-4 py-3"><a href="https://github.com/walbarellos/free-qr-code" class="text-emerald-300 hover:underline">Free QR Code</a></td>
+        <td class="px-4 py-3 text-gray-300">Gerador de QR Codes offline, gratuito e personalizável.</td>
+        <td class="px-4 py-3 text-gray-400">JS, HTML5, Frontend leve</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- CARDS: Stack Tecnológica -->
