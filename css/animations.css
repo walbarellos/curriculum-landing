@@ -1,6 +1,7 @@
 @keyframes pulseGlow {
     0%, 15% { text-shadow: 0 0 1px rgba(0, 255, 180, 0.1); }
-    50% { text-shadow: 0 0 4px rgba(0, 255, 180, 0.2); }
+    50% { text-shadow: 0 0 6px rgba(0, 255, 180, 0.4); }
+    100% { text-shadow: 0 0 2px rgba(0, 255, 180, 0.2); }
 }
 
 @keyframes moveLine {
@@ -30,6 +31,7 @@
   100% { opacity: 1; transform: translateY(0); }
 }
 
+/* Classes utilitárias */
 .animate { animation-duration: 0.7s; animation-fill-mode: backwards; }
 .pop { animation-name: pop; }
 .slide { animation-name: slide; }
@@ -39,3 +41,25 @@
 .delay-1 { animation-delay: 0.3s; }
 .delay-2 { animation-delay: 0.6s; }
 .delay-3 { animation-delay: 0.9s; }
+
+/* ===== Refinamento dos cards ===== */
+.card-css {
+  transition: transform 0.4s ease, box-shadow 0.4s ease, background-position 1.2s linear;
+  background-size: 200% 200%;
+}
+
+/* Hover com glow + leve movimento */
+.card-css:hover {
+  animation: pulseGlow 2s infinite alternate;
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 0 18px rgba(0, 255, 180, 0.35);
+  background-position: 100% 100%;
+}
+
+/* Alternância de direção (não fica todo igual) */
+.card-css:nth-child(even):hover {
+  animation: pulseGlow 2s infinite alternate, bgFlow 10s linear infinite reverse;
+}
+.card-css:nth-child(odd):hover {
+  animation: pulseGlow 2s infinite alternate, bgFlow 10s linear infinite;
+}
