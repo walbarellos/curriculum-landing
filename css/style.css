@@ -405,8 +405,8 @@ p {
 }
 .ritual-moldura img {
   display: block;
-  border-radius: 1rem;
-  width: 180px;
-  height: 180px;
-  object-fit: cover;
+  width: 200px;         /* ajuste conforme o design */
+  height: auto;         /* mantém proporção */
+  border-radius: 1rem;  /* segue a moldura */
+  object-fit: contain;  /* mostra a foto inteira */
 }
