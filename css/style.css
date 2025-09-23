@@ -402,7 +402,7 @@ p {
   padding: 6px;
   background: linear-gradient(90deg, #1dd1a1, #48dbfb);
   box-shadow: 0 0 15px rgba(72, 219, 251, 0.25);
-  margin-bottom: 1.5rem; /* afasta do nome */
+  margin-bottom: 2.5rem; /* afasta do nome */
 }
 .ritual-moldura img {
   display: block;
