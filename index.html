@@ -4,311 +4,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Willian Albarello — Desenvolvedor Fullstack</title>
+  <title>Willian Albarello — Engenharia & Auditoria</title>
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Inter:wght@400;600;700&family=Martel:wght@900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <!-- TailwindCSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
-  <!-- GSAP & ScrollMagic -->
+  <!-- GSAP & Plugins -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/scrollmagic@2.0.8/scrollmagic/minified/ScrollMagic.min.js"></script>
 
-  <!-- Swiper.js (Carousel) -->
+  <!-- Swiper.js -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
   <!-- CSS -->
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/index.css">
-<link rel="stylesheet" href="css/card.css">
-<link rel="stylesheet" href="css/themes.css">
-<link rel="stylesheet" href="css/animations.css">
-<!-- Coloque o style.css por último -->
-<link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/style.css">
 
-
-  <!-- Estilo direto para ícones -->
   <style>
-    .icon {
-      width: 32px;
-      height: 32px;
-      color: white;
+    .icon { width: 32px; height: 32px; color: white; }
+    #lightbox-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98);
+      backdrop-filter: blur(20px); z-index: 10000; justify-content: center; align-items: center;
     }
-    .icon-link {
-      display: inline-block;
-      transition: transform 0.3s ease;
-    }
-    .icon-link:hover {
-      transform: scale(1.1);
-      color: #10b981;
-    }
+    #lightbox-overlay.active { display: flex; }
+    #lightbox-img { max-width: 95%; max-height: 92%; border-radius: 10px; border: 2px solid #10b981; }
+    .close-lightbox { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-gray-950 via-blue-950 to-slate-950 text-slate-200 font-sans">
+<body class="bg-gray-950 text-slate-200 font-sans">
 
-  <!-- Ícone de toggle (hamburger) -->
+  <div id="lightbox-overlay">
+    <span class="close-lightbox">&times;</span>
+    <img id="lightbox-img" src="" alt="Zoom">
+  </div>
+
   <div id="menu-toggle" class="fixed top-4 left-4 z-50 cursor-pointer p-2 rounded bg-gray-800 hover:bg-emerald-600 transition">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
     </svg>
   </div>
 
-  <!-- Sidebar lateral -->
-  <aside id="sidebar" class="fixed top-0 left-0 h-full w-56 bg-gray-900 bg-opacity-95 shadow-lg z-40 transform -translate-x-full transition-transform duration-300 ease-in-out">
-    <nav class="flex flex-col mt-20 space-y-6 px-6 text-gray-200 font-semibold text-lg">
-      <a href="#intro" class="nav-link-sidebar hover:text-emerald-300">Início</a>
-      <a href="#atuacao" class="nav-link-sidebar hover:text-emerald-300">Resumo</a>
-      <a href="#projetos" class="nav-link-sidebar hover:text-emerald-300">Projetos</a>
-      <a href="#contato" class="nav-link-sidebar hover:text-emerald-300">Contato</a>
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-56 bg-gray-900 shadow-lg z-40 transform -translate-x-full transition-transform duration-300">
+    <nav class="flex flex-col mt-20 space-y-6 px-6 text-gray-200 font-semibold">
+      <a href="#intro" class="hover:text-emerald-300">Início</a>
+      <a href="#atuacao" class="hover:text-emerald-300">Resumo</a>
+      <a href="#projetos" class="hover:text-emerald-300">Projetos</a>
+      <a href="#contato" class="hover:text-emerald-300">Contato</a>
     </nav>
   </aside>
-  <!-- Sidebar lateral -->
-<main class="max-w-5xl mx-auto py-28 px-4" role="main">
-  <header class="text-center mb-16" id="intro">
-    <div class="relative mx-auto mb-10 ritual-moldura">
-      <img src="assets/img/perfil.jpg" alt="Willian Albarello"
-           class="shadow-xl">
-    </div>
-    
-    <div class="header-banner">
-      <h1 class="title-name">Willian Albarello</h1>
-      <p class="subtitle-hero">
-        Engenheiro de Software · Especialista em Sistemas de Auditoria · Dados
-      </p>
-      <p class="mt-4 text-slate-400 font-medium">
-        Pesquisador Autodidata em Engenharia de Sistemas Críticos e Governança de Dados.
-      </p>
-    </div>
 
-    <a href="assets/pdf/Willian_Albarello_Curriculo.pdf" download
-       class="inline-block mt-8 bg-emerald-600 hover:bg-emerald-400 text-slate-950 font-bold px-8 py-3 rounded-lg shadow-lg transition-all transform hover:scale-105 ring-2 ring-emerald-400/20">
-      📄 Baixar Currículo (PDF)
-    </a>
-  </header>
+  <main class="max-w-5xl mx-auto py-28 px-4">
+    <header class="text-center mb-16" id="intro">
+      <div class="relative mx-auto ritual-moldura">
+        <img src="assets/img/perfil.jpg" alt="Willian Albarello">
+      </div>
+      
+      <div class="header-banner">
+        <h1 class="title-name">Willian Albarello</h1>
+        <p class="subtitle-hero">Engenheiro de Software · Especialista em Sistemas de Auditoria</p>
+        <p class="mt-4 text-slate-400 font-medium">Pesquisador Autodidata em Engenharia de Sistemas Críticos e Governança.</p>
+      </div>
 
-    <section class="mb-14 opacity-0 text-center" id="atuacao">
+      <a href="assets/pdf/Willian_Albarello_Curriculo.pdf" download
+         class="inline-block mt-8 bg-emerald-600 hover:bg-emerald-400 text-slate-950 font-bold px-8 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-all">
+        📄 Baixar Currículo (PDF)
+      </a>
+    </header>
+
+    <section id="atuacao" class="mb-14 opacity-0">
       <div class="card-css">
         <h2 class="card-title gradient-text section-title">Sobre Willian</h2>
         <p class="card-body">
-          Desenvolvedor e Pesquisador Autodidata com mais de <strong>10 anos de imersão técnica</strong>. Atuo na intersecção entre <strong>Engenharia de Software, Arquitetura de Dados e Auditoria Digital</strong>, construindo ferramentas de inteligência para fiscalização e transparência institucional.
+          Desenvolvedor e Pesquisador Autodidata com mais de <strong>10 anos de imersão técnica</strong>. Atuo na intersecção entre <strong>Engenharia de Software, Arquitetura de Dados e Auditoria Digital</strong>.
           <br><br>
-          Como neurodivergente, utilizo o rigor lógico e a abstração técnica como canais de excelência para a resolução de problemas complexos e desenvolvimento de sistemas íntegros.
+          Como neurodivergente, utilizo o rigor lógico e a abstração técnica como canais de excelência para o desenvolvimento de sistemas íntegros.
         </p>
-
-        <ul class="text-left mt-4 mb-2 list-disc list-inside text-slate-300 text-sm leading-relaxed">
-          <li><strong>Auditoria & Inteligência</strong> — Desenvolvimento de ferramentas OSINT e pipelines de análise de dados públicos para detecção de anomalias em licitações e recursos governamentais.</li>
-          <li><strong>Engenharia de Software</strong> — Arquitetura modular, pipelines de CI/CD, e sistemas corporativos escaláveis focados em conformidade e integridade.</li>
-          <li><strong>Refinador de Sistemas</strong> — Otimização de performance, semântica de código e design consciente para missões críticas.</li>
-          <li><strong>Arquiteto Fullstack Poliglota</strong> — Proficiência real em mais de 30 tecnologias, com foco em robustez (Rust, Go, Python, C++).</li>
-          <ul class="ml-6 list-disc">
-            <li><strong>Linguagens:</strong> Python · C · C++ · Go · Rust · Lua · Ruby · PHP · TypeScript · JavaScript · Shell · Elixir · Nim · Haskell · R · Dart · Java · SQL · Regex</li>
-            <li><strong>Backend:</strong> FastAPI · Flask · Django · Node.js · Express · PostgreSQL · MongoDB · Redis · Celery · SQLAlchemy</li>
-            <li><strong>Frontend:</strong> React · Vite · TailwindCSS · Vue.js · Astro · Svelte · HTMX · jQuery</li>
-            <li><strong>Desktop / Mobile:</strong> Tauri · Electron · GTK · Qt · React Native · C/C++ · Kivy</li>
-            <li><strong>DevOps & CLI:</strong> Docker · GitHub Actions · Zsh · Bash · Nix · Arch Linux · Ansible</li>
-            <li><strong>Ferramentas:</strong> Blender · Figma · GIMP · Inkscape · Jupyter · VSCode · Vim</li>
-          </ul>
-          <li><strong>Especialista em Automação</strong> — Sistemas para terminal, rotinas de deploy, controle de dependências, ingestão de dados e integração contínua.</li>
-          <li><strong>Pesquisador Independente</strong> — Estudos em CTMU, Engenharia Ontológica, IA Simbólica e Semântica Computacional aplicada à construção inteligente e cognição. A interconexão entre as áreas científicas, e os padrões ou modelos autoestruturantes que surgem delas, me fascina.</li>
+        <ul class="text-left mt-6 space-y-2 text-slate-300 text-sm list-disc list-inside">
+          <li><strong>Engenharia & Auditoria</strong> — Sistemas de inteligência para fiscalização e transparência.</li>
+          <li><strong>Fullstack Poliglota</strong> — Proficiência real em Rust, Go, Python, C++, TypeScript e mais.</li>
+          <li><strong>Automação & OSINT</strong> — Pipelines de análise de dados massivos e captura Selenium.</li>
         </ul>
       </div>
     </section>
 
-    <section class="mb-14 opacity-0 text-center" id="projetos">
-      <h2 class="text-3xl font-bold text-white border-b border-gray-700 pb-2 mb-8 gradient-text">Projetos Profissionais</h2>
+    <section id="projetos" class="mb-14 opacity-0">
       <div id="cards-section-container"></div>
     </section>
 
-    <section class="mb-14 opacity-0 text-center" id="certificados">
-      <h2 class="text-3xl font-bold text-white border-b border-gray-700 pb-2 mb-4 gradient-text">📜 Certificados</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="card-css">
-          <p class="card-title">TOEFL ITP (nível B1 CEFR - 510)</p>
-          <p class="card-body">Emitido pela Universidade Federal do Acre. <a href="assets/pdf/isf-declaracao.pdf" class="text-blue-400 underline hover:text-blue-300">Ver certificado</a></p>
-        </div>
-        <div class="card-css">
-          <p class="card-title">Capacitação em Atendimento Público</p>
-          <p class="card-body">OCA / Governo do Acre — 17h, abril de 2023. <a href="assets/pdf/certificado-servidorpublico.pdf" class="text-blue-400 underline hover:text-blue-300">Ver certificado</a></p>
-        </div>
-      </div>
-
-      <!-- Novo Certificado 
-      <div class="card-css">
-        <p class="card-title">Iniciação e Princípios à Engenharia de Software – Edx</p>
-        <p class="card-body">
-          Curso oferecido pela Harvard University na plataforma edX, com foco em princípios fundamentais da engenharia de software: requisitos, testes, modelagem, versionamento, DevOps e práticas ágeis. Certificado internacional reconhecido.
-          <a href="assets/img/certificado-harvard-edx.png"
-          class="text-blue-400 underline hover:text-blue-300 ml-1">Ver certificado</a>
-        </p>
-      </div> -->
-    </section>
-
-    <section class="opacity-0 animate-fade-in-up mb-14 text-center" id="contato">
-      <h2 class="text-3xl font-bold text-emerald-400 border-b border-gray-700 pb-2 mb-4 tracking-tight section-title">📬 Contato</h2>
-
-      <ul class="space-y-2 text-lg text-gray-300 font-medium">
-        <li>Email: <a href="mailto:willianalbarello@gmail.com" class="text-yellow-400 hover:text-yellow-300 transition duration-300">willianalbarello@gmail.com</a></li>
-        <li>Site: <a href="https://dev-walbarello.netlify.app" class="text-yellow-400 hover:text-yellow-300 transition duration-300">dev-walbarello.netlify.app</a></li>
-        <li>GitHub: <a href="https://github.com/walbarellos" class="text-yellow-400 hover:text-yellow-300 transition duration-300">github.com/walbarellos</a></li>
-        <li>Fediverso: <a href="https://qoto.org/@wepiphany" class="text-yellow-400 hover:text-yellow-300 transition duration-300">qoto.org/@wepiphany</a></li>
-      </ul>
-
-      <div class="flex justify-center items-center mt-8 gap-6 text-white text-xl">
-        <a href="https://github.com/walbarellos" target="_blank" class="social-icon icon-github">
-          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg" alt="GitHub" class="icon-img" />
-        </a>
-        <span class="divider">|</span>
-        <a href="https://qoto.org/@wepiphany" target="_blank" class="social-icon icon-mastodon">
-          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/mastodon.svg" alt="Mastodon" class="icon-img" />
-        </a>
-        <span class="divider">|</span>
-        <a href="mailto:willianalbarello@gmail.com" class="social-icon icon-gmail">
-          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gmail.svg" alt="Email" class="icon-img" />
-        </a>
-        <span class="divider">|</span>
-        <a href="https://dev-walbarello.netlify.app" target="_blank" class="social-icon icon-site">
-          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/internetexplorer.svg" alt="Site pessoal" class="icon-img" />
-        </a>
+    <section id="contato" class="text-center opacity-0 mb-14">
+      <h2 class="text-3xl font-bold gradient-text section-title">📬 Contato</h2>
+      <div class="flex justify-center gap-6 mt-8">
+        <a href="https://github.com/walbarellos" target="_blank" class="social-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg" class="icon-img"></a>
+        <a href="https://qoto.org/@wepiphany" target="_blank" class="social-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/mastodon.svg" class="icon-img"></a>
+        <a href="mailto:willianalbarello@gmail.com" class="social-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gmail.svg" class="icon-img"></a>
+        <a href="https://dev-walbarello.netlify.app" target="_blank" class="social-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/internetexplorer.svg" class="icon-img"></a>
       </div>
     </section>
   </main>
 
-  <!-- Botão Back to Top -->
-  <button id="back-to-top" class="fixed bottom-8 left-4 z-50 p-3 rounded-full bg-slate-950 border-2 border-emerald-500/50 text-emerald-400 opacity-0 translate-y-10 transition-all duration-500 hover:bg-emerald-500 hover:text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.2)] cursor-pointer btn-highlight">
+  <button id="back-to-top" class="fixed bottom-8 left-4 z-50 p-3 rounded-full bg-slate-950 border-2 border-emerald-500/50 text-emerald-400 opacity-0 btn-highlight">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
     </svg>
   </button>
 
-  <!-- Lightbox (Zoom de Imagens) -->
-  <div id="lightbox-overlay">
-    <span class="close-lightbox">&times;</span>
-    <img id="lightbox-img" src="" alt="Zoom">
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="js/navbar-animate.js"></script>
-  <script src="js/footer-icons.js"></script>
-
-  <!-- Scripts -->
-  <script src="js/scrollmagic-init.js"></script>
   <script src="js/script.js"></script>
-  <script src="js/title-parallax.js"></script>
-
-  <!-- Navigation Scripts -->
   <script>
-    // 0. Lightbox Logic (PRIORIDADE TOTAL)
+    // Lightbox Global
     window.openLightbox = function(src) {
-      console.log("Abrindo lightbox para:", src); // Debug
       const lb = document.getElementById("lightbox-overlay");
-      const lbImg = document.getElementById("lightbox-img");
-      if (lb && lbImg) {
-        lbImg.src = src;
-        lb.classList.add("active");
-        document.body.style.overflow = "hidden";
-      }
+      const img = document.getElementById("lightbox-img");
+      img.src = src;
+      lb.classList.add("active");
+      document.body.style.overflow = "hidden";
     };
-
-    window.closeLightboxFunc = function() {
-      const lb = document.getElementById("lightbox-overlay");
-      if (lb) {
-        lb.classList.remove("active");
+    document.getElementById("lightbox-overlay").onclick = (e) => {
+      if(e.target.id !== "lightbox-img") {
+        document.getElementById("lightbox-overlay").classList.remove("active");
         document.body.style.overflow = "auto";
       }
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const lb = document.getElementById("lightbox-overlay");
-      if (lb) {
-        lb.onclick = (e) => {
-          if (e.target.id !== "lightbox-img") closeLightboxFunc();
-        };
-      }
-      const closeBtn = document.querySelector(".close-lightbox");
-      if (closeBtn) closeBtn.onclick = closeLightboxFunc;
-    });
+    // Sidebar
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.onclick = () => sidebar.classList.toggle('-translate-x-full');
 
-    // 1. Back to Top Logic
-    document.addEventListener('DOMContentLoaded', () => {
-      const btnTop = document.getElementById("back-to-top");
-      if (btnTop) {
-        window.addEventListener('scroll', () => {
-          if (window.scrollY > 500) {
-            btnTop.classList.remove("opacity-0", "translate-y-10");
-            btnTop.classList.add("opacity-100", "translate-y-0");
-          } else {
-            btnTop.classList.add("opacity-0", "translate-y-10");
-            btnTop.classList.remove("opacity-100", "translate-y-0");
-          }
-        });
-        btnTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    });
-
-    // 2. Click-and-Drag Scrolling (Desktop Pan)
-    let isDragging = false;
-    let lastY;
-
-    document.addEventListener('mousedown', (e) => {
-      if (e.target.closest('a, button, .swiper, input, textarea, .nav-link-sidebar, #lightbox-overlay')) return;
-      isDragging = true;
-      lastY = e.clientY;
-      document.body.style.cursor = 'grabbing';
-      document.body.style.userSelect = 'none';
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      if (e.cancelable) e.preventDefault();
-      const deltaY = lastY - e.clientY;
-      window.scrollBy(0, deltaY * 1.5);
-      lastY = e.clientY;
-    });
-
-    const stopPan = () => {
-      isDragging = false;
-      document.body.style.cursor = 'default';
-      document.body.style.userSelect = 'auto';
-    };
-
-    document.addEventListener('mouseup', stopPan);
-    document.addEventListener('mouseleave', stopPan);
-  </script>
-
-  <!-- Cards Dinâmicos -->
-  <script>
-    fetch("components/cards.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("cards-section-container").innerHTML = html;
-        
-        // Inicializar Swiper após carregar o conteúdo
-        new Swiper(".mySwiper", {
-          observer: true,
-          observeParents: true,
-          preventClicks: false, // Permite que o clique passe para a imagem
-          preventClicksPropagation: false, // Permite que o clique propague para o onclick
-          pagination: {
-            el: ".swiper-pagination",
-            clickable: true,
-          },
-          navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-          },
-          loop: false,
-          autoplay: {
-            delay: 5000,
-            disableOnInteraction: false,
-          },
-        });
+    // Load Cards & Swiper
+    fetch("components/cards.html").then(r => r.text()).then(html => {
+      document.getElementById("cards-section-container").innerHTML = html;
+      new Swiper(".mySwiper", {
+        observer: true, observeParents: true,
+        navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+        pagination: { el: ".swiper-pagination", clickable: true }
       });
+    });
+
+    // Back to Top
+    const btt = document.getElementById("back-to-top");
+    window.onscroll = () => {
+      if (window.scrollY > 500) btt.classList.replace("opacity-0", "opacity-100");
+      else btt.classList.replace("opacity-100", "opacity-0");
+    };
+    btt.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
   </script>
 </body>
-
 </html>
