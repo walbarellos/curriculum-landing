@@ -1,39 +1,33 @@
 :root {
-    --navy-dark: #020617;
-    --slate-800: #1e293b;
-    --emerald-500: #10b981;
-    --silver: #cbd5e1;
+    --navy-obsidian: #010409;
+    --navy-card: #0d1117;
+    --emerald-muted: rgba(16, 185, 129, 0.4);
+    --slate-text: #94a3b8;
+    --silver-muted: #cbd5e1;
 }
 
 body {
-    background-color: var(--navy-dark);
-    color: var(--silver);
+    background-color: var(--navy-obsidian) !important;
+    color: var(--slate-text);
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
 }
 
 h1, h2, h3, .card-title {
     font-family: 'Lora', serif;
+    color: var(--silver-muted);
 }
 
 .gradient-text {
-    background: linear-gradient(90deg, #f8fafc, #10b981);
+    background: linear-gradient(90deg, #94a3b8, #10b981);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* Scrollbar minimalista */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #020617;
-}
-::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #10b981;
-}
+/* Scrollbar Minimalista Dark */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #010409; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #10b981; }
