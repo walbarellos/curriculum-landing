@@ -285,6 +285,8 @@
         new Swiper(".mySwiper", {
           observer: true,
           observeParents: true,
+          preventClicks: false, // Permite que o clique passe para a imagem
+          preventClicksPropagation: false, // Permite que o clique propague para o onclick
           pagination: {
             el: ".swiper-pagination",
             clickable: true,
@@ -293,7 +295,7 @@
             nextEl: ".swiper-button-next",
             prevEl: ".swiper-button-prev",
           },
-          loop: false, // Desativado para evitar clones fantasmas que quebram o layout
+          loop: false,
           autoplay: {
             delay: 5000,
             disableOnInteraction: false,
