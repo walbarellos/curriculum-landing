@@ -5,119 +5,101 @@
   --obsidian: #010409;
   --navy-900: #0d1117;
   --emerald-muted: #10b981;
+  --blue-muted: #3b82f6;
   --slate-400: #94a3b8;
   --slate-200: #e2e8f0;
 }
 
-/* === MOLDURA PERFIL (RESTAURADA) === */
+/* === ESTRUTURA GLOBAL === */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--obsidian) !important;
+}
+
+/* === MOLDURA PERFIL (FIXED & COMPACT) === */
 .ritual-moldura {
-  display: inline-block;
+  display: block;
+  margin: 0 auto 2rem auto;
+  width: 150px !important;
+  height: 150px !important;
   border-radius: 12px;
-  padding: 4px;
+  padding: 3px;
   background: linear-gradient(135deg, var(--emerald-muted), var(--blue-muted));
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
-  width: 180px;
-  height: 180px;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
 }
 
 .ritual-moldura img {
+  width: 100% !important;
+  height: 100% !important;
   border-radius: 10px;
-  width: 100%;
-  height: 100%;
   object-fit: cover;
   display: block;
 }
 
-/* === ICONES SOCIAIS (CORREÇÃO DEFINITIVA) === */
+/* === HEADER BANNER === */
+.header-banner {
+  background: #0d1117;
+  border-top: 1px solid rgba(16, 185, 129, 0.15);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+  padding: 2rem 1rem;
+  margin: 1.5rem 0;
+}
+
+/* === ICONES SOCIAIS (FOOTER - FILHODAPUT.PNG FIX) === */
 .social-icon {
   display: inline-flex;
-  width: 48px;
-  height: 48px;
-  padding: 10px;
+  width: 42px;
+  height: 42px;
+  padding: 8px;
   transition: all 0.3s ease;
 }
 
 .icon-img {
   width: 100%;
   height: 100%;
-  filter: invert(1); /* Base branca para visibilidade */
+  filter: invert(1); /* SEMPRE BRANCO NA BASE */
   opacity: 0.8;
-  transition: all 0.3s ease;
 }
 
 .social-icon:hover .icon-img {
-  /* Filtro esmeralda puro vindo do branco */
   filter: invert(48%) sepia(71%) saturate(546%) hue-rotate(115deg) brightness(96%) contrast(91%);
   opacity: 1;
-  transform: scale(1.15);
+  transform: translateY(-3px);
 }
 
-/* === LIGHTBOX DE LUXO === */
+/* === LIGHTBOX === */
 #lightbox-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(1, 4, 9, 0.95);
-  backdrop-filter: blur(15px);
-  z-index: 9999;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
   justify-content: center;
   align-items: center;
-  cursor: zoom-out;
-  opacity: 0;
-  transition: opacity 0.4s ease;
 }
 
-#lightbox-overlay.active {
-  display: flex;
-  opacity: 1;
-}
+#lightbox-overlay.active { display: flex; }
 
 #lightbox-img {
-  max-width: 90%;
-  max-height: 85%;
-  border-radius: 12px;
-  box-shadow: 0 0 50px rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  transform: scale(0.9);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  max-width: 95%;
+  max-height: 90%;
+  border-radius: 8px;
+  border: 1px solid var(--emerald-muted);
 }
 
-#lightbox-overlay.active #lightbox-img {
-  transform: scale(1);
-}
-
-.close-lightbox {
-  position: absolute;
-  top: 30px;
-  right: 40px;
-  color: #fff;
-  font-size: 40px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.close-lightbox:hover {
-  color: var(--emerald-muted);
-}
-
-/* === AJUSTES CARROSSEL === */
-/* === NAVEGAÇÃO & HIGHLIGHTS === */
-.btn-highlight {
-  animation: pulse-emerald 3s infinite ease-in-out;
-}
-
-@keyframes pulse-emerald {
-  0% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
-  50% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
-  100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+/* === CARROSSEL COMPACTO === */
+.swiper-container-custom {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .swiper-slide img {
+  max-height: 350px !important; /* REDUZIDO PARA NÃO SER GIGANTE */
+  width: auto !important;
+  margin: 0 auto;
+  border-radius: 8px;
   cursor: zoom-in;
-  transition: transform 0.3s ease;
-}
-
-.swiper-slide:hover img {
-  transform: scale(1.02);
 }
