@@ -102,8 +102,9 @@ html, body {
 }
 
 .social-icon:hover .icon-img {
-  /* Transforma de preto para verde esmeralda no hover */
-  filter: invert(48%) sepia(79%) saturate(457%) hue-rotate(114deg) brightness(98%) contrast(93%);
+  /* Filtro calibrado para transformar o BRANCO (invert 1) em ESMERALDA VIBRANTE no hover */
+  filter: invert(53%) sepia(93%) saturate(457%) hue-rotate(115deg) brightness(110%) contrast(100%);
+  opacity: 1;
 }
 
 /* === MOLDURA PERFIL === */
