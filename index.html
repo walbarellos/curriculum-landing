@@ -140,7 +140,10 @@
     fetch("components/cards.html").then(r => r.text()).then(html => {
       document.getElementById("cards-section-container").innerHTML = html;
       new Swiper(".mySwiper", {
-        observer: true, observeParents: true,
+        observer: true, 
+        observeParents: true,
+        preventClicks: false,
+        preventClicksPropagation: false,
         navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
         pagination: { el: ".swiper-pagination", clickable: true }
       });
