@@ -208,38 +208,44 @@
     };
     btnTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-    // 2. Click-and-Drag Scrolling (Desktop Pan)
+    // 2. Click-and-Drag Scrolling (Desktop Pan) - Versão Estabilizada
     let isDragging = false;
-    let startY;
-    let scrollTop;
+    let lastY;
 
-    document.body.addEventListener('mousedown', (e) => {
-      // Evitar arrastar se clicar em links, botões ou componentes interativos
-      if (e.target.closest('a') || e.target.closest('button') || e.target.closest('.swiper') || e.target.closest('input')) return;
+    document.addEventListener('mousedown', (e) => {
+      // Evitar em elementos interativos
+      if (e.target.closest('a, button, .swiper, input, textarea, .nav-link-sidebar')) return;
       
       isDragging = true;
+      lastY = e.clientY; // Captura a posição inicial do mouse
       document.body.style.cursor = 'grabbing';
-      document.body.style.userSelect = 'none'; // Desativa seleção de texto
-      startY = e.pageY - document.body.offsetTop;
-      scrollTop = window.scrollY;
-    });
+      document.body.style.userSelect = 'none';
+    }, { passive: true });
 
-    const stopDragging = () => {
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      // Impede scroll nativo de interferir
+      if (e.cancelable) e.preventDefault();
+      
+      // Calcula quanto o mouse moveu desde o último evento
+      const deltaY = lastY - e.clientY;
+      
+      // Move a página exatamente essa distância
+      window.scrollBy(0, deltaY * 1.5); // Sensibilidade de 1.5x
+      
+      // Atualiza a última posição para o próximo cálculo
+      lastY = e.clientY;
+    }, { passive: false });
+
+    const stopPan = () => {
       isDragging = false;
       document.body.style.cursor = 'default';
-      document.body.style.userSelect = 'auto'; // Reativa seleção de texto
+      document.body.style.userSelect = 'auto';
     };
 
-    document.body.addEventListener('mouseleave', stopDragging);
-    document.body.addEventListener('mouseup', stopDragging);
-
-    document.body.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      e.preventDefault();
-      const y = e.pageY - document.body.offsetTop;
-      const walk = (y - startY) * 1.5; // Ajuste de sensibilidade
-      window.scrollTo(0, scrollTop - walk);
-    });
+    document.addEventListener('mouseup', stopPan);
+    document.addEventListener('mouseleave', stopPan);
   </script>
 
   <!-- Cards Dinâmicos -->
