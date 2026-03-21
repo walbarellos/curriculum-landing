@@ -1,74 +1,46 @@
 :root {
-    --radius-xl: 1.5rem;
+    --radius-xl: 1rem;
     --transition-fast: 0.3s ease;
     --transition-spring: cubic-bezier(0.25, 1, 0.5, 1);
 
-    --verde-urbano: #008000;
-    --verde-luz: #00ffa3;
-    --dourado-digital: #ffd700;
-    --cinza-concreto: #1e1e1e;
-    --preto-urbano: #000000;
-    --texto-base: #e1e1e1;
+    --navy-deep: #0f172a;
+    --slate-dark: #1e293b;
+    --emerald-accent: #10b981;
+    --silver-text: #e2e8f0;
+    --slate-muted: #94a3b8;
 }
 
 body {
-    background: #0a0a0a;
-    color: var(--texto-base);
-    font-family: "Martel Sans", sans-serif;
+    background: #020617;
+    color: var(--silver-text);
+    font-family: 'Inter', sans-serif;
     line-height: 1.6;
 }
 
-/* === TÍTULOS COM GLOW SUAVE === */
+/* === TÍTULOS COM SERIFA PARA AUTORIDADE === */
+h1, h2, h3, .card-title {
+    font-family: 'Lora', serif;
+    letter-spacing: 0.02em;
+}
+
 .gradient-text {
-    background: linear-gradient(90deg, var(--verde-luz), var(--dourado-digital));
+    background: linear-gradient(90deg, #f8fafc, #94a3b8, #10b981);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow:
-    0 0 2px rgba(0, 255, 163, 0.3),
-    0 0 4px rgba(0, 255, 163, 0.2);
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
 }
 
-/* === CARDS COM FUNDO ESCURO E EFEITO CONTIDO === */
+/* === CARDS COM ESTILO AUDITORIA === */
 .card-css {
-    background-color: var(--cinza-concreto);
+    background-color: #1e293b;
     border-radius: var(--radius-xl);
     padding: 1.5rem;
-    box-shadow: 0 0 6px rgba(0, 255, 163, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    transition: all 0.3s ease;
 }
 
-/* === FOOTER COM ELEGÂNCIA === */
-.footer-css {
-    background: #121212;
-    color: #ccc;
-    padding: 2rem 1rem;
-    margin-top: 4rem;
-    text-align: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-.footer-quote {
-    font-weight: 500;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    color: #aaa;
-    text-shadow: 0 0 2px rgba(0, 255, 180, 0.1);
-}
-.footer-icons {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-}
-.icon {
-    width: 1.8rem;
-    height: 1.8rem;
-    transition: transform 0.3s ease, filter 0.3s ease;
-}
-.icon-link:hover .icon {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 3px rgba(0, 255, 180, 0.3));
-}
-.footer-copy {
-    font-size: 0.875rem;
-    color: #777;
+.card-css:hover {
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 25px rgba(16, 185, 129, 0.1);
 }
