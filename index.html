@@ -214,30 +214,30 @@
     let scrollTop;
 
     document.body.addEventListener('mousedown', (e) => {
-      // Evitar arrastar se clicar em links ou botões
-      if (e.target.closest('a') || e.target.closest('button') || e.target.closest('.swiper')) return;
+      // Evitar arrastar se clicar em links, botões ou componentes interativos
+      if (e.target.closest('a') || e.target.closest('button') || e.target.closest('.swiper') || e.target.closest('input')) return;
       
       isDragging = true;
       document.body.style.cursor = 'grabbing';
+      document.body.style.userSelect = 'none'; // Desativa seleção de texto
       startY = e.pageY - document.body.offsetTop;
       scrollTop = window.scrollY;
     });
 
-    document.body.addEventListener('mouseleave', () => {
+    const stopDragging = () => {
       isDragging = false;
       document.body.style.cursor = 'default';
-    });
+      document.body.style.userSelect = 'auto'; // Reativa seleção de texto
+    };
 
-    document.body.addEventListener('mouseup', () => {
-      isDragging = false;
-      document.body.style.cursor = 'default';
-    });
+    document.body.addEventListener('mouseleave', stopDragging);
+    document.body.addEventListener('mouseup', stopDragging);
 
     document.body.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       e.preventDefault();
       const y = e.pageY - document.body.offsetTop;
-      const walk = (y - startY) * 1.5; // Velocidade do arraste
+      const walk = (y - startY) * 1.5; // Ajuste de sensibilidade
       window.scrollTo(0, scrollTop - walk);
     });
   </script>
