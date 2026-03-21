@@ -19,110 +19,78 @@ html, body {
   color: var(--slate-400);
 }
 
-/* === MOLDURA PERFIL (IMPOSTA E SEM CORTE) === */
+/* === MOLDURA PERFIL (RESTAURAÇÃO TOTAL - SEM CORTES) === */
 .ritual-moldura {
   display: block;
-  margin: 0 auto 2.5rem auto;
-  width: 200px !important;
-  height: 200px !important;
-  border-radius: 15px;
-  padding: 5px;
+  margin: 0 auto 3rem auto;
+  width: 220px !important; /* Aumentado para dar respiro */
+  height: 280px !important; /* Proporção vertical para não cortar corpo/cabeça */
+  border-radius: 20px;
+  padding: 6px;
   background: linear-gradient(135deg, var(--emerald-muted), var(--blue-muted));
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.2);
 }
 
 .ritual-moldura img {
   width: 100% !important;
   height: 100% !important;
-  border-radius: 12px;
-  object-fit: cover !important; /* Garante que preencha a moldura perfeitamente */
+  border-radius: 15px;
+  object-fit: contain !important; /* GARANTE QUE NADA SEJA CORTADO */
+  background: #0d1117; /* Fundo escuro caso a imagem seja menor que o container */
   display: block;
 }
 
-/* === HEADER BANNER (RECUPERANDO A GRANDEZA) === */
+/* === HEADER BANNER === */
 .header-banner {
-  background: rgba(13, 17, 23, 0.9);
+  background: rgba(13, 17, 23, 0.95);
   border-top: 1px solid rgba(16, 185, 129, 0.2);
   border-bottom: 1px solid rgba(16, 185, 129, 0.2);
-  padding: 3rem 1rem;
+  padding: 4rem 1rem;
   margin: 2rem 0;
 }
 
 .title-name {
   font-family: 'Lora', serif !important;
-  font-size: clamp(3.5rem, 10vw, 5rem) !important; /* VOLTOU A SER GIGANTE */
-  font-weight: 800 !important;
+  font-size: clamp(3.5rem, 12vw, 5.5rem) !important;
+  font-weight: 900 !important;
   color: var(--slate-200) !important;
   margin-bottom: 1rem;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  letter-spacing: -2px;
 }
 
-.subtitle-hero {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.4rem;
-  color: var(--emerald-muted);
-  font-weight: 600;
-  letter-spacing: 1px;
-}
-
-/* === ICONES SOCIAIS (TRAVADOS PARA NÃO SUMIR) === */
+/* === ICONES SOCIAIS (BLINDADOS) === */
 .social-icon {
   display: inline-flex;
-  width: 50px;
-  height: 50px;
-  padding: 10px;
-  transition: all 0.3s ease;
+  width: 55px;
+  height: 55px;
+  padding: 12px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .icon-img {
   width: 100% !important;
   height: 100% !important;
-  /* FORÇA BRANCO ABSOLUTO NA BASE */
   filter: brightness(0) invert(1) !important; 
-  opacity: 0.9 !important;
+  opacity: 0.8 !important;
 }
 
-.social-icon:hover {
-  transform: translateY(-5px) scale(1.1);
-}
-
+.social-icon:hover { transform: translateY(-8px); }
 .social-icon:hover .icon-img {
-  /* FORÇA ESMERALDA VIBRANTE NO HOVER - NÃO FICA PRETO */
   filter: invert(48%) sepia(71%) saturate(546%) hue-rotate(115deg) brightness(100%) contrast(100%) !important;
   opacity: 1 !important;
 }
 
-/* === LIGHTBOX === */
-#lightbox-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.98);
-  backdrop-filter: blur(20px);
-  z-index: 10000;
-  justify-content: center;
-  align-items: center;
-}
-#lightbox-overlay.active { display: flex; }
-#lightbox-img {
-  max-width: 95%;
-  max-height: 92%;
-  border-radius: 10px;
-  border: 2px solid var(--emerald-muted);
-  box-shadow: 0 0 50px rgba(16, 185, 129, 0.3);
-}
-
-/* === CARROSSEL LUXUOSO === */
+/* === CARROSSEL & CARDS === */
 .swiper-container-custom {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .swiper-slide img {
-  max-height: 500px !important; /* VOLTOU A SER GRANDE PARA LEITURA */
+  max-height: 550px !important;
   width: auto !important;
   margin: 0 auto;
-  border-radius: 12px;
+  border-radius: 15px;
   cursor: zoom-in;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
 }
