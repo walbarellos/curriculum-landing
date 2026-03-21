@@ -2,114 +2,95 @@
 <h2 class="text-2xl font-semibold text-emerald-400 mb-6 text-left border-l-4 border-emerald-500 pl-4 section-title">Auditoria & Inteligência de Dados</h2>
 <div class="grid md:grid-cols-2 gap-6 text-center mb-12">
 
-  <!-- Sentinela -->
+  <!-- Sentinela Card -->
   <div class="card-css border-2 border-emerald-500/30">
     <p class="card-title">
       <a href="https://github.com/walbarellos/Sentinela" class="text-emerald-300 hover:underline">Sentinela</a>
     </p>
     <p class="text-[10px] text-emerald-500 font-mono mb-3 uppercase tracking-widest">Public Accountability / Data Intelligence</p>
-    <div class="my-4 overflow-hidden rounded-lg bg-gray-950 p-2 h-56">
-      <img src="assets/img/Sentinal.png" 
-           alt="Sentinela Preview" class="w-full h-full object-contain cursor-zoom-in" onclick="openLightbox(this.src)">
+    <div class="my-4 overflow-hidden rounded-lg bg-gray-950 p-2 h-40">
+      <img src="assets/img/Sentinal.png" class="w-full h-full object-contain cursor-zoom-in" onclick="openLightbox(this.src)">
     </div>
-    <p class="card-body text-slate-300 text-sm">
-      Monitoramento estratégico de recursos públicos. Plataforma de detecção de anomalias, análise de licitações e visualização de fluxos para auditoria ativa.
+    <p class="card-body text-slate-300 text-xs">
+      Monitoramento estratégico de recursos públicos. Plataforma de detecção de anomalias e visualização de fluxos.
     </p>
-    <div class="mt-4 flex flex-wrap gap-2 justify-center text-[9px]">
-      <span class="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded text-emerald-400">Python</span>
-      <span class="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded text-emerald-400">DuckDB</span>
-      <span class="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded text-emerald-400">OSINT</span>
-    </div>
   </div>
 
-  <!-- Shomer OSINT -->
+  <!-- Shomer OSINT Card -->
   <div class="card-css">
     <p class="card-title">
       <a href="https://github.com/walbarellos/shomer-OSINT" class="text-emerald-300 hover:underline">Shomer OSINT</a>
     </p>
     <p class="text-[10px] text-blue-500 font-mono mb-3 uppercase tracking-widest">Behavioral Analysis / Automation</p>
-    <div class="my-4 overflow-hidden rounded-lg bg-gray-950 p-2 h-56 flex items-center justify-center">
-       <span class="text-emerald-500/50 italic text-lg text-center px-4">Análise Comportamental Facebook/Meta</span>
+    <div class="my-4 overflow-hidden rounded-lg bg-gray-950 p-2 h-40 flex items-center justify-center">
+       <!-- Usando uma representação visual ou ícone forte enquanto não temos print específico -->
+       <img src="assets/img/projects.png" class="w-full h-full object-cover opacity-40 cursor-zoom-in" onclick="openLightbox(this.src)">
+       <span class="absolute text-emerald-400 font-bold text-xs">OSINT ENGINE</span>
     </div>
-    <p class="card-body text-slate-300 text-sm">
-      Investigação de padrões comportamentais e análise de discurso massiva via Selenium. Vitrine interativa para visualização de métricas de redes sociais.
+    <p class="card-body text-slate-300 text-xs">
+      Investigação de padrões comportamentais e análise de discurso massiva via Selenium.
     </p>
-    <div class="mt-4 flex flex-wrap gap-2 justify-center text-[9px]">
-      <span class="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400">Selenium</span>
-      <span class="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400">FastAPI</span>
-      <span class="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400">React</span>
+  </div>
+
+</div>
+
+<!-- SEÇÃO: SISTEMAS CORPORATIVOS -->
+<h2 class="text-2xl font-semibold text-blue-400 mb-6 text-left border-l-4 border-blue-500 pl-4 section-title">Sistemas & Engenharia</h2>
+<div class="grid md:grid-cols-2 gap-6 text-center mb-12">
+  
+  <!-- Aequitas ERP Card -->
+  <div class="card-css">
+    <p class="card-title"><a href="https://github.com/walbarellos/wErpy" class="text-emerald-300 hover:underline">Aequitas ERP</a></p>
+    <p class="text-[10px] text-slate-500 font-mono mb-2 uppercase">Compliance & Management</p>
+    <div class="my-3 overflow-hidden rounded bg-gray-900 h-32">
+      <img src="assets/img/wErpy.png" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition cursor-zoom-in" onclick="openLightbox(this.src)">
     </div>
+    <p class="card-body text-xs">Arquitetura modular em Rust/Tauri focada em integridade absoluta de dados.</p>
+  </div>
+
+  <!-- Portfolio Card -->
+  <div class="card-css">
+    <p class="card-title">Infrastructure Portfolio</p>
+    <p class="text-[10px] text-slate-500 font-mono mb-2 uppercase">UI/UX & Performance</p>
+    <div class="my-3 overflow-hidden rounded bg-gray-900 h-32">
+      <img src="assets/img/skillset.png" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition cursor-zoom-in" onclick="openLightbox(this.src)">
+    </div>
+    <p class="card-body text-xs">Design responsivo focado em autoridade visual e performance GSAP.</p>
   </div>
 
 </div>
 
 <!-- CARROSSEL DE EVIDÊNCIAS -->
-<h2 class="text-3xl font-bold gradient-text border-b border-gray-800 pb-2 mt-12 mb-8 section-title">Resultados & Evidências Técnicas</h2>
+<h2 class="text-3xl font-bold gradient-text border-b border-gray-800 pb-2 mt-12 mb-8 section-title">Evidências Técnicas & Dashboard</h2>
 
 <div class="card-css !p-0 overflow-hidden border border-emerald-500/20 mb-10 swiper-container-custom">
   <div class="swiper mySwiper w-full">
     <div class="swiper-wrapper">
       
-      <!-- Slide 1: Aequitas ERP Screen 1 -->
-      <div class="swiper-slide p-8">
+      <!-- Slide 1: Aequitas ERP -->
+      <div class="swiper-slide p-10">
         <div class="flex flex-col items-center">
-          <h3 class="text-xl font-bold text-emerald-400 mb-4">Aequitas ERP: Controle Tactical</h3>
-          <img src="assets/img/wErpy.png" class="max-h-[400px] object-contain cursor-zoom-in rounded-lg shadow-2xl" onclick="openLightbox(this.src)">
-          <p class="mt-4 text-slate-400 text-sm text-center">Gestão centralizada de empresas e usuários.</p>
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Aequitas ERP: Controle Tactical</h3>
+          <img src="assets/img/wErpy.png" class="max-h-[450px] object-contain cursor-zoom-in rounded-lg shadow-2xl" onclick="openLightbox(this.src)">
+          <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center italic">Painel de gestão centralizada com foco em auditoria de acesso.</p>
         </div>
       </div>
 
-      <!-- Slide 2: Aequitas ERP Screen 2 -->
-      <div class="swiper-slide p-8">
+      <!-- Slide 2: Sentinela Rede -->
+      <div class="swiper-slide p-10 bg-slate-900/20">
         <div class="flex flex-col items-center">
-          <h3 class="text-xl font-bold text-emerald-400 mb-4">Aequitas ERP: Módulo PDV</h3>
-          <img src="assets/img/wErpy-2.png" class="max-h-[400px] object-contain cursor-zoom-in rounded-lg shadow-2xl" onclick="openLightbox(this.src)">
-          <p class="mt-4 text-slate-400 text-sm text-center">Interface de vendas com alta integridade de dados.</p>
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Sentinela: Análise de Redes</h3>
+          <img src="assets/img/Sentinela-2.png" class="max-h-[450px] object-contain cursor-zoom-in shadow-2xl rounded-lg" onclick="openLightbox(this.src)">
+          <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center italic">Detecção de vínculos suspeitos e nepotismo cruzado.</p>
         </div>
       </div>
 
-      <!-- Slide 3: Aequitas ERP Screen 3 -->
-      <div class="swiper-slide p-8">
+      <!-- Slide 3: Skillset -->
+      <div class="swiper-slide p-10 bg-slate-950/40">
         <div class="flex flex-col items-center">
-          <h3 class="text-xl font-bold text-emerald-400 mb-4">Aequitas ERP: Gestão de Fluxos</h3>
-          <img src="assets/img/wErpy-3.png" class="max-h-[400px] object-contain cursor-zoom-in rounded-lg shadow-2xl" onclick="openLightbox(this.src)">
-          <p class="mt-4 text-slate-400 text-sm text-center">Automação de processos industriais.</p>
-        </div>
-      </div>
-
-      <!-- Slide 4: Aequitas ERP Screen 4 -->
-      <div class="swiper-slide p-8">
-        <div class="flex flex-col items-center">
-          <h3 class="text-xl font-bold text-emerald-400 mb-4">Aequitas ERP: Compliance</h3>
-          <img src="assets/img/wErpy-4.png" class="max-h-[400px] object-contain cursor-zoom-in rounded-lg shadow-2xl" onclick="openLightbox(this.src)">
-          <p class="mt-4 text-slate-400 text-sm text-center">Painel de conformidade e integridade tributária.</p>
-        </div>
-      </div>
-
-      <!-- Slide 5: Sentinela Rede -->
-      <div class="swiper-slide p-8">
-        <div class="flex flex-col items-center">
-          <h3 class="text-xl font-bold text-emerald-400 mb-4">Sentinela: Análise de Redes</h3>
-          <img src="assets/img/Sentinela-2.png" class="max-h-[400px] object-contain cursor-zoom-in rounded-lg shadow-2xl" onclick="openLightbox(this.src)">
-          <p class="mt-4 text-slate-400 text-sm text-center italic">"Detecção de nepotismo cruzado e vínculos suspeitos."</p>
-        </div>
-      </div>
-
-      <!-- Slide 6: Skillset -->
-      <div class="swiper-slide p-8">
-        <div class="flex flex-col items-center">
-          <h3 class="text-xl font-bold text-blue-400 mb-4">Arquitetura: Mapeamento de Stack</h3>
-          <img src="assets/img/skillset.png" class="max-h-[400px] object-contain cursor-zoom-in rounded-lg shadow-2xl" onclick="openLightbox(this.src)">
-          <p class="mt-4 text-slate-400 text-sm text-center">Domínio tecnológico em linguagens de baixo nível.</p>
-        </div>
-      </div>
-
-      <!-- Slide 7: Projects -->
-      <div class="swiper-slide p-8">
-        <div class="flex flex-col items-center">
-          <h3 class="text-xl font-bold text-emerald-400 mb-4">Engenharia: Gestão de Projetos</h3>
-          <img src="assets/img/projects.png" class="max-h-[400px] object-contain cursor-zoom-in rounded-lg shadow-2xl" onclick="openLightbox(this.src)">
-          <p class="mt-4 text-slate-400 text-sm text-center">Controle organizacional de desenvolvimento técnico.</p>
+          <h3 class="text-2xl font-bold text-blue-400 mb-4">Arquitetura: Mapeamento de Stack</h3>
+          <img src="assets/img/skillset.png" class="max-h-[450px] object-contain cursor-zoom-in shadow-2xl rounded-lg" onclick="openLightbox(this.src)">
+          <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center">Domínio tecnológico em linguagens de baixo nível e análise massiva.</p>
         </div>
       </div>
 
@@ -121,6 +102,8 @@
 </div>
 
 <style>
-  .swiper-pagination-bullet { background: #10b981 !important; width: 10px; height: 10px; }
-  .swiper-button-next:after, .swiper-button-prev:after { font-size: 1.2rem !important; font-weight: bold; }
+  .swiper-pagination-bullet { background: #10b981 !important; width: 12px; height: 12px; }
+  .swiper-button-next:after, .swiper-button-prev:after { font-size: 1.5rem !important; font-weight: bold; }
+  /* Forçar clique */
+  .swiper-slide img { pointer-events: auto !important; position: relative; z-index: 10; }
 </style>
