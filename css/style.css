@@ -94,3 +94,31 @@ html, body {
   cursor: zoom-in;
   box-shadow: 0 20px 50px rgba(0,0,0,0.6);
 }
+
+/* === NAVEGAÇÃO & HIGHLIGHTS === */
+.btn-highlight {
+  animation: pulse-emerald 3s infinite ease-in-out;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-highlight:hover {
+  transform: translateY(-5px) scale(1.1);
+  background-color: var(--emerald-muted) !important;
+  color: var(--obsidian) !important;
+  box-shadow: 0 0 30px var(--emerald-muted);
+}
+
+.btn-highlight:hover svg {
+  animation: arrow-bounce 0.6s infinite alternate;
+}
+
+@keyframes arrow-bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+
+@keyframes pulse-emerald {
+  0% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+  100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+}
