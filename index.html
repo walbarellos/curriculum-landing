@@ -254,24 +254,22 @@
     document.addEventListener('mouseleave', stopPan);
 
     // 3. Lightbox Logic (Zoom de Imagem)
-    const lightbox = document.getElementById("lightbox-overlay");
-    const lightboxImg = document.getElementById("lightbox-img");
-    const closeLightbox = document.querySelector(".close-lightbox");
-
-    function openLightbox(src) {
+    window.openLightbox = function(src) {
+      const lightbox = document.getElementById("lightbox-overlay");
+      const lightboxImg = document.getElementById("lightbox-img");
       lightboxImg.src = src;
       lightbox.classList.add("active");
-      document.body.style.overflow = "hidden"; // Trava o scroll do fundo
-    }
+      document.body.style.overflow = "hidden";
+    };
 
-    lightbox.onclick = (e) => {
-      if (e.target !== lightboxImg) {
-        lightbox.classList.remove("active");
+    document.getElementById("lightbox-overlay").onclick = (e) => {
+      if (e.target.id !== "lightbox-img") {
+        document.getElementById("lightbox-overlay").classList.remove("active");
         document.body.style.overflow = "auto";
       }
     };
-    closeLightbox.onclick = () => {
-      lightbox.classList.remove("active");
+    document.querySelector(".close-lightbox").onclick = () => {
+      document.getElementById("lightbox-overlay").classList.remove("active");
       document.body.style.overflow = "auto";
     };
   </script>
@@ -285,6 +283,8 @@
         
         // Inicializar Swiper após carregar o conteúdo
         new Swiper(".mySwiper", {
+          observer: true,
+          observeParents: true,
           pagination: {
             el: ".swiper-pagination",
             clickable: true,
@@ -293,7 +293,7 @@
             nextEl: ".swiper-button-next",
             prevEl: ".swiper-button-prev",
           },
-          loop: true,
+          loop: false, // Desativado para evitar clones fantasmas que quebram o layout
           autoplay: {
             delay: 5000,
             disableOnInteraction: false,
