@@ -83,6 +83,17 @@
 }
 
 /* === AJUSTES CARROSSEL === */
+/* === NAVEGAÇÃO & HIGHLIGHTS === */
+.btn-highlight {
+  animation: pulse-emerald 3s infinite ease-in-out;
+}
+
+@keyframes pulse-emerald {
+  0% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+  50% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+}
+
 .swiper-slide img {
   cursor: zoom-in;
   transition: transform 0.3s ease;
