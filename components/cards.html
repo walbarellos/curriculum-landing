@@ -58,32 +58,59 @@
   </div>
 </div>
 
-<!-- CARROSSEL DE RESULTADOS (VITRINE COMPLETA) -->
+<!-- CARROSSEL DE RESULTADOS (VITRINE COMPLETA - 4 IMAGENS ERP) -->
 <h2 class="text-3xl font-bold gradient-text border-b border-gray-800 pb-2 mt-12 mb-8 section-title">Evidências Técnicas & Dashboard</h2>
 
 <div class="card-css !p-0 overflow-hidden border border-emerald-500/20 mb-10 swiper-container-custom">
   <div class="swiper mySwiper w-full">
     <div class="swiper-wrapper">
       
-      <!-- Slide 1: Sentinela Rede -->
+      <!-- Slide 1: Aequitas ERP - Screen 1 -->
       <div class="swiper-slide p-10">
         <div class="flex flex-col items-center">
-          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Monitoramento de Redes: Sentinela</h3>
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Aequitas ERP: Controle Tactical</h3>
+          <img src="assets/img/wErpy.png" alt="ERP 1" class="max-h-[480px] object-contain cursor-zoom-in shadow-2xl rounded-lg" onclick="openLightbox(this.src)">
+          <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center">Gestão centralizada de empresas e usuários com foco em segurança e auditoria de acesso.</p>
+        </div>
+      </div>
+
+      <!-- Slide 2: Aequitas ERP - Screen 2 -->
+      <div class="swiper-slide p-10 bg-slate-900/20">
+        <div class="flex flex-col items-center">
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Aequitas ERP: Módulo de Vendas</h3>
+          <img src="assets/img/wErpy-2.png" alt="ERP 2" class="max-h-[480px] object-contain cursor-zoom-in shadow-2xl rounded-lg" onclick="openLightbox(this.src)">
+          <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center">Interface de PDV com integração em tempo real e persistência de dados íntegros.</p>
+        </div>
+      </div>
+
+      <!-- Slide 3: Aequitas ERP - Screen 3 -->
+      <div class="swiper-slide p-10">
+        <div class="flex flex-col items-center">
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Aequitas ERP: Gestão de Fluxos</h3>
+          <img src="assets/img/wErpy-3.png" alt="ERP 3" class="max-h-[480px] object-contain cursor-zoom-in shadow-2xl rounded-lg" onclick="openLightbox(this.src)">
+          <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center">Módulo de automação de processos industriais e fluxos de trabalho auditáveis.</p>
+        </div>
+      </div>
+
+      <!-- Slide 4: Aequitas ERP - Screen 4 -->
+      <div class="swiper-slide p-10 bg-slate-900/20">
+        <div class="flex flex-col items-center">
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Aequitas ERP: Relatórios & Compliance</h3>
+          <img src="assets/img/wErpy-4.png" alt="ERP 4" class="max-h-[480px] object-contain cursor-zoom-in shadow-2xl rounded-lg" onclick="openLightbox(this.src)">
+          <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center">Painel de conformidade e integridade tributária com visualização analítica.</p>
+        </div>
+      </div>
+
+      <!-- Slide 5: Sentinela Rede -->
+      <div class="swiper-slide p-10">
+        <div class="flex flex-col items-center">
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Sentinela: Análise de Redes</h3>
           <img src="assets/img/Sentinela-2.png" alt="Sentinela Redes" class="max-h-[480px] object-contain cursor-zoom-in shadow-2xl rounded-lg" onclick="openLightbox(this.src)">
           <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center italic">"Visualização de grafos para detecção de vínculos suspeitos e nepotismo cruzado."</p>
         </div>
       </div>
 
-      <!-- Slide 2: Aequitas ERP -->
-      <div class="swiper-slide p-10 bg-slate-900/20">
-        <div class="flex flex-col items-center">
-          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Aequitas ERP: Controle Tactical</h3>
-          <img src="assets/img/wErpy.png" alt="ERP 1" class="max-h-[480px] object-contain cursor-zoom-in shadow-2xl rounded-lg" onclick="openLightbox(this.src)">
-          <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center">Gestão de empresas e usuários com foco em segurança e permissões granulares.</p>
-        </div>
-      </div>
-
-      <!-- Slide 3: Projects Map (RESTAURADO) -->
+      <!-- Slide 6: Projects Map -->
       <div class="swiper-slide p-10 bg-slate-950/40">
         <div class="flex flex-col items-center">
           <h3 class="text-2xl font-bold text-emerald-400 mb-4">Engenharia: Gestão de Projetos</h3>
@@ -92,7 +119,7 @@
         </div>
       </div>
 
-      <!-- Slide 4: Skillset (RESTAURADO) -->
+      <!-- Slide 7: Skillset -->
       <div class="swiper-slide p-10 bg-slate-900/20">
         <div class="flex flex-col items-center">
           <h3 class="text-2xl font-bold text-blue-400 mb-4">Arquitetura: Mapeamento de Stack</h3>
@@ -101,10 +128,10 @@
         </div>
       </div>
 
-      <!-- Slide 5: Sentinela Bancada -->
+      <!-- Slide 8: Sentinela Bancada -->
       <div class="swiper-slide p-10 bg-slate-950/40">
         <div class="flex flex-col items-center">
-          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Data Intelligence: Bancada de Casos</h3>
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4">Sentinela: Bancada de Casos</h3>
           <img src="assets/img/Sentinal.png" alt="Sentinela Bancada" class="max-h-[480px] object-contain cursor-zoom-in shadow-2xl rounded-lg" onclick="openLightbox(this.src)">
           <p class="mt-6 text-slate-300 text-sm max-w-3xl text-center">Painel de integridade pública para priorização de investigações fiscais.</p>
         </div>
