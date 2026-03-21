@@ -16,57 +16,80 @@ html, body {
   max-width: 100%;
   overflow-x: hidden;
   background-color: var(--obsidian) !important;
+  color: var(--slate-400);
 }
 
-/* === MOLDURA PERFIL (FIXED & COMPACT) === */
+/* === MOLDURA PERFIL (IMPOSTA E SEM CORTE) === */
 .ritual-moldura {
   display: block;
-  margin: 0 auto 2rem auto;
-  width: 150px !important;
-  height: 150px !important;
-  border-radius: 12px;
-  padding: 3px;
+  margin: 0 auto 2.5rem auto;
+  width: 200px !important;
+  height: 200px !important;
+  border-radius: 15px;
+  padding: 5px;
   background: linear-gradient(135deg, var(--emerald-muted), var(--blue-muted));
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
 }
 
 .ritual-moldura img {
   width: 100% !important;
   height: 100% !important;
-  border-radius: 10px;
-  object-fit: cover;
+  border-radius: 12px;
+  object-fit: cover !important; /* Garante que preencha a moldura perfeitamente */
   display: block;
 }
 
-/* === HEADER BANNER === */
+/* === HEADER BANNER (RECUPERANDO A GRANDEZA) === */
 .header-banner {
-  background: #0d1117;
-  border-top: 1px solid rgba(16, 185, 129, 0.15);
-  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
-  padding: 2rem 1rem;
-  margin: 1.5rem 0;
+  background: rgba(13, 17, 23, 0.9);
+  border-top: 1px solid rgba(16, 185, 129, 0.2);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 3rem 1rem;
+  margin: 2rem 0;
 }
 
-/* === ICONES SOCIAIS (FOOTER - FILHODAPUT.PNG FIX) === */
+.title-name {
+  font-family: 'Lora', serif !important;
+  font-size: clamp(3.5rem, 10vw, 5rem) !important; /* VOLTOU A SER GIGANTE */
+  font-weight: 800 !important;
+  color: var(--slate-200) !important;
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.subtitle-hero {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.4rem;
+  color: var(--emerald-muted);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* === ICONES SOCIAIS (TRAVADOS PARA NÃO SUMIR) === */
 .social-icon {
   display: inline-flex;
-  width: 42px;
-  height: 42px;
-  padding: 8px;
+  width: 50px;
+  height: 50px;
+  padding: 10px;
   transition: all 0.3s ease;
 }
 
 .icon-img {
-  width: 100%;
-  height: 100%;
-  filter: invert(1); /* SEMPRE BRANCO NA BASE */
-  opacity: 0.8;
+  width: 100% !important;
+  height: 100% !important;
+  /* FORÇA BRANCO ABSOLUTO NA BASE */
+  filter: brightness(0) invert(1) !important; 
+  opacity: 0.9 !important;
+}
+
+.social-icon:hover {
+  transform: translateY(-5px) scale(1.1);
 }
 
 .social-icon:hover .icon-img {
-  filter: invert(48%) sepia(71%) saturate(546%) hue-rotate(115deg) brightness(96%) contrast(91%);
-  opacity: 1;
-  transform: translateY(-3px);
+  /* FORÇA ESMERALDA VIBRANTE NO HOVER - NÃO FICA PRETO */
+  filter: invert(48%) sepia(71%) saturate(546%) hue-rotate(115deg) brightness(100%) contrast(100%) !important;
+  opacity: 1 !important;
 }
 
 /* === LIGHTBOX === */
@@ -74,32 +97,32 @@ html, body {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.98);
+  backdrop-filter: blur(20px);
   z-index: 10000;
   justify-content: center;
   align-items: center;
 }
-
 #lightbox-overlay.active { display: flex; }
-
 #lightbox-img {
   max-width: 95%;
-  max-height: 90%;
-  border-radius: 8px;
-  border: 1px solid var(--emerald-muted);
+  max-height: 92%;
+  border-radius: 10px;
+  border: 2px solid var(--emerald-muted);
+  box-shadow: 0 0 50px rgba(16, 185, 129, 0.3);
 }
 
-/* === CARROSSEL COMPACTO === */
+/* === CARROSSEL LUXUOSO === */
 .swiper-container-custom {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
 .swiper-slide img {
-  max-height: 350px !important; /* REDUZIDO PARA NÃO SER GIGANTE */
+  max-height: 500px !important; /* VOLTOU A SER GRANDE PARA LEITURA */
   width: auto !important;
   margin: 0 auto;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: zoom-in;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
