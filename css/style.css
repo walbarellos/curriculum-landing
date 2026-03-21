@@ -5,131 +5,89 @@
   --obsidian: #010409;
   --navy-900: #0d1117;
   --emerald-muted: #10b981;
-  --blue-muted: #3b82f6;
   --slate-400: #94a3b8;
   --slate-200: #e2e8f0;
 }
 
-/* === ESTRUTURA GLOBAL === */
-html, body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  padding: 0;
-  margin: 0;
-  background-color: var(--obsidian) !important;
-}
-
-/* === HEADER COM TARJA (OPACA E PROFUNDA) === */
-.header-banner {
-  background: #0d1117; /* Sólido Obsidian */
-  border-top: 1px solid rgba(16, 185, 129, 0.2);
-  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
-  padding: 2.5rem 1rem;
-  margin-top: 2rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-}
-
-.title-name {
-  font-family: 'Lora', serif;
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 700;
-  color: var(--slate-200);
-  margin-bottom: 0.5rem;
-}
-
-.subtitle-hero {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.15rem;
-  color: var(--emerald-muted);
-  font-weight: 500;
-  letter-spacing: 0.5px;
-}
-
-/* === TITULOS DE SEÇÃO SUAVES === */
-.section-title {
-  position: relative;
-  display: inline-block;
-  padding-bottom: 6px;
-  margin-bottom: 1.5rem;
-  color: var(--slate-200);
-}
-
-.section-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; width: 30px; height: 2px;
-  background: var(--emerald-muted);
-  transition: width 0.3s ease;
-}
-
-.section-title:hover::after {
-  width: 100%;
-}
-
-/* === CARDS DE AUDITORIA (SOBRIOS) === */
-.card-css {
-  background: var(--navy-900);
-  border: 1px solid rgba(148, 163, 184, 0.08);
-  border-radius: var(--radius-xl);
-  padding: 1.5rem;
-  transition: border-color 0.3s ease;
-}
-
-.card-css:hover {
-  border-color: rgba(16, 185, 129, 0.2);
-}
-
-/* === ICONES SOCIAIS (CORRIGIDO) === */
+/* === ICONES SOCIAIS (CORREÇÃO DEFINITIVA) === */
 .social-icon {
   display: inline-flex;
-  width: 44px;
-  height: 44px;
-  padding: 8px;
+  width: 48px;
+  height: 48px;
+  padding: 10px;
   transition: all 0.3s ease;
-  opacity: 0.7; /* Opacidade para não gritar muito na tela */
 }
 
 .icon-img {
   width: 100%;
   height: 100%;
-  filter: invert(1); /* Garante que o ícone fique 100% BRANCO para não sumir no fundo preto */
-}
-
-.social-icon:hover {
-  opacity: 1;
-  transform: translateY(-2px);
+  filter: invert(1); /* Base branca para visibilidade */
+  opacity: 0.8;
+  transition: all 0.3s ease;
 }
 
 .social-icon:hover .icon-img {
-  /* Filtro calibrado para transformar o BRANCO (invert 1) em ESMERALDA VIBRANTE no hover */
-  filter: invert(53%) sepia(93%) saturate(457%) hue-rotate(115deg) brightness(110%) contrast(100%);
+  /* Filtro esmeralda puro vindo do branco */
+  filter: invert(48%) sepia(71%) saturate(546%) hue-rotate(115deg) brightness(96%) contrast(91%);
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+/* === LIGHTBOX DE LUXO === */
+#lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(1, 4, 9, 0.95);
+  backdrop-filter: blur(15px);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+#lightbox-overlay.active {
+  display: flex;
   opacity: 1;
 }
 
-/* === MOLDURA PERFIL === */
-.ritual-moldura {
-  display: inline-block;
-  border-radius: 8px;
-  padding: 3px;
-  background: linear-gradient(135deg, var(--emerald-muted), var(--blue-muted));
-  opacity: 0.9;
+#lightbox-img {
+  max-width: 90%;
+  max-height: 85%;
+  border-radius: 12px;
+  box-shadow: 0 0 50px rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  transform: scale(0.9);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.ritual-moldura img {
-  border-radius: 6px;
-  width: 160px;
-  height: auto;
-  display: block;
+#lightbox-overlay.active #lightbox-img {
+  transform: scale(1);
 }
 
-/* === CARROSSEL FIX === */
+.close-lightbox {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-lightbox:hover {
+  color: var(--emerald-muted);
+}
+
+/* === AJUSTES CARROSSEL === */
 .swiper-slide img {
-  border-radius: 8px;
-  filter: brightness(0.85); /* Reduz o brilho agressivo das imagens */
-  transition: filter 0.3s ease;
+  cursor: zoom-in;
+  transition: transform 0.3s ease;
 }
 
 .swiper-slide:hover img {
-  filter: brightness(1);
+  transform: scale(1.02);
 }
