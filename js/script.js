@@ -1,3 +1,6 @@
+// Registrar o plugin ScrollTrigger
+gsap.registerPlugin(ScrollTrigger);
+
 // Script para animações de entrada das seções
 document.addEventListener("DOMContentLoaded", () => {
   const sections = ["#atuacao", "#projetos", "#certificados", "#contato"];
@@ -12,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ease: "power2.out",
         scrollTrigger: {
           trigger: id,
-          start: "top 80%",
+          start: "top 85%",
         }
       });
     }
