@@ -1,46 +1,39 @@
 :root {
-    --radius-xl: 1rem;
-    --transition-fast: 0.3s ease;
-    --transition-spring: cubic-bezier(0.25, 1, 0.5, 1);
-
-    --navy-deep: #0f172a;
-    --slate-dark: #1e293b;
-    --emerald-accent: #10b981;
-    --silver-text: #e2e8f0;
-    --slate-muted: #94a3b8;
+    --navy-dark: #020617;
+    --slate-800: #1e293b;
+    --emerald-500: #10b981;
+    --silver: #cbd5e1;
 }
 
 body {
-    background: #020617;
-    color: var(--silver-text);
+    background-color: var(--navy-dark);
+    color: var(--silver);
     font-family: 'Inter', sans-serif;
-    line-height: 1.6;
+    margin: 0;
+    padding: 0;
 }
 
-/* === TÍTULOS COM SERIFA PARA AUTORIDADE === */
 h1, h2, h3, .card-title {
     font-family: 'Lora', serif;
-    letter-spacing: 0.02em;
 }
 
 .gradient-text {
-    background: linear-gradient(90deg, #f8fafc, #94a3b8, #10b981);
+    background: linear-gradient(90deg, #f8fafc, #10b981);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
 }
 
-/* === CARDS COM ESTILO AUDITORIA === */
-.card-css {
-    background-color: #1e293b;
-    border-radius: var(--radius-xl);
-    padding: 1.5rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(148, 163, 184, 0.1);
-    transition: all 0.3s ease;
+/* Scrollbar minimalista */
+::-webkit-scrollbar {
+  width: 8px;
 }
-
-.card-css:hover {
-    border-color: rgba(16, 185, 129, 0.4);
-    box-shadow: 0 4px 25px rgba(16, 185, 129, 0.1);
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
 }
