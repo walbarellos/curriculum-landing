@@ -67,7 +67,7 @@
       
       <div class="header-banner">
         <h1 class="title-name">Willian Albarello</h1>
-        <p class="subtitle-hero">Engenheiro de Software · Especialista em Sistemas de Auditoria</p>
+        <p class="subtitle-hero">Engenheiro de Software · Especialista em Sistemas de Auditoria · Dados</p>
         <p class="mt-4 text-slate-400 font-medium">Pesquisador Autodidata em Engenharia de Sistemas Críticos e Governança.</p>
       </div>
 
@@ -77,18 +77,18 @@
       </a>
     </header>
 
-    <section id="atuacao" class="mb-14 opacity-0">
+    <section id="atuacao" class="mb-14 opacity-0 text-center">
       <div class="card-css">
         <h2 class="card-title gradient-text section-title">Sobre Willian</h2>
-        <p class="card-body">
+        <p class="card-body mx-auto max-w-3xl">
           Desenvolvedor e Pesquisador Autodidata com mais de <strong>10 anos de imersão técnica</strong>. Atuo na intersecção entre <strong>Engenharia de Software, Arquitetura de Dados e Auditoria Digital</strong>.
           <br><br>
           Como neurodivergente, utilizo o rigor lógico e a abstração técnica como canais de excelência para o desenvolvimento de sistemas íntegros.
         </p>
-        <ul class="text-left mt-6 space-y-2 text-slate-300 text-sm list-disc list-inside">
-          <li><strong>Engenharia & Auditoria</strong> — Sistemas de inteligência para fiscalização e transparência.</li>
-          <li><strong>Fullstack Poliglota</strong> — Proficiência real em Rust, Go, Python, C++, TypeScript e mais.</li>
-          <li><strong>Automação & OSINT</strong> — Pipelines de análise de dados massivos e captura Selenium.</li>
+        <ul class="mt-8 space-y-4 text-slate-300 text-sm flex flex-col items-center">
+          <li class="max-w-xl"><strong>Engenharia & Auditoria</strong> — Sistemas de inteligência para fiscalização e transparência institucional.</li>
+          <li class="max-w-xl"><strong>Fullstack Poliglota</strong> — Proficiência real em Rust, Go, Python, C++, TypeScript e tecnologias de missão crítica.</li>
+          <li class="max-w-xl"><strong>Automação & OSINT</strong> — Pipelines de análise de dados massivos e captura automatizada via Selenium.</li>
         </ul>
       </div>
     </section>
@@ -97,7 +97,7 @@
       <div id="cards-section-container"></div>
     </section>
 
-    <section id="contato" class="text-center opacity-0 mb-14">
+    <section id="contato" class="text-center mb-14">
       <h2 class="text-3xl font-bold gradient-text section-title">📬 Contato</h2>
       <div class="flex justify-center gap-6 mt-8">
         <a href="https://github.com/walbarellos" target="_blank" class="social-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg" class="icon-img"></a>
@@ -106,6 +106,18 @@
         <a href="https://dev-walbarello.netlify.app" target="_blank" class="social-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/internetexplorer.svg" class="icon-img"></a>
       </div>
     </section>
+
+    <footer id="footer-elite" class="mt-24 text-center pb-12 opacity-0 translate-y-6 transition-all duration-1000">
+      <p class="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">
+        Engenharia de sistemas auditáveis, análise de dados e construção de estruturas confiáveis.
+        <span class="text-emerald-400 font-medium highlight">Precisão não é opcional.</span>
+      </p>
+      <p id="status-line" class="text-xs text-emerald-400 mt-4 min-h-[1.2rem] opacity-0 transition-opacity duration-500"></p>
+      <div class="w-16 h-[1px] bg-emerald-500/30 mx-auto my-6 footer-divider"></div>
+      <p class="text-slate-600 text-[10px] tracking-[0.2em] uppercase signature">
+        © 2026 Willian Albarello · Engenharia & Auditoria
+      </p>
+    </footer>
   </main>
 
   <button id="back-to-top" class="fixed bottom-8 left-4 z-50 p-3 rounded-full bg-slate-950 border-2 border-emerald-500/50 text-emerald-400 opacity-0 btn-highlight">
@@ -116,46 +128,77 @@
 
   <script src="js/script.js"></script>
   <script>
-    // Lightbox Global
-    window.openLightbox = function(src) {
-      const lb = document.getElementById("lightbox-overlay");
-      const img = document.getElementById("lightbox-img");
-      img.src = src;
-      lb.classList.add("active");
-      document.body.style.overflow = "hidden";
-    };
-    document.getElementById("lightbox-overlay").onclick = (e) => {
-      if(e.target.id !== "lightbox-img") {
-        document.getElementById("lightbox-overlay").classList.remove("active");
-        document.body.style.overflow = "auto";
-      }
-    };
+    document.addEventListener("DOMContentLoaded", () => {
+      // Registrar Plugin GSAP
+      gsap.registerPlugin(ScrollTrigger);
 
-    // Sidebar
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.getElementById('sidebar');
-    menuToggle.onclick = () => sidebar.classList.toggle('-translate-x-full');
+      // 0. Lightbox Global
+      window.openLightbox = function(src) {
+        const lb = document.getElementById("lightbox-overlay");
+        const img = document.getElementById("lightbox-img");
+        if(lb && img) { img.src = src; lb.classList.add("active"); document.body.style.overflow = "hidden"; }
+      };
+      document.getElementById("lightbox-overlay").onclick = (e) => {
+        if(e.target.id !== "lightbox-img") { e.currentTarget.classList.remove("active"); document.body.style.overflow = "auto"; }
+      };
 
-    // Load Cards & Swiper
-    fetch("components/cards.html").then(r => r.text()).then(html => {
-      document.getElementById("cards-section-container").innerHTML = html;
-      new Swiper(".mySwiper", {
-        observer: true, 
-        observeParents: true,
-        preventClicks: false,
-        preventClicksPropagation: false,
-        navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
-        pagination: { el: ".swiper-pagination", clickable: true }
+      // 1. Sidebar
+      const menuToggle = document.getElementById('menu-toggle');
+      const sidebar = document.getElementById('sidebar');
+      if(menuToggle) menuToggle.onclick = () => sidebar.classList.toggle('-translate-x-full');
+
+      // 2. Load Cards & Swiper
+      fetch("components/cards.html").then(r => r.text()).then(html => {
+        const container = document.getElementById("cards-section-container");
+        if(container) {
+          container.innerHTML = html;
+          new Swiper(".mySwiper", {
+            observer: true, observeParents: true, preventClicks: false, preventClicksPropagation: false,
+            navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+            pagination: { el: ".swiper-pagination", clickable: true }
+          });
+        }
       });
-    });
 
-    // Back to Top
-    const btt = document.getElementById("back-to-top");
-    window.onscroll = () => {
-      if (window.scrollY > 500) btt.classList.replace("opacity-0", "opacity-100");
-      else btt.classList.replace("opacity-100", "opacity-0");
-    };
-    btt.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
+      // 3. Back to Top
+      const btt = document.getElementById("back-to-top");
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 500) btt.style.opacity = "1";
+        else btt.style.opacity = "0";
+      });
+      if(btt) btt.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
+
+      // 4. Footer Elite Reveal (Intersection Observer)
+      const footer = document.getElementById("footer-elite");
+      if (footer) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              footer.classList.remove("opacity-0", "translate-y-6");
+              footer.classList.add("opacity-100", "translate-y-0");
+            }
+          });
+        }, { threshold: 0.1 });
+        observer.observe(footer);
+      }
+
+      // 5. Dynamic Status
+      const statusLine = document.getElementById("status-line");
+      const messages = ["● Disponível para novos projetos", "● Foco atual: sistemas auditáveis", "● Respondendo em até 24h", "● Construindo soluções com integridade"];
+      let msgIdx = 0;
+      if(statusLine) {
+        const updateStatus = () => {
+          statusLine.style.opacity = "0";
+          setTimeout(() => {
+            statusLine.innerText = messages[msgIdx];
+            statusLine.style.opacity = "1";
+            msgIdx = (msgIdx + 1) % messages.length;
+          }, 500);
+        };
+        updateStatus();
+        setInterval(updateStatus, 4500);
+      }
+    });
   </script>
 </body>
 </html>
