@@ -9,6 +9,25 @@
   --slate-200: #e2e8f0;
 }
 
+/* === MOLDURA PERFIL (RESTAURADA) === */
+.ritual-moldura {
+  display: inline-block;
+  border-radius: 12px;
+  padding: 4px;
+  background: linear-gradient(135deg, var(--emerald-muted), var(--blue-muted));
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+  width: 180px;
+  height: 180px;
+}
+
+.ritual-moldura img {
+  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 /* === ICONES SOCIAIS (CORREÇÃO DEFINITIVA) === */
 .social-icon {
   display: inline-flex;
