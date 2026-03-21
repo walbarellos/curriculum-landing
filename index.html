@@ -184,6 +184,12 @@
     </svg>
   </button>
 
+  <!-- Lightbox (Zoom de Imagens) -->
+  <div id="lightbox-overlay">
+    <span class="close-lightbox">&times;</span>
+    <img id="lightbox-img" src="" alt="Zoom">
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="js/navbar-animate.js"></script>
   <script src="js/footer-icons.js"></script>
@@ -246,6 +252,28 @@
 
     document.addEventListener('mouseup', stopPan);
     document.addEventListener('mouseleave', stopPan);
+
+    // 3. Lightbox Logic (Zoom de Imagem)
+    const lightbox = document.getElementById("lightbox-overlay");
+    const lightboxImg = document.getElementById("lightbox-img");
+    const closeLightbox = document.querySelector(".close-lightbox");
+
+    function openLightbox(src) {
+      lightboxImg.src = src;
+      lightbox.classList.add("active");
+      document.body.style.overflow = "hidden"; // Trava o scroll do fundo
+    }
+
+    lightbox.onclick = (e) => {
+      if (e.target !== lightboxImg) {
+        lightbox.classList.remove("active");
+        document.body.style.overflow = "auto";
+      }
+    };
+    closeLightbox.onclick = () => {
+      lightbox.classList.remove("active");
+      document.body.style.overflow = "auto";
+    };
   </script>
 
   <!-- Cards Dinâmicos -->
