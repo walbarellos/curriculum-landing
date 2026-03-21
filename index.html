@@ -51,54 +51,39 @@
   </div>
 
   <aside id="sidebar" class="fixed top-0 left-0 h-full w-56 bg-gray-900 shadow-lg z-40 transform -translate-x-full transition-transform duration-300">
-    <nav class="flex flex-col mt-20 space-y-6 px-6 text-gray-200 font-semibold">
-      <a href="#intro" class="hover:text-emerald-300">Início</a>
-      <a href="#atuacao" class="hover:text-emerald-300">Resumo</a>
-      <a href="#projetos" class="hover:text-emerald-300">Projetos</a>
-      <a href="#contato" class="hover:text-emerald-300">Contato</a>
+    <nav class="flex flex-col mt-20 space-y-6 px-6 text-gray-200 font-semibold text-lg">
+      <a href="#intro" class="nav-link-sidebar hover:text-emerald-300">Início</a>
+      <a href="#projetos" class="nav-link-sidebar hover:text-emerald-300">Projetos</a>
+      <a href="#contato" class="nav-link-sidebar hover:text-emerald-300">Contato</a>
+      <a href="#footer-elite" class="nav-link-sidebar hover:text-emerald-300">Sobre</a>
     </nav>
   </aside>
 
-  <main class="max-w-5xl mx-auto py-28 px-4">
+  <main class="max-w-5xl mx-auto py-28 px-4" role="main">
     <header class="text-center mb-16" id="intro">
-      <div class="relative mx-auto ritual-moldura">
-        <img src="assets/img/perfil.jpg" alt="Willian Albarello">
+      <div class="relative mx-auto mb-10 ritual-moldura">
+        <img src="assets/img/perfil.jpg" alt="Willian Albarello" class="shadow-xl">
       </div>
       
       <div class="header-banner">
         <h1 class="title-name">Willian Albarello</h1>
         <p class="subtitle-hero">Engenheiro de Software · Especialista em Sistemas de Auditoria · Dados</p>
-        <p class="mt-4 text-slate-400 font-medium">Pesquisador Autodidata em Engenharia de Sistemas Críticos e Governança.</p>
+        <p class="mt-4 text-slate-400 font-medium">Pesquisador Autodidata em Engenharia de Sistemas Críticos e Governança de Dados.</p>
       </div>
 
       <a href="assets/pdf/Willian_Albarello_Curriculo.pdf" download
-         class="inline-block mt-8 bg-emerald-600 hover:bg-emerald-400 text-slate-950 font-bold px-8 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-all">
+         class="inline-block mt-8 bg-emerald-600 hover:bg-emerald-400 text-slate-950 font-bold px-8 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-all ring-2 ring-emerald-400/20">
         📄 Baixar Currículo (PDF)
       </a>
     </header>
 
-    <section id="atuacao" class="mb-14 opacity-0 text-center">
-      <div class="card-css">
-        <h2 class="card-title gradient-text section-title">Sobre Willian</h2>
-        <p class="card-body mx-auto max-w-3xl">
-          Desenvolvedor e Pesquisador Autodidata com mais de <strong>10 anos de imersão técnica</strong>. Atuo na intersecção entre <strong>Engenharia de Software, Arquitetura de Dados e Auditoria Digital</strong>.
-          <br><br>
-          Como neurodivergente, utilizo o rigor lógico e a abstração técnica como canais de excelência para o desenvolvimento de sistemas íntegros.
-        </p>
-        <ul class="mt-8 space-y-4 text-slate-300 text-sm flex flex-col items-center">
-          <li class="max-w-xl"><strong>Engenharia & Auditoria</strong> — Sistemas de inteligência para fiscalização e transparência institucional.</li>
-          <li class="max-w-xl"><strong>Fullstack Poliglota</strong> — Proficiência real em Rust, Go, Python, C++, TypeScript e tecnologias de missão crítica.</li>
-          <li class="max-w-xl"><strong>Automação & OSINT</strong> — Pipelines de análise de dados massivos e captura automatizada via Selenium.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="projetos" class="mb-14 opacity-0">
+    <section id="projetos" class="mb-14 opacity-0 text-center">
+      <h2 class="text-3xl font-bold text-white border-b border-gray-700 pb-2 mb-8 gradient-text section-title">Projetos Profissionais</h2>
       <div id="cards-section-container"></div>
     </section>
 
     <section id="contato" class="text-center mb-14">
-      <h2 class="text-3xl font-bold gradient-text section-title">📬 Contato</h2>
+      <h2 class="text-3xl font-bold text-emerald-400 border-b border-gray-700 pb-2 mb-4 tracking-tight section-title">📬 Contato</h2>
       <div class="flex justify-center gap-6 mt-8">
         <a href="https://github.com/walbarellos" target="_blank" class="social-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg" class="icon-img"></a>
         <a href="https://qoto.org/@wepiphany" target="_blank" class="social-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/mastodon.svg" class="icon-img"></a>
@@ -107,16 +92,34 @@
       </div>
     </section>
 
-    <footer id="footer-elite" class="mt-24 text-center pb-12 opacity-0 translate-y-6 transition-all duration-1000">
-      <p class="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">
-        Engenharia de sistemas auditáveis, análise de dados e construção de estruturas confiáveis.
-        <span class="text-emerald-400 font-medium highlight">Precisão não é opcional.</span>
-      </p>
-      <p id="status-line" class="text-xs text-emerald-400 mt-4 min-h-[1.2rem] opacity-0 transition-opacity duration-500"></p>
-      <div class="w-16 h-[1px] bg-emerald-500/30 mx-auto my-6 footer-divider"></div>
-      <p class="text-slate-600 text-[10px] tracking-[0.2em] uppercase signature">
-        © 2026 Willian Albarello · Engenharia & Auditoria
-      </p>
+    <!-- FOOTER BIOGRÁFICO (REPOSICIONADO PARA O FINAL) -->
+    <footer id="footer-elite" class="mt-32 text-center pb-12 border-t border-gray-800 pt-16">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-2xl font-bold text-slate-200 mb-6 font-serif">Sobre o Autor</h2>
+        <p class="text-slate-400 text-sm leading-relaxed mb-8">
+          Desenvolvedor e Pesquisador Autodidata com mais de <strong>10 anos de imersão técnica</strong>. Atuo na intersecção entre o desenvolvimento de sistemas, arquitetura de dados e auditoria digital, construindo ferramentas para transparência e fiscalização institucional.
+          <br><br>
+          Como neurodivergente, encontro no rigor lógico e na abstração técnica um canal de expressão para a resolução de problemas complexos e o desenvolvimento de sistemas íntegros.
+        </p>
+        
+        <div class="grid md:grid-cols-3 gap-4 text-[10px] font-mono text-emerald-500/70 mb-10 uppercase tracking-widest">
+          <div class="p-3 border border-emerald-500/10 rounded bg-gray-900/30">● Engenharia & Auditoria Digital</div>
+          <div class="p-3 border border-emerald-500/10 rounded bg-gray-900/30">● Proficiência Poliglota (Rust/Go/Python)</div>
+          <div class="p-3 border border-emerald-500/10 rounded bg-gray-900/30">● Automação & OSINT Massivo</div>
+        </div>
+
+        <p class="text-slate-500 text-[11px] italic mb-6">
+          "Dados revelam padrões. Sistemas sustentam a verdade. Precisão não é opcional."
+        </p>
+        
+        <p id="status-line" class="text-[10px] text-emerald-400 min-h-[1.2rem] transition-opacity duration-500 uppercase tracking-widest"></p>
+        
+        <div class="w-16 h-[1px] bg-emerald-500/20 mx-auto my-8"></div>
+        
+        <p class="text-slate-600 text-[9px] tracking-[0.3em] uppercase signature">
+          © 2026 walbarellos · Pesquisa & Desenvolvimento
+        </p>
+      </div>
     </footer>
   </main>
 
@@ -130,7 +133,9 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // Registrar Plugin GSAP
-      gsap.registerPlugin(ScrollTrigger);
+      if (typeof gsap !== "undefined" && typeof ScrollTrigger !== "undefined") {
+        gsap.registerPlugin(ScrollTrigger);
+      }
 
       // 0. Lightbox Global
       window.openLightbox = function(src) {
@@ -168,23 +173,9 @@
       });
       if(btt) btt.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
 
-      // 4. Footer Elite Reveal (Intersection Observer)
-      const footer = document.getElementById("footer-elite");
-      if (footer) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              footer.classList.remove("opacity-0", "translate-y-6");
-              footer.classList.add("opacity-100", "translate-y-0");
-            }
-          });
-        }, { threshold: 0.1 });
-        observer.observe(footer);
-      }
-
-      // 5. Dynamic Status
+      // 4. Dynamic Status
       const statusLine = document.getElementById("status-line");
-      const messages = ["● Disponível para novos projetos", "● Foco atual: sistemas auditáveis", "● Respondendo em até 24h", "● Construindo soluções com integridade"];
+      const messages = ["● ACTIVE: Building Integridade", "● STATUS: Open for Colabs", "● FOCUS: Auditable Systems"];
       let msgIdx = 0;
       if(statusLine) {
         const updateStatus = () => {
