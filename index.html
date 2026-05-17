@@ -36,69 +36,71 @@
     #lightbox-img { max-width: 95%; max-height: 92%; border-radius: 10px; border: 2px solid #10b981; }
     .close-lightbox { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
 
-    .featured-project-shell {
-      position: relative;
+    .fala-feature {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
       overflow: hidden;
-      border: 1px solid rgba(148, 163, 184, 0.26);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 1rem;
       background:
-        radial-gradient(circle at 16% 0%, rgba(16,185,129,0.16), transparent 34%),
-        radial-gradient(circle at 84% 24%, rgba(59,130,246,0.13), transparent 32%),
+        radial-gradient(circle at 20% 0%, rgba(16,185,129,0.16), transparent 34%),
+        radial-gradient(circle at 90% 30%, rgba(59,130,246,0.12), transparent 32%),
         linear-gradient(135deg, rgba(2,6,23,0.98), rgba(15,23,42,0.92));
       box-shadow: 0 0 70px rgba(16,185,129,0.08);
     }
-    .featured-project-shell::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
-      background-size: 44px 44px;
-      opacity: 0.18;
-      mask-image: linear-gradient(to bottom, black, transparent 82%);
-    }
-    .featured-project-media {
+    .fala-copy { padding: 2.25rem; }
+    .fala-media {
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.75rem;
+      border-left: 1px solid rgba(255,255,255,0.08);
       background:
-        radial-gradient(circle at 45% 18%, rgba(16,185,129,0.15), transparent 28%),
+        radial-gradient(circle at 45% 18%, rgba(16,185,129,0.15), transparent 30%),
         radial-gradient(circle at 65% 70%, rgba(59,130,246,0.16), transparent 34%),
         rgba(2,6,23,0.72);
     }
-    .featured-link {
+    .fala-link {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 44px;
-      padding: 0 18px;
+      min-height: 42px;
+      padding: 0 1rem;
       border-radius: 0.75rem;
-      border: 1px solid rgba(148,163,184,0.36);
+      border: 1px solid rgba(148,163,184,0.38);
       background: rgba(2,6,23,0.42);
       color: #bfdbfe;
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.18em;
+      letter-spacing: .14em;
       text-transform: uppercase;
-      transition: border-color .2s ease, color .2s ease, transform .2s ease, background .2s ease;
+      transition: .2s ease;
     }
-    .featured-link:hover {
+    .fala-link:hover {
       transform: translateY(-1px);
-      border-color: rgba(52,211,153,0.9);
+      border-color: rgba(52,211,153,.9);
       color: #6ee7b7;
-      background: rgba(16,185,129,0.08);
+      background: rgba(16,185,129,.08);
     }
-    .featured-pill {
+    .fala-pill {
       display: inline-flex;
       align-items: center;
-      border: 1px solid rgba(148,163,184,0.34);
+      border: 1px solid rgba(148,163,184,.34);
       border-radius: 999px;
-      padding: 0.45rem 0.8rem;
+      padding: .42rem .72rem;
       color: #bfdbfe;
-      background: rgba(15,23,42,0.55);
+      background: rgba(15,23,42,.55);
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      letter-spacing: 0.12em;
+      letter-spacing: .08em;
       text-transform: uppercase;
+    }
+    @media (max-width: 900px) {
+      .fala-feature { grid-template-columns: 1fr; }
+      .fala-media { border-left: 0; border-top: 1px solid rgba(255,255,255,0.08); }
+      .fala-copy { padding: 1.5rem; }
     }
   </style>
 </head>
@@ -146,61 +148,57 @@
       </a>
     </header>
 
-    <section id="fala-comigo" class="mb-24 opacity-0">
+    <section id="fala-comigo" class="mb-24">
       <div class="mb-8">
-        <p class="mono text-[10px] uppercase tracking-[0.35em] text-emerald-400 font-bold mb-3">Projeto em destaque</p>
+        <p class="mono text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">Projeto em destaque</p>
         <h2 class="text-3xl md:text-4xl font-bold gradient-text section-title">Fala Comigo</h2>
         <p class="text-slate-400 text-sm md:text-base leading-relaxed max-w-3xl">
           Comunicação Aumentativa e Alternativa em português do Brasil, com pranchas visuais, uso offline e foco em autonomia para usuários, famílias e cuidadores.
         </p>
       </div>
 
-      <article class="featured-project-shell rounded-2xl">
-        <div class="relative grid lg:grid-cols-[0.95fr_1.05fr] gap-0">
-          <div class="p-7 md:p-10 flex flex-col justify-between">
+      <article class="fala-feature">
+        <div class="fala-copy">
+          <div class="flex items-center gap-4 mb-7">
+            <img src="assets/img/falacomigo-icon.png"
+                 alt="Ícone do aplicativo Fala Comigo"
+                 class="w-16 h-16 rounded-2xl border border-emerald-500 bg-slate-950 p-1">
             <div>
-              <div class="flex items-center gap-4 mb-7">
-                <img src="assets/img/falacomigo-icon.png"
-                     alt="Ícone do aplicativo Fala Comigo"
-                     class="w-16 h-16 rounded-2xl border border-emerald-500/30 bg-slate-950/60 p-1 shadow-[0_0_24px_rgba(16,185,129,0.10)]">
-                <div>
-                  <p class="mono text-[10px] text-emerald-300 uppercase tracking-[0.24em] font-bold">Android · Acessibilidade</p>
-                  <h3 class="font-serif text-3xl text-slate-100 font-bold leading-tight">Fala Comigo</h3>
-                </div>
-              </div>
-
-              <p class="text-slate-300 leading-relaxed text-sm md:text-base mb-6">
-                Aplicativo independente de Comunicação Aumentativa e Alternativa com símbolos visuais, voz em português do Brasil e experiência pensada para uso cotidiano, inclusive sem internet.
-              </p>
-
-              <div class="flex flex-wrap gap-2 mb-8">
-                <span class="featured-pill">CAA</span>
-                <span class="featured-pill">Android</span>
-                <span class="featured-pill">Offline</span>
-                <span class="featured-pill">Famílias</span>
-                <span class="featured-pill">Acessibilidade</span>
-              </div>
-            </div>
-
-            <div class="flex flex-col sm:flex-row flex-wrap gap-3">
-              <a class="featured-link" href="https://falacomigo-br.netlify.app/" target="_blank" rel="noreferrer">Site publicado</a>
-              <a class="featured-link" href="https://github.com/walbarellos/FalaComigo/wiki" target="_blank" rel="noreferrer">Wiki técnica</a>
-              <a class="featured-link" href="https://github.com/walbarellos/FalaComigo/tree/beta" target="_blank" rel="noreferrer">Repositório beta</a>
+              <p class="mono text-xs text-emerald-300 uppercase tracking-widest font-bold">Android · Acessibilidade</p>
+              <h3 class="font-serif text-3xl text-slate-100 font-bold leading-tight">Fala Comigo</h3>
             </div>
           </div>
 
-          <div class="featured-project-media relative min-h-[340px] border-t lg:border-t-0 lg:border-l border-white/10 flex items-center justify-center p-6 md:p-8">
-            <img src="assets/img/falacomigo-preview.png"
-                 alt="Prévia visual do projeto Fala Comigo"
-                 class="relative z-10 max-h-[420px] w-full object-contain rounded-xl">
+          <p class="text-slate-300 leading-relaxed text-sm md:text-base mb-6">
+            Aplicativo independente de Comunicação Aumentativa e Alternativa com símbolos visuais, voz em português do Brasil e experiência pensada para uso cotidiano, inclusive sem internet.
+          </p>
+
+          <div class="flex flex-wrap gap-2 mb-8">
+            <span class="fala-pill">CAA</span>
+            <span class="fala-pill">Android</span>
+            <span class="fala-pill">Offline</span>
+            <span class="fala-pill">Famílias</span>
+            <span class="fala-pill">Acessibilidade</span>
           </div>
+
+          <div class="flex flex-col sm:flex-row flex-wrap gap-3">
+            <a class="fala-link" href="https://falacomigo-br.netlify.app/" target="_blank" rel="noreferrer">Site publicado</a>
+            <a class="fala-link" href="https://github.com/walbarellos/FalaComigo/wiki" target="_blank" rel="noreferrer">Wiki técnica</a>
+            <a class="fala-link" href="https://github.com/walbarellos/FalaComigo/tree/beta" target="_blank" rel="noreferrer">Repositório beta</a>
+          </div>
+        </div>
+
+        <div class="fala-media">
+          <img src="assets/img/falacomigo-preview.png"
+               alt="Prévia visual do projeto Fala Comigo"
+               class="max-h-96 w-full object-contain rounded-xl">
         </div>
       </article>
     </section>
 
     <section id="projetos" class="mb-24 opacity-0">
       <div class="mb-8">
-        <p class="mono text-[10px] uppercase tracking-[0.35em] text-slate-500 font-bold mb-3">Portfólio complementar</p>
+        <p class="mono text-xs uppercase tracking-widest text-slate-500 font-bold mb-3">Portfólio complementar</p>
         <h2 class="text-3xl md:text-4xl font-bold gradient-text section-title">Outros Projetos & Automações</h2>
       </div>
       <div id="cards-section-container"></div>
@@ -301,35 +299,10 @@
       const sidebar = document.getElementById('sidebar');
       if(menuToggle) menuToggle.onclick = () => sidebar.classList.toggle('-translate-x-full');
 
-      function removeFalaComigoFromCarousel(container) {
-        if (!container) return;
-
-        const candidates = Array.from(container.querySelectorAll(".swiper-slide, article, [class*='card'], li, div"))
-          .filter(el => /fala\s*comigo/i.test((el.textContent || "").trim()));
-
-        const removable = new Set();
-
-        candidates.forEach(el => {
-          const slide = el.closest(".swiper-slide");
-          if (slide) {
-            removable.add(slide);
-            return;
-          }
-
-          const card = el.closest("article, [class*='card'], li");
-          if (card && container.contains(card)) {
-            removable.add(card);
-          }
-        });
-
-        removable.forEach(el => el.remove());
-      }
-
       fetch("components/cards.html").then(r => r.text()).then(html => {
         const container = document.getElementById("cards-section-container");
         if(container) {
           container.innerHTML = html;
-          removeFalaComigoFromCarousel(container);
           new Swiper(".mySwiper", {
             observer: true, observeParents: true, preventClicks: false, preventClicksPropagation: false,
             navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
