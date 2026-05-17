@@ -55,6 +55,7 @@
     <nav class="flex flex-col mt-20 space-y-6 px-6 text-gray-200 font-semibold uppercase text-xs tracking-widest">
       <a href="#intro" class="hover:text-emerald-300">Início</a>
       <a href="#projetos" class="hover:text-emerald-300">Projetos</a>
+      <a href="#fala-comigo" class="hover:text-emerald-300">Fala Comigo</a>
       <a href="#footer-elite" class="hover:text-emerald-300">Sobre & Stack</a>
       <a href="#contato" class="hover:text-emerald-300">Contato</a>
     </nav>
@@ -81,6 +82,90 @@
     </header>
 
     <section id="projetos" class="mb-24 opacity-0">
+      <article id="fala-comigo"
+               class="mb-12 overflow-hidden rounded-2xl border border-emerald-500/20 bg-slate-900/80 shadow-[0_0_45px_rgba(16,185,129,0.08)]">
+        <div class="grid md:grid-cols-[1.1fr_0.9fr] gap-0">
+          <div class="p-8 md:p-10">
+            <p class="mono text-[10px] uppercase tracking-[0.35em] text-emerald-400 font-bold mb-4">
+              Projeto em destaque · Acessibilidade · Android
+            </p>
+
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-100 leading-tight mb-4">
+              Fala Comigo
+            </h2>
+
+            <p class="text-slate-300 text-sm md:text-base leading-relaxed mb-6">
+              Aplicativo Android brasileiro de Comunicação Aumentativa e Alternativa, com pranchas visuais,
+              uso offline e voz em português do Brasil. Projeto independente, voltado a autonomia, inclusão
+              e apoio à comunicação cotidiana.
+            </p>
+
+            <div class="flex flex-wrap gap-2 mb-8">
+              <span class="mono text-[10px] px-3 py-1 rounded-full border border-emerald-500/30 text-emerald-300 bg-emerald-500/5">CAA</span>
+              <span class="mono text-[10px] px-3 py-1 rounded-full border border-blue-500/30 text-blue-300 bg-blue-500/5">ANDROID</span>
+              <span class="mono text-[10px] px-3 py-1 rounded-full border border-purple-500/30 text-purple-300 bg-purple-500/5">OFFLINE</span>
+              <span class="mono text-[10px] px-3 py-1 rounded-full border border-amber-500/30 text-amber-300 bg-amber-500/5">ACESSIBILIDADE</span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+              <a href="https://falacomigo-br.netlify.app/"
+                 target="_blank"
+                 rel="noreferrer"
+                 class="inline-flex justify-center items-center rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-3 uppercase tracking-widest text-[10px] transition">
+                Site publicado
+              </a>
+
+              <a href="https://github.com/walbarellos/FalaComigo/wiki"
+                 target="_blank"
+                 rel="noreferrer"
+                 class="inline-flex justify-center items-center rounded-lg border border-emerald-500/40 hover:border-emerald-300 text-emerald-300 font-bold px-5 py-3 uppercase tracking-widest text-[10px] transition">
+                Wiki técnica
+              </a>
+
+              <a href="https://github.com/walbarellos/FalaComigo/tree/beta"
+                 target="_blank"
+                 rel="noreferrer"
+                 class="inline-flex justify-center items-center rounded-lg border border-slate-600 hover:border-slate-300 text-slate-300 font-bold px-5 py-3 uppercase tracking-widest text-[10px] transition">
+                Repositório beta
+              </a>
+            </div>
+          </div>
+
+          <div class="relative min-h-[280px] bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/40 border-t md:border-t-0 md:border-l border-white/5 p-8 flex items-center justify-center">
+            <div class="absolute inset-0 opacity-30"
+                 style="background-image: radial-gradient(circle at 20% 20%, rgba(16,185,129,0.24), transparent 28%), radial-gradient(circle at 80% 70%, rgba(59,130,246,0.20), transparent 30%);">
+            </div>
+
+            <div class="relative w-full max-w-xs rounded-2xl border border-emerald-500/30 bg-slate-950/70 p-5 shadow-[0_0_40px_rgba(16,185,129,0.08)]">
+              <div class="flex items-center justify-between mb-5">
+                <div>
+                  <p class="mono text-[10px] text-emerald-400 uppercase tracking-[0.25em]">Status</p>
+                  <p class="text-slate-200 font-bold">Beta público</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                  <span class="block w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.8)]"></span>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex items-center justify-between rounded-lg bg-white/5 border border-white/5 px-4 py-3">
+                  <span class="text-slate-400 text-xs">Site</span>
+                  <span class="mono text-emerald-300 text-[10px]">ONLINE</span>
+                </div>
+                <div class="flex items-center justify-between rounded-lg bg-white/5 border border-white/5 px-4 py-3">
+                  <span class="text-slate-400 text-xs">Documentação</span>
+                  <span class="mono text-blue-300 text-[10px]">WIKI</span>
+                </div>
+                <div class="flex items-center justify-between rounded-lg bg-white/5 border border-white/5 px-4 py-3">
+                  <span class="text-slate-400 text-xs">Código</span>
+                  <span class="mono text-purple-300 text-[10px]">BETA</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
       <div id="cards-section-container"></div>
     </section>
 
@@ -98,7 +183,7 @@
       <div class="max-w-4xl mx-auto">
         <h2 class="text-2xl font-bold text-slate-200 mb-8 font-serif uppercase tracking-widest">Sobre o Especialista</h2>
         <p class="text-slate-400 text-sm leading-relaxed mb-12 text-center max-w-3xl mx-auto">
-          Pesquisador autodidata com 10 anos de imersão técnica. Especializado na intersecção entre segurança ofensiva e engenharia de sistemas, utilizo o rigor lógico da neurodivergência para decifrar arquiteturas complexas e garantir a integridade de fluxos de dados críticos.
+          Pesquisador autodidata com 10 anos de imersão técnica. Especializado na intersecção entre segurança ofensiva e engenharia de sistemas, utilizo o rigor lógico para decifrar arquiteturas complexas e garantir a integridade de fluxos de dados críticos.
         </p>
         
         <!-- STACK DE ELITE (HIERARQUIA 1000/1000) -->
