@@ -38,8 +38,8 @@ main{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 1.5rem}
 .hero-top{display:flex;align-items:flex-start;gap:2rem;flex-wrap:wrap}
 .hero-text{flex:1;min-width:260px}
 .hero-avatar{flex-shrink:0;width:120px;height:120px;border-radius:50%;border:2px solid var(--border-h);overflow:hidden;box-shadow:0 0 0 6px rgba(52,211,153,.06);margin-top:3.5rem}
-.hero-avatar img{width:100%;height:100%;object-fit:cover;object-position:top}
-.hero-tag{font-family:var(--dm);font-size:10px;letter-spacing:.22em;color:var(--em);text-transform:uppercase;margin-bottom:14rem;display:flex;align-items:center;gap:.6rem}
+.hero-avatar img{width:100%;height:100%;object-fit:cover}
+.hero-tag{font-family:var(--dm);font-size:10px;letter-spacing:.22em;color:var(--em);text-transform:uppercase;margin-bottom:1.4rem;display:flex;align-items:center;gap:.6rem}
 .hero-tag::before{content:'';display:block;width:28px;height:1px;background:var(--em)}
 .hero-name{font-family:var(--sans);font-size:clamp(3rem,8vw,5.5rem);font-weight:800;line-height:.95;color:var(--text-hi);letter-spacing:-2px}
 .hero-name span{color:var(--em)}
@@ -117,19 +117,6 @@ section{padding:5rem 0}
 .fc-dots{display:flex;gap:.35rem;align-items:center}
 .fc-dot{width:5px;height:5px;border-radius:50%;background:var(--text-dim);cursor:pointer;transition:background .2s,transform .2s;border:none;padding:0}
 .fc-dot.active{background:var(--em);transform:scale(1.4)}
-
-/* GALLERY CAROUSEL */
-#galeria{padding:5rem 0}
-.gal-card{border:1px solid var(--border-h);border-radius:16px;background:linear-gradient(135deg,#0d1410 0%,#080c0a 100%);overflow:hidden;position:relative}
-.gal-carousel{position:relative;width:100%;height:500px;overflow:hidden}
-@media(max-width:700px){.gal-carousel{height:350px}}
-.gal-slide{position:absolute;inset:0;opacity:0;transition:opacity .6s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;pointer-events:none}
-.gal-slide.active{opacity:1;pointer-events:auto}
-.gal-img-wrap{width:100%;height:85%;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,.3)}
-.gal-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .4s ease}
-.gal-slide.active .gal-img-wrap img{transform:scale(1.02)}
-.gal-caption{margin-top:1.2rem;font-family:var(--dm);font-size:10px;color:var(--em);text-transform:uppercase;letter-spacing:.14em;text-align:center}
-.gal-controls{display:flex;gap:1.2rem;justify-content:center;padding:1.5rem 0;align-items:center;border-top:1px solid var(--border)}
 
 /* TERMINAL MOCK */
 .terminal-mock{width:100%;max-width:240px;background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;font-family:var(--dm);font-size:10px;line-height:1.9;backdrop-filter:blur(4px)}
@@ -215,9 +202,8 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;margin-top:2rem;displ
 <nav id="sidebar">
   <span class="side-lbl">nav</span>
   <a href="#hero"     class="side-dot active" data-s="hero"     title="Início"></a>
-  <a href="#destaque" class="side-dot"         data-s="destaque" title="Destaque"></a>
+  <a href="#destaque" class="side-dot"         data-s="destaque" title="Fala Comigo"></a>
   <a href="#projetos" class="side-dot"         data-s="projetos" title="Projetos"></a>
-  <a href="#galeria"  class="side-dot"         data-s="galeria"  title="Galeria"></a>
   <a href="#agora"    class="side-dot"         data-s="agora"    title="Agora"></a>
   <a href="#stack"    class="side-dot"         data-s="stack"    title="Stack"></a>
   <a href="#historia" class="side-dot"         data-s="historia" title="Histórico"></a>
@@ -541,85 +527,10 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;margin-top:2rem;displ
   </div>
 </section>
 
-<!-- ── GALERIA ──────────────────────────────────── -->
-<section id="galeria">
-  <div class="sec-header fade-up">
-    <span class="sec-num">03 /</span>
-    <h2 class="sec-title">Galeria de Resultados</h2>
-  </div>
-
-  <div class="gal-card fade-up d1">
-    <div class="gal-carousel" id="galCarousel">
-      <div class="gal-slide active" data-label="Fala Comigo - Banner">
-        <div class="gal-img-wrap"><img src="assets/img/fala-comigo-banner.png" alt="Fala Comigo Banner"></div>
-        <p class="gal-caption">Fala Comigo — Banner Principal</p>
-      </div>
-      <div class="gal-slide" data-label="Fala Comigo - Preview">
-        <div class="gal-img-wrap"><img src="assets/img/falacomigo-preview.png" alt="Fala Comigo Preview"></div>
-        <p class="gal-caption">Fala Comigo — Interface do App</p>
-      </div>
-      <div class="gal-slide" data-label="Sentinela - Auditoria">
-        <div class="gal-img-wrap"><img src="assets/img/Sentinal.png" alt="Sentinela Screenshot"></div>
-        <p class="gal-caption">Sentinela — Monitor de Licitações</p>
-      </div>
-      <div class="gal-slide" data-label="Sentinela - Dashboard">
-        <div class="gal-img-wrap"><img src="assets/img/Sentinela-2.png" alt="Sentinela Screenshot 2"></div>
-        <p class="gal-caption">Sentinela — Análise de Dados</p>
-      </div>
-      <div class="gal-slide" data-label="wErpy - ERP">
-        <div class="gal-img-wrap"><img src="assets/img/wErpy.png" alt="wErpy ERP"></div>
-        <p class="gal-caption">Aequitas ERP (wErpy) — Visão Geral</p>
-      </div>
-      <div class="gal-slide" data-label="wErpy - Módulos">
-        <div class="gal-img-wrap"><img src="assets/img/wErpy-2.png" alt="wErpy ERP 2"></div>
-        <p class="gal-caption">Aequitas ERP (wErpy) — Gestão</p>
-      </div>
-      <div class="gal-slide" data-label="wErpy - Relatórios">
-        <div class="gal-img-wrap"><img src="assets/img/wErpy-3.png" alt="wErpy ERP 3"></div>
-        <p class="gal-caption">Aequitas ERP (wErpy) — Relatórios</p>
-      </div>
-      <div class="gal-slide" data-label="wErpy - Config">
-        <div class="gal-img-wrap"><img src="assets/img/wErpy-4.png" alt="wErpy ERP 4"></div>
-        <p class="gal-caption">Aequitas ERP (wErpy) — Configurações</p>
-      </div>
-      <div class="gal-slide" data-label="IRC Bot">
-        <div class="gal-img-wrap"><img src="assets/img/IRC-BOT.png" alt="IRC Bot"></div>
-        <p class="gal-caption">Ferramenta de Automação — IRC Bot</p>
-      </div>
-      <div class="gal-slide" data-label="Portal de Transparência">
-        <div class="gal-img-wrap"><img src="assets/img/portalfg.png" alt="Portal FG"></div>
-        <p class="gal-caption">Portal de Transparência — Mockup</p>
-      </div>
-      <div class="gal-slide" data-label="Landing Page 1">
-        <div class="gal-img-wrap"><img src="assets/img/site.png" alt="Site Screenshot"></div>
-        <p class="gal-caption">Landing Page — Layout Moderno</p>
-      </div>
-      <div class="gal-slide" data-label="Landing Page 2">
-        <div class="gal-img-wrap"><img src="assets/img/site1.png" alt="Site Screenshot 1"></div>
-        <p class="gal-caption">Landing Page — Seção de Serviços</p>
-      </div>
-      <div class="gal-slide" data-label="Landing Page 3">
-        <div class="gal-img-wrap"><img src="assets/img/site2.png" alt="Site Screenshot 2"></div>
-        <p class="gal-caption">Landing Page — Contato e Footer</p>
-      </div>
-      <div class="gal-slide" data-label="Visão Geral de Projetos">
-        <div class="gal-img-wrap"><img src="assets/img/projects.png" alt="Projects Overview"></div>
-        <p class="gal-caption">Portfólio — Visão Geral dos Projetos</p>
-      </div>
-    </div>
-    
-    <div class="gal-controls">
-      <button class="fc-btn" id="galPrev">&#8592;</button>
-      <div class="fc-dots" id="galDots"></div>
-      <button class="fc-btn" id="galNext">&#8594;</button>
-    </div>
-  </div>
-</section>
-
 <!-- ── AGORA ────────────────────────────────────── -->
 <section id="agora">
   <div class="sec-header fade-up">
-    <span class="sec-num">04 /</span>
+    <span class="sec-num">03 /</span>
     <h2 class="sec-title">O que estou fazendo agora</h2>
   </div>
 
@@ -696,7 +607,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;margin-top:2rem;displ
 <!-- ── STACK ────────────────────────────────────── -->
 <section id="stack">
   <div class="sec-header fade-up">
-    <span class="sec-num">05 /</span>
+    <span class="sec-num">04 /</span>
     <h2 class="sec-title">Stack Real</h2>
   </div>
 
@@ -742,7 +653,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;margin-top:2rem;displ
 <!-- ── HISTÓRICO ────────────────────────────────── -->
 <section id="historia">
   <div class="sec-header fade-up">
-    <span class="sec-num">06 /</span>
+    <span class="sec-num">05 /</span>
     <h2 class="sec-title">Histórico</h2>
   </div>
 
@@ -792,7 +703,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;margin-top:2rem;displ
 <!-- ── CONTATO ──────────────────────────────────── -->
 <section id="contato">
   <div class="sec-header fade-up">
-    <span class="sec-num">07 /</span>
+    <span class="sec-num">06 /</span>
     <h2 class="sec-title">Contato</h2>
   </div>
 
@@ -914,42 +825,6 @@ sections.forEach(s => secObs.observe(s));
 
   let timer;
   function startAuto() { timer = setInterval(() => goTo(current + 1), 3500); }
-  function clearAuto()  { clearInterval(timer); }
-  startAuto();
-})();
-
-// ── GALLERY CAROUSEL ─────────────────────────────
-(function () {
-  const carousel = document.getElementById('galCarousel');
-  const dotsWrap = document.getElementById('galDots');
-  const prevBtn  = document.getElementById('galPrev');
-  const nextBtn  = document.getElementById('galNext');
-  if (!carousel) return;
-
-  const slides = Array.from(carousel.querySelectorAll('.gal-slide'));
-  const total  = slides.length;
-  let current  = 0;
-
-  slides.forEach((sl, i) => {
-    const d = document.createElement('button');
-    d.className = 'fc-dot' + (i === 0 ? ' active' : '');
-    d.addEventListener('click', () => goTo(i));
-    dotsWrap.appendChild(d);
-  });
-
-  function goTo(idx) {
-    slides[current].classList.remove('active');
-    dotsWrap.children[current].classList.remove('active');
-    current = (idx + total) % total;
-    slides[current].classList.add('active');
-    dotsWrap.children[current].classList.add('active');
-  }
-
-  prevBtn.addEventListener('click', () => { clearAuto(); goTo(current - 1); startAuto(); });
-  nextBtn.addEventListener('click', () => { clearAuto(); goTo(current + 1); startAuto(); });
-
-  let timer;
-  function startAuto() { timer = setInterval(() => goTo(current + 1), 5000); }
   function clearAuto()  { clearInterval(timer); }
   startAuto();
 })();
