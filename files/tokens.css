@@ -1,0 +1,41 @@
+/* ── TOKENS — DARK (default) ─────────────────────── */
+:root {
+  --bg:        #080c0a;
+  --bg-card:   #0d1410;
+  --bg-card2:  #111812;
+  --border:    rgba(52,211,153,.12);
+  --border-h:  rgba(52,211,153,.45);
+  --em:        #34d399;
+  --em-dim:    rgba(52,211,153,.55);
+  --blue:      #60a5fa;
+  --amber:     #fbbf24;
+  --purple:    #a78bfa;
+  --rose:      #fb7185;
+  --text:      #c8d5ce;
+  --text-dim:  #5a7068;
+  --text-hi:   #ecfdf5;
+  --shadow:    0 8px 30px rgba(0,0,0,.45);
+
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+  --dm:   'DM Mono', monospace;
+}
+
+/* ── TOKENS — LIGHT ──────────────────────────────── */
+[data-theme="light"] {
+  --bg:        #f0f5f2;
+  --bg-card:   #ffffff;
+  --bg-card2:  #f7faf8;
+  --border:    rgba(5,150,105,.14);
+  --border-h:  rgba(5,150,105,.48);
+  --em:        #059669;
+  --em-dim:    rgba(5,150,105,.5);
+  --blue:      #1d4ed8;
+  --amber:     #b45309;
+  --purple:    #6d28d9;
+  --rose:      #be123c;
+  --text:      #374151;
+  --text-dim:  #9ca3af;
+  --text-hi:   #0f1a14;
+  --shadow:    0 4px 20px rgba(0,0,0,.10);
+}
