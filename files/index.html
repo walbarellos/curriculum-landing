@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Willian Albarello — Desenvolvedor de Sistemas</title>
+
+  <meta property="og:title"       content="Willian Albarello — Desenvolvedor de Sistemas" />
+  <meta property="og:description" content="Construo sistemas com propósito — acessibilidade, transparência pública e educação. Rio Branco, Acre." />
+  <meta property="og:type"        content="website" />
+  <meta name="twitter:card"       content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+
+  <!-- Theme applied before paint — prevents flash -->
+  <script src="js/theme.js"></script>
+</head>
+<body>
+
+<!-- ── SIDEBAR ─────────────────────────────────────── -->
+<nav id="sidebar" aria-label="Navegação principal">
+  <span class="side-lbl" aria-hidden="true">nav</span>
+  <a href="#hero"        class="side-dot active" data-s="hero"        title="Início"            aria-label="Ir para Início"></a>
+  <a href="#falacomigo"  class="side-dot"         data-s="falacomigo"  title="Fala Comigo"      aria-label="Ir para Fala Comigo"></a>
+  <a href="#acessivel"   class="side-dot"         data-s="acessivel"   title="Acre Acessível"   aria-label="Ir para Acre Acessível"></a>
+  <a href="#projetos"    class="side-dot"         data-s="projetos"    title="Projetos"          aria-label="Ir para Projetos"></a>
+  <a href="#agora"       class="side-dot"         data-s="agora"       title="Agora"             aria-label="Ir para Agora"></a>
+  <a href="#stack"       class="side-dot"         data-s="stack"       title="Stack"             aria-label="Ir para Stack"></a>
+  <a href="#historia"    class="side-dot"         data-s="historia"    title="Histórico"         aria-label="Ir para Histórico"></a>
+  <a href="#certificados" class="side-dot"        data-s="certificados" title="Certificados"     aria-label="Ir para Certificados"></a>
+  <a href="#contato"     class="side-dot"         data-s="contato"     title="Contato"           aria-label="Ir para Contato"></a>
+  <button id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+</nav>
+
+<main>
+
+<!-- ── HERO ──────────────────────────────────────────── -->
+<section id="hero">
+  <p class="hero-tag fade-up">Portfólio — 2026</p>
+
+  <div class="hero-top fade-up d1">
+    <div class="hero-text">
+      <h1 class="hero-name">
+        Willian<br><span>Albarello</span>
+      </h1>
+
+      <p class="hero-role">
+        <strong>Desenvolvedor de Sistemas</strong> ·
+        Estudante IFAC — Sistemas para Internet (1º período) ·
+        Estagiário T.I. @ FEM Cultura · Rio Branco, Acre
+      </p>
+
+      <p class="hero-desc">
+        Construo sistemas com propósito — de apps Android de acessibilidade
+        a ferramentas de transparência pública e plataformas educacionais.
+        Autônomo, orientado a produto, foco em impacto real.
+      </p>
+
+      <div class="chip-cloud">
+        <span class="chip em">Kotlin · Android</span>
+        <span class="chip em">Jetpack Compose</span>
+        <span class="chip ro">Assembly x86 · C/C++</span>
+        <span class="chip bl">Python · FastAPI</span>
+        <span class="chip bl">React · Next.js</span>
+        <span class="chip am">Linux · Docker</span>
+        <span class="chip pu">ELF Reversing</span>
+        <span class="chip pu">PostgreSQL · DuckDB</span>
+        <span class="chip em">TypeScript</span>
+        <span class="chip am">Bash · Shell</span>
+      </div>
+
+      <div class="ctx-badges">
+        <span class="badge bg">● Rio Branco, Acre</span>
+        <span class="badge bb">IFAC · 1º Período</span>
+        <span class="badge ba">Estágio FEM Cultura</span>
+      </div>
+
+      <div class="hero-links">
+        <a href="https://github.com/walbarellos" target="_blank" rel="noopener" class="btn btn-p">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.84 10.91.57.11.78-.25.78-.55 0-.27-.01-1.17-.02-2.12-3.19.69-3.86-1.54-3.86-1.54-.52-1.33-1.27-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.28 1.18-3.08-.12-.29-.51-1.47.11-3.07 0 0 .97-.31 3.18 1.17A11.12 11.12 0 0 1 12 6.8c.98.01 1.97.13 2.9.38 2.2-1.48 3.17-1.17 3.17-1.17.63 1.6.24 2.78.12 3.07.74.8 1.18 1.82 1.18 3.08 0 4.43-2.69 5.41-5.25 5.7.42.37.77 1.1.77 2.22 0 1.6-.02 2.9-.02 3.29 0 .3.21.66.79.55A11.52 11.52 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+          GitHub
+        </a>
+        <a href="#falacomigo" class="btn btn-g">Projeto Principal</a>
+        <a href="#projetos"   class="btn btn-g">Ver Projetos</a>
+        <a href="assets/pdf/Willian_Albarello_Curriculo.pdf" target="_blank" rel="noopener" class="btn btn-pdf">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          Currículo PDF
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-avatar" aria-hidden="true">
+      <img
+        src="assets/img/perfil.jpg"
+        alt="Foto de Willian Albarello"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+      />
+      <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg-card),var(--bg-card2))">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-h)" stroke-width="1.5" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 01 / FALA COMIGO ──────────────────────────────── -->
+<section id="falacomigo">
+  <div class="sec-header fade-up">
+    <span class="sec-num">01 /</span>
+    <h2 class="sec-title">Fala Comigo</h2>
+  </div>
+
+  <div class="featured-card fade-up d1">
+    <div class="featured-inner">
+      <div class="featured-copy">
+        <div>
+          <p class="featured-badge">Android · Acessibilidade · GPL-3.0 · 2026</p>
+          <h3 class="featured-title">Fala Comigo</h3>
+          <p class="featured-desc">
+            App brasileiro de Comunicação Aumentativa e Alternativa (CAA),
+            offline-first, para pessoas autistas não-verbais e neurodivergentes.
+            Pranchas visuais ARASAAC, voz em português do Brasil, 60 FPS garantidos.
+            APK v0.3.0 auditado —&nbsp;<strong style="color:var(--em)">0/72 detecções no VirusTotal</strong>.
+            Parceiro no Rio de Janeiro fez fork para uso educacional.
+            Submetido ao Programa Centelha (FAPEAC/FINEP).
+          </p>
+          <div class="featured-pills">
+            <span class="pill">Kotlin</span>
+            <span class="pill">Jetpack Compose</span>
+            <span class="pill">Room</span>
+            <span class="pill">Hilt</span>
+            <span class="pill">Coil 2.6</span>
+            <span class="pill">Drag &amp; Drop</span>
+            <span class="pill">Offline-first</span>
+            <span class="pill">CAA / ARASAAC</span>
+            <span class="pill">GPL-3.0</span>
+          </div>
+        </div>
+        <div class="featured-links">
+          <a href="https://github.com/walbarellos/FalaComigo" target="_blank" rel="noopener" class="btn btn-p">Repositório</a>
+          <a href="https://falacomigo-br.netlify.app/"          target="_blank" rel="noopener" class="btn btn-g">Site</a>
+          <a href="https://github.com/walbarellos/FalaComigo/wiki" target="_blank" rel="noopener" class="btn btn-g">Wiki</a>
+        </div>
+      </div>
+
+      <div class="featured-visual">
+        <!-- Phone carousel -->
+        <div class="fc-carousel" id="fcCarousel" role="region" aria-label="Prévia do app Fala Comigo">
+
+          <!-- Slide 0: Pranchas -->
+          <div class="fc-slide" data-label="Pranchas" aria-hidden="false">
+            <div class="fc-phone">
+              <div class="fc-phone-bar">⬤ Fala Comigo</div>
+              <div class="fc-phone-search">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                buscar prancha...
+              </div>
+              <div style="flex:1;border-radius:5px;border:1px solid var(--border);padding:5px;display:grid;grid-template-columns:1fr 1fr;gap:4px;overflow:hidden">
+                <div style="border:1px solid var(--border);border-radius:4px;background:var(--bg-card2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;font-family:var(--dm);font-size:7px;color:var(--em)">😀<br>Feliz</div>
+                <div style="border:1px solid var(--border);border-radius:4px;background:var(--bg-card2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;font-family:var(--dm);font-size:7px;color:var(--text-dim)">😢<br>Triste</div>
+                <div style="border:1px solid var(--border);border-radius:4px;background:var(--bg-card2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;font-family:var(--dm);font-size:7px;color:var(--text-dim)">🚿<br>Banho</div>
+                <div style="border:1px solid var(--border);border-radius:4px;background:var(--bg-card2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;font-family:var(--dm);font-size:7px;color:var(--amber)">🍽<br>Comida</div>
+                <div style="border:1px solid var(--border);border-radius:4px;background:var(--bg-card2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;font-family:var(--dm);font-size:7px;color:var(--blue)">💧<br>Água</div>
+                <div style="border:1px solid var(--border);border-radius:4px;background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;font-family:var(--dm);font-size:7px;color:var(--em)">🛑<br>Parar</div>
+              </div>
+              <div class="fc-phone-play">▶ reproduzir voz PT-BR</div>
+              <div class="fc-phone-foot">offline · ARASAAC · v0.3.0</div>
+            </div>
+          </div>
+
+          <!-- Slide 1: Configurações -->
+          <div class="fc-slide" data-label="Configurar" aria-hidden="true">
+            <div class="fc-phone">
+              <div class="fc-phone-bar">⚙ Configurações</div>
+              <div style="display:flex;flex-direction:column;gap:5px;flex:1;padding:4px 0">
+                <div class="fc-setting-row"><span>Voz</span><span style="color:var(--em)">Feminina BR</span></div>
+                <div class="fc-setting-row"><span>Velocidade</span><span style="color:var(--em)">Normal</span></div>
+                <div class="fc-setting-row"><span>Grade</span><span style="color:var(--em)">4×4</span></div>
+                <div class="fc-setting-row"><span>Offline</span><span style="color:var(--em)">✓ ativo</span></div>
+                <div class="fc-setting-row"><span>Tema</span><span style="color:var(--em)">Escuro</span></div>
+                <div class="fc-setting-row"><span>ARASAAC</span><span style="color:var(--em)">sync ✓</span></div>
+              </div>
+              <div class="fc-phone-play">salvar preferências</div>
+              <div class="fc-phone-foot">GPL-3.0</div>
+            </div>
+          </div>
+
+          <!-- Slide 2: Auditoria -->
+          <div class="fc-slide" data-label="Auditoria" aria-hidden="true">
+            <div class="fc-phone" style="font-family:var(--dm)">
+              <div style="display:flex;gap:4px;margin-bottom:6px">
+                <div style="width:7px;height:7px;border-radius:50%;background:#ff5f56"></div>
+                <div style="width:7px;height:7px;border-radius:50%;background:#ffbd2e"></div>
+                <div style="width:7px;height:7px;border-radius:50%;background:#27c93f"></div>
+              </div>
+              <div style="font-size:8px;color:var(--text-dim);line-height:2;flex:1">
+                <div><span style="color:var(--em)">$</span> sha256sum .apk</div>
+                <div style="color:var(--em)">29b688f3...</div>
+                <div>✓ <span style="color:var(--em)">íntegro</span></div>
+                <div style="margin-top:4px"><span style="color:var(--em)">$</span> virustotal</div>
+                <div><span style="color:var(--em);font-size:11px;font-weight:700">0</span><span>/72</span></div>
+                <div style="color:var(--em)">✓ limpo</div>
+                <div style="margin-top:4px">ver: <span style="color:var(--amber)">v0.3.0</span></div>
+                <div>lic: <span style="color:var(--em)">GPL-3.0</span></div>
+                <div style="display:inline-block;width:6px;height:11px;background:var(--em);animation:blink 1.1s step-end infinite;vertical-align:middle;margin-top:4px"></div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /fcCarousel -->
+
+        <div class="fc-controls">
+          <button class="fc-btn" id="fcPrev" aria-label="Slide anterior">&#8592;</button>
+          <div class="fc-dots" id="fcDots" role="tablist" aria-label="Slides Fala Comigo"></div>
+          <button class="fc-btn" id="fcNext" aria-label="Próximo slide">&#8594;</button>
+        </div>
+        <div style="font-family:var(--dm);font-size:8px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:.3rem">
+          v0.3.0 · Kotlin · Jetpack Compose · Room
+        </div>
+      </div><!-- /featured-visual -->
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 02 / ACRE ACESSÍVEL ──────────────────────────── -->
+<section id="acessivel">
+  <div class="sec-header fade-up">
+    <span class="sec-num">02 /</span>
+    <h2 class="sec-title">Acre Acessível</h2>
+  </div>
+
+  <div class="featured-card fade-up d1" style="--accent:var(--blue)">
+    <div class="featured-inner">
+      <div class="featured-copy">
+        <div>
+          <p class="featured-badge" style="color:var(--em)">Web Component · TypeScript · Acessibilidade Digital · 2026</p>
+          <h3 class="featured-title">Acre<br>Acessível</h3>
+          <p class="featured-desc">
+            Plataforma e widget de acessibilidade digital aberta, gratuita e de código livre —
+            alternativa moderna ao Rybena, desenhada especificamente para órgãos públicos do Acre.
+            Mascote <strong style="color:var(--em)">Capi</strong> (capivara acreana) guia o cidadão com olhar
+            adaptativo, respiração animada e reações contextuais. Shadow DOM isolado, sem dependências,
+            menos de 5 KB, W3C A11Y completo.
+          </p>
+          <div class="featured-pills">
+            <span class="pill">TypeScript</span>
+            <span class="pill">Web Component</span>
+            <span class="pill">Shadow DOM</span>
+            <span class="pill">W3C A11Y</span>
+            <span class="pill">TTS PT-BR</span>
+            <span class="pill">Alto Contraste</span>
+            <span class="pill">Sem dependências</span>
+            <span class="pill">BSL 1.1</span>
+          </div>
+        </div>
+        <div class="featured-links">
+          <a href="https://github.com/walbarellos/Acre-Acessibilidade" target="_blank" rel="noopener" class="btn btn-p">Repositório</a>
+          <a href="https://github.com/walbarellos/Acre-Acessibilidade/blob/main/README.md" target="_blank" rel="noopener" class="btn btn-g">Documentação</a>
+        </div>
+      </div>
+
+      <div class="featured-visual" style="background:radial-gradient(ellipse at 60% 40%,rgba(96,165,250,.07) 0%,transparent 70%),linear-gradient(135deg,var(--bg-card),var(--bg-card2))">
+        <!-- Capi Widget ASCII Preview -->
+        <div class="acre-widget" role="presentation">
+          <div class="acre-widget-top">
+            <div class="t-dot t-r"></div>
+            <div class="t-dot t-y"></div>
+            <div class="t-dot t-g"></div>
+            <span class="acre-widget-title">🦦 Capi — Acre Acessível</span>
+          </div>
+          <div class="acre-widget-body">
+            <p class="acre-greeting">Olá! 👋 Posso ajudar?</p>
+            <div class="acre-opts">
+              <div class="acre-opt">♿ Acessível</div>
+              <div class="acre-opt">⌨ Teclado</div>
+              <div class="acre-opt">👁 Contraste</div>
+              <div class="acre-opt">🔊 Leitor TTS</div>
+              <div class="acre-opt">🎨 Preferências</div>
+              <div class="acre-opt">⚙ Config</div>
+            </div>
+            <div style="font-family:var(--dm);font-size:8px;color:var(--text-dim);line-height:1.8;border-top:1px solid var(--border);padding-top:.5rem">
+              <div>· Pupilas seguem o cursor</div>
+              <div>· Corpo "respira" naturalmente</div>
+              <div>· Reage ao contexto da página</div>
+              <div>· Aparece após 2s · discreto</div>
+            </div>
+          </div>
+          <div class="acre-widget-footer">
+            <span class="acre-tag">TypeScript</span>
+            <span class="acre-tag">Shadow DOM</span>
+            <span class="acre-tag">W3C A11Y</span>
+            <span class="acre-tag">&lt; 5 KB</span>
+          </div>
+        </div>
+
+        <div style="font-family:var(--dm);font-size:8px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:.3rem">
+          Alternativa ao Rybena · Órgãos Públicos do Acre
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 03 / PROJETOS ─────────────────────────────────── -->
+<section id="projetos">
+  <div class="sec-header fade-up">
+    <span class="sec-num">03 /</span>
+    <h2 class="sec-title">Projetos</h2>
+  </div>
+
+  <div class="proj-grid">
+
+    <div class="proj-card fade-up" style="--accent:var(--em)">
+      <p class="proj-cat" style="color:var(--em)">Estudo · Engenharia Reversa ELF</p>
+      <p class="proj-name"><a href="https://crack-lab.vercel.app/" target="_blank" rel="noopener">CrackLab</a></p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">$</span> ./cracklab --list</div>
+        <div class="t-line"><span class="em">01</span> nop-patch  <span class="bl">ELF64</span></div>
+        <div class="t-line"><span class="em">02</span> ret-patch  <span class="bl">ELF64</span></div>
+        <div class="t-line"><span class="em">03</span> crc8-keygen <span class="am">C</span></div>
+        <div class="t-line"><span class="em">…</span> 10 desafios</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">Plataforma com 10 desafios de reversing ELF Linux 64-bit — do NOP patch a keygen com checksum CRC-8. Cada binário escrito do zero em C. Site em produção.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">C</span><span class="tech-tag">Assembly x86</span>
+        <span class="tech-tag">Python</span><span class="tech-tag">ELF Linux</span>
+      </div>
+      <a href="https://crack-lab.vercel.app/" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        crack-lab.vercel.app
+      </a>
+    </div>
+
+    <div class="proj-card fade-up d1" style="--accent:var(--blue)">
+      <p class="proj-cat" style="color:var(--blue)">Transparência Pública · Detecção de Fraudes</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/Sentinela" target="_blank" rel="noopener">Sentinela</a></p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">$</span> sentinela scan --municipio rb</div>
+        <div class="t-line"><span class="bl">→</span> 1842 contratos analisados</div>
+        <div class="t-line"><span class="am">⚠</span> 3 anomalias via IQR</div>
+        <div class="t-line"><span class="em">✓</span> alerta Telegram enviado</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">Monitor de contratos e licitações de Rio Branco. Detecção de anomalias via IQR, alertas Telegram via n8n, scraping do Portal da Transparência Federal.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">Python</span><span class="tech-tag">DuckDB</span>
+        <span class="tech-tag">n8n</span><span class="tech-tag">PNCP API</span>
+        <span class="tech-tag">Telegram</span>
+      </div>
+    </div>
+
+    <div class="proj-card fade-up d2" style="--accent:var(--em)">
+      <p class="proj-cat" style="color:var(--em)">ETL Cívico · Dados Abertos</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/Acre-Processos-Licitatorios" target="_blank" rel="noopener">Acre Licitações</a></p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">$</span> python crawl.py --portal ac</div>
+        <div class="t-line"><span class="bl">→</span> JSF session ativa</div>
+        <div class="t-line"><span class="em">→</span> PNCP REST sync</div>
+        <div class="t-line"><span class="em">✓</span> PostgreSQL atualizado</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">ETL integrando o Portal de Licitações do Acre (JSF/HTTP session) e a API REST do PNCP. FastAPI + PostgreSQL + Redis. Análise automatizada de editais.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">Python</span><span class="tech-tag">FastAPI</span>
+        <span class="tech-tag">PostgreSQL</span><span class="tech-tag">Redis</span><span class="tech-tag">Docker</span>
+      </div>
+    </div>
+
+    <div class="proj-card fade-up d3" style="--accent:var(--rose)">
+      <p class="proj-cat" style="color:var(--rose)">Preservação Cultural · Linguística Indígena</p>
+      <p class="proj-name">VIVA — Vozes Indígenas Vivas do Acre</p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">línguas</span> catalogadas:</div>
+        <div class="t-line">· <span class="am">Huni Kuĩ</span>  ·  Apurinã</div>
+        <div class="t-line">· <span class="am">Jaminawa</span>  ·  Yawanawá</div>
+        <div class="t-line"><span class="em">5</span>/115 docs completos</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">Conservação e digitalização de línguas indígenas acreanas em risco de extinção. Gravação, catalogação e acervo público de vocabulários, histórias e cantos.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">Python</span><span class="tech-tag">Next.js</span>
+        <span class="tech-tag">PostgreSQL</span><span class="tech-tag">Supabase</span>
+        <span class="tech-tag">Áudio/Vídeo</span>
+      </div>
+    </div>
+
+    <div class="proj-card fade-up" style="--accent:var(--purple)">
+      <p class="proj-cat" style="color:var(--purple)">Game · C++ / raylib · Android</p>
+      <p class="proj-name">Kite Game</p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">modos:</span> KiteBall · Race</div>
+        <div class="t-line">  Territory <span class="bl">(paper.io)</span></div>
+        <div class="t-line"><span class="em">física:</span> Catmull-Rom tail</div>
+        <div class="t-line"><span class="am">AI:</span> DQN agent Python</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">Jogo multiplayer com KiteBall, Race e Territory. Física de cauda via trail histórico + Catmull-Rom. DQN AI agent treinado. Android + PC.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">C++</span><span class="tech-tag">raylib</span>
+        <span class="tech-tag">Python DQN</span><span class="tech-tag">Android NDK</span>
+      </div>
+    </div>
+
+    <div class="proj-card fade-up d1" style="--accent:var(--blue)">
+      <p class="proj-cat" style="color:var(--blue)">OSINT · Análise Comportamental</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/shomer-OSINT" target="_blank" rel="noopener">Shomer OSINT</a></p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">$</span> shomer crawl --target fb</div>
+        <div class="t-line"><span class="bl">→</span> Selenium iniciado</div>
+        <div class="t-line"><span class="em">→</span> 4823 comentários coletados</div>
+        <div class="t-line"><span class="am">→</span> FastAPI análise pronta</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">Coleta e análise de comentários públicos do Facebook via Selenium. Backend FastAPI + vitrine React/Next.js. Análise de padrões de discurso massivo.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">Python</span><span class="tech-tag">Selenium</span>
+        <span class="tech-tag">FastAPI</span><span class="tech-tag">React</span><span class="tech-tag">TypeScript</span>
+      </div>
+    </div>
+
+    <div class="proj-card fade-up d2" style="--accent:var(--amber)">
+      <p class="proj-cat" style="color:var(--amber)">Android · Game · Educação Matemática</p>
+      <p class="proj-name">O Grande Atlas <span style="font-size:.7rem;color:var(--text-dim)">(em dev)</span></p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">dungeon</span> aritmética ▓▓░</div>
+        <div class="t-line"><span class="am">boss</span> HP: ████░ 80%</div>
+        <div class="t-line"><span class="em">Q:</span> 7 × 8 = ?</div>
+        <div class="t-line"><span class="bl">[56] [54] [48] [63]</span></div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">RPG Android de matemática. Jetpack Compose + StateFlow + missões em JSON. 8 tipos de dungeon, metodologia Kumon progressiva, estética neon/dark.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">Kotlin</span><span class="tech-tag">Jetpack Compose</span>
+        <span class="tech-tag">StateFlow</span><span class="tech-tag">Room</span>
+      </div>
+    </div>
+
+    <div class="proj-card fade-up d3" style="--accent:var(--em)">
+      <p class="proj-cat" style="color:var(--em)">Gestão · ERP Modular</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/wErpy" target="_blank" rel="noopener">wErpy</a></p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">módulos:</span></div>
+        <div class="t-line">· <span class="bl">vendas</span>  · estoque</div>
+        <div class="t-line">· <span class="am">financeiro</span>  · acesso</div>
+        <div class="t-line"><span class="em">✓</span> fluxos auditáveis</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">ERP focado em vendas, estoque e financeiro, com perfis de acesso separados para empresa e plataforma. Arquitetura modular, integridade e fluxos auditáveis.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">Rust</span><span class="tech-tag">React</span>
+        <span class="tech-tag">PostgreSQL</span><span class="tech-tag">Docker</span>
+      </div>
+    </div>
+
+    <div class="proj-card fade-up" style="--accent:var(--blue)">
+      <p class="proj-cat" style="color:var(--blue)">Segurança · Infraestrutura de Rede</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/RTSP-Scanner-Pro" target="_blank" rel="noopener">RTSP Scanner Pro</a></p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">$</span> rtsp-scan --target 192.x</div>
+        <div class="t-line"><span class="bl">→</span> vendor fingerprint</div>
+        <div class="t-line"><span class="em">→</span> Hikvision DS-2CD2x</div>
+        <div class="t-line"><span class="em">✓</span> stream acessível</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">Engine RTSP modular de alta performance com GPU acceleration, interleaving global de targets e fingerprinting de fabricantes de câmeras.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">Python</span><span class="tech-tag">RTSP</span>
+        <span class="tech-tag">Networking</span><span class="tech-tag">GPU</span>
+      </div>
+    </div>
+
+    <div class="proj-card fade-up d1" style="--accent:var(--amber)">
+      <p class="proj-cat" style="color:var(--amber)">Automação · YouTube API</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/Youtube-Transcript" target="_blank" rel="noopener">YouTube Transcript</a></p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">$</span> ytransc --url [URL]</div>
+        <div class="t-line"><span class="bl">→</span> extraindo legenda</div>
+        <div class="t-line"><span class="em">✓</span> transcript.txt salvo</div>
+        <div class="t-line"><span class="am">→</span> PDF / TXT / JSON</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">Extração em massa de transcrições de vídeos do YouTube para processamento de dados, IA e análise de conteúdo. Suporta TXT, PDF e JSON.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">Python</span><span class="tech-tag">YouTube API</span>
+        <span class="tech-tag">Data Mining</span>
+      </div>
+    </div>
+
+    <div class="proj-card fade-up d2" style="--accent:var(--purple)">
+      <p class="proj-cat" style="color:var(--purple)">Automação · IRC · Python</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/IRC-Bot" target="_blank" rel="noopener">IRC-Bot</a></p>
+      <div class="terminal-win" style="margin:.8rem 0;font-size:9px;line-height:1.7">
+        <div class="t-bar"><div class="t-dot t-r"></div><div class="t-dot t-y"></div><div class="t-dot t-g"></div></div>
+        <div class="t-line"><span class="em">:bot!bot@host</span> PRIVMSG</div>
+        <div class="t-line"><span class="bl">JOIN</span> #channel ✓</div>
+        <div class="t-line"><span class="em">!cmd</span> → executa action</div>
+        <div class="t-line">socket <span class="am">6667</span> conectado</div>
+        <div class="t-line"><span class="em">$</span> <span class="t-cursor" style="animation:blink 1.1s step-end infinite"></span></div>
+      </div>
+      <p class="proj-desc">Bot IRC em Python com socket TCP, parsing de protocolo IRC raw, sistema de comandos extensível e automação de canais.</p>
+      <div class="proj-tech">
+        <span class="tech-tag">Python</span><span class="tech-tag">Sockets</span>
+        <span class="tech-tag">IRC Protocol</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 04 / AGORA ────────────────────────────────────── -->
+<section id="agora">
+  <div class="sec-header fade-up">
+    <span class="sec-num">04 /</span>
+    <h2 class="sec-title">O que estou fazendo agora</h2>
+  </div>
+
+  <div class="status-grid">
+
+    <div class="status-card fade-up">
+      <div class="status-card-header">
+        <div class="status-dot"></div>
+        <span class="status-label" style="color:var(--em)">Estágio Ativo</span>
+      </div>
+      <p class="status-title">T.I. @ FEM Cultura</p>
+      <p class="status-desc">Fundação de Cultura Elias Mansour · Museu dos Povos Acreanos, Rio Branco. Selecionado via Lidera Estágios em 2026. Desenvolvimento de soluções digitais no contexto cultural público do Acre.</p>
+    </div>
+
+    <div class="status-card fade-up d1">
+      <div class="status-card-header">
+        <div class="status-dot" style="background:var(--blue);animation-delay:.3s"></div>
+        <span class="status-label" style="color:var(--blue)">Em Curso</span>
+      </div>
+      <p class="status-title">IFAC — 1º Período</p>
+      <p class="status-desc">Sistemas para Internet · Campus Rio Branco · ingresso 2026. Cursando Álgebra Matricial e bases de desenvolvimento. Projetos práticos institucionais paralelos ao curso.</p>
+    </div>
+
+    <div class="status-card fade-up d2">
+      <div class="status-card-header">
+        <div class="status-dot" style="background:var(--amber);animation-delay:.5s"></div>
+        <span class="status-label" style="color:var(--amber)">Em Desenvolvimento</span>
+      </div>
+      <p class="status-title">O Grande Atlas</p>
+      <p class="status-desc">RPG Android de matemática. Próximo passo: <code style="font-size:11px;color:var(--em);font-family:var(--dm)">LearningViewModel.kt</code> para consumir missões JSON via StateFlow com Room.</p>
+    </div>
+
+    <div class="status-card fade-up d3">
+      <div class="status-card-header">
+        <div class="status-dot" style="background:var(--em);animation-delay:.3s"></div>
+        <span class="status-label" style="color:var(--em)">Manutenção Ativa</span>
+      </div>
+      <p class="status-title">Fala Comigo · Sentinela · Kite</p>
+      <p class="status-desc">Fala Comigo v0.3.x, Sentinela (patches de auditoria PNCP), Kite Game (otimização Android + ShopUI). Três frentes paralelas.</p>
+    </div>
+
+    <div class="status-card full fade-up">
+      <div class="status-card-header">
+        <div class="status-dot" style="background:var(--purple);animation-delay:.7s"></div>
+        <span class="status-label" style="color:var(--purple)">Widget Ativo</span>
+      </div>
+      <p class="status-title">Acre Acessível — Capi Widget</p>
+      <p class="status-desc">Web Component TypeScript para acessibilidade de órgãos públicos acreanos. Mascote Capi com pupilas adaptativas, respiração animada e reações contextuais. Shadow DOM isolado, sem dependências, W3C A11Y. Em implantação institucional. Repositório: <a href="https://github.com/walbarellos/Acre-Acessibilidade" target="_blank" rel="noopener" style="color:var(--em);text-decoration:none">github.com/walbarellos/Acre-Acessibilidade</a></p>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 05 / STACK ─────────────────────────────────────── -->
+<section id="stack">
+  <div class="sec-header fade-up">
+    <span class="sec-num">05 /</span>
+    <h2 class="sec-title">Stack Real</h2>
+  </div>
+
+  <div class="stack-section">
+    <div class="fade-up">
+      <p class="stack-group-title">Android / Mobile</p>
+      <div class="stack-items">
+        <div class="stack-item"><span class="stack-item-name">Kotlin + Jetpack Compose</span><div class="stack-bar-wrap"><div class="stack-bar" style="width:88%"></div></div></div>
+        <div class="stack-item"><span class="stack-item-name">Room · Hilt · Coil · StateFlow</span><div class="stack-bar-wrap"><div class="stack-bar" style="width:78%"></div></div></div>
+        <div class="stack-item"><span class="stack-item-name">Android SDK / NDK (C++)</span><div class="stack-bar-wrap"><div class="stack-bar" style="width:62%"></div></div></div>
+      </div>
+    </div>
+
+    <div class="fade-up d1">
+      <p class="stack-group-title">Sistemas / Baixo Nível</p>
+      <div class="stack-items">
+        <div class="stack-item"><span class="stack-item-name">C / C++ (raylib, NDK)</span><div class="stack-bar-wrap"><div class="stack-bar" style="width:70%"></div></div></div>
+        <div class="stack-item"><span class="stack-item-name">C# (.NET)</span><div class="stack-bar-wrap"><div class="stack-bar" style="width:55%"></div></div></div>
+        <div class="stack-item"><span class="stack-item-name">Assembly x86 / ELF Reversing</span><div class="stack-bar-wrap"><div class="stack-bar pu" style="width:42%"></div></div></div>
+      </div>
+    </div>
+
+    <div class="fade-up d2">
+      <p class="stack-group-title">Web / Backend</p>
+      <div class="stack-items">
+        <div class="stack-item"><span class="stack-item-name">HTML5 · CSS · JS / TypeScript</span><div class="stack-bar-wrap"><div class="stack-bar" style="width:85%"></div></div></div>
+        <div class="stack-item"><span class="stack-item-name">Python · FastAPI · PHP</span><div class="stack-bar-wrap"><div class="stack-bar bl" style="width:80%"></div></div></div>
+        <div class="stack-item"><span class="stack-item-name">React · Next.js · Tailwind</span><div class="stack-bar-wrap"><div class="stack-bar bl" style="width:68%"></div></div></div>
+      </div>
+    </div>
+
+    <div class="fade-up d3">
+      <p class="stack-group-title">Infra / Dados</p>
+      <div class="stack-items">
+        <div class="stack-item"><span class="stack-item-name">Linux · Bash · Git</span><div class="stack-bar-wrap"><div class="stack-bar am" style="width:82%"></div></div></div>
+        <div class="stack-item"><span class="stack-item-name">PostgreSQL · DuckDB · Redis</span><div class="stack-bar-wrap"><div class="stack-bar am" style="width:65%"></div></div></div>
+        <div class="stack-item"><span class="stack-item-name">Docker · Supabase</span><div class="stack-bar-wrap"><div class="stack-bar am" style="width:55%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 06 / HISTÓRICO ─────────────────────────────────── -->
+<section id="historia">
+  <div class="sec-header fade-up">
+    <span class="sec-num">06 /</span>
+    <h2 class="sec-title">Histórico</h2>
+  </div>
+
+  <div class="timeline fade-up">
+
+    <div class="tl-item">
+      <div class="tl-dot active"></div>
+      <p class="tl-date">2026 — Presente</p>
+      <p class="tl-title">Estagiário T.I. — FEM Cultura</p>
+      <p class="tl-sub">Fundação de Cultura Elias Mansour · Museu dos Povos Acreanos · Rio Branco, AC</p>
+      <p class="tl-desc">Selecionado via Lidera Estágios. Suporte e desenvolvimento de soluções digitais no contexto cultural público do Acre. Primeiro emprego formal na área.</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot active"></div>
+      <p class="tl-date">2026 — Presente</p>
+      <p class="tl-title">Sistemas para Internet — IFAC</p>
+      <p class="tl-sub">Instituto Federal do Acre · Campus Rio Branco · 1º Período</p>
+      <p class="tl-desc">Ingresso em 2026. Cursando bases de redes, desenvolvimento e álgebra matricial. Projetos práticos com aplicação institucional paralelos ao curso.</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot active"></div>
+      <p class="tl-date">2026</p>
+      <p class="tl-title">Acre Acessível — Widget de Acessibilidade</p>
+      <p class="tl-sub">TypeScript · Web Component · Órgãos Públicos do Acre</p>
+      <p class="tl-desc">Widget mascote Capi para acessibilidade digital em portais governamentais. Alternativa ao Rybena, desenvolvida com Shadow DOM isolado e W3C A11Y.</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot active"></div>
+      <p class="tl-date">2026</p>
+      <p class="tl-title">Fala Comigo v0.3.0 — Produção</p>
+      <p class="tl-sub">App Android de CAA · GPL-3.0 · VirusTotal 0/72</p>
+      <p class="tl-desc">App de acessibilidade para comunicação de pessoas não-verbais. Parceiro no RJ fez fork para uso educacional. Submetido ao Programa Centelha (FAPEAC/FINEP).</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot active"></div>
+      <p class="tl-date">2026</p>
+      <p class="tl-title">CrackLab — Plataforma de Reversing</p>
+      <p class="tl-sub">crack-lab.vercel.app · 10 desafios ELF · C + Python</p>
+      <p class="tl-desc">Plataforma de aprendizado de engenharia reversa com binários escritos do zero. Writeups detalhados com múltiplos caminhos de solução.</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot active"></div>
+      <p class="tl-date">2024</p>
+      <p class="tl-title">Certificação de Inglês — TOEFL ITP</p>
+      <p class="tl-sub">Nível B2 (Intermediário Superior)</p>
+      <p class="tl-desc">Comprovação de fluência e proficiência em compreensão auditiva, estrutura e expressão escrita e leitura.</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot active"></div>
+      <p class="tl-date">2023</p>
+      <p class="tl-title">Capacitação "Boas Práticas no Atendimento Público"</p>
+      <p class="tl-sub">Diretoria de Organização em Centros de Atendimento — OCA</p>
+      <p class="tl-desc">Treinamento em Linguagem Simples, Gestão da Qualidade, Posturas e Comportamento no diálogo com o cidadão e Gestão da Informação.</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <p class="tl-date">Anterior a 2026</p>
+      <p class="tl-title">Desenvolvedor Autônomo — Sistemas Institucionais</p>
+      <p class="tl-sub">OCA · IAPEN · Polícia Civil do Acre</p>
+      <p class="tl-desc">Entrega de sistemas reais para órgãos públicos do Acre como desenvolvedor solo. Requisitos institucionais, integridade de dados, sem suporte de equipe.</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 07 / CERTIFICADOS ──────────────────────────────── -->
+<section id="certificados">
+  <div class="sec-header fade-up">
+    <span class="sec-num">07 /</span>
+    <h2 class="sec-title">Certificados</h2>
+  </div>
+
+  <p class="fade-up" style="font-size:13px;color:var(--text-dim);max-width:520px;line-height:1.7;margin-bottom:2rem">
+    Formações, capacitações e certificações — com verificação direta via PDF ou imagem.
+  </p>
+
+  <div class="cert-grid">
+
+    <!-- Cert 1: TOEFL ITP B2 -->
+    <div class="cert-card fade-up">
+      <div class="cert-header">
+        <div class="cert-icon">🌐</div>
+        <div class="cert-meta">
+          <span class="cert-type pdf">PDF</span>
+          <p class="cert-title">TOEFL ITP — Inglês B2</p>
+          <p class="cert-issuer">Educational Testing Service · 2024</p>
+        </div>
+      </div>
+      <div class="cert-body">
+        <p class="cert-desc">Certificação de proficiência em inglês, nível B2 — Intermediário Superior. Compreensão auditiva, estrutura, expressão escrita e leitura.</p>
+        <div class="cert-actions">
+          <a href="assets/pdf/isf-declaracao.pdf" target="_blank" rel="noopener" class="btn btn-pdf">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Abrir PDF
+          </a>
+          <button class="btn btn-g" onclick="openCertModal('assets/pdf/isf-declaracao.pdf','TOEFL ITP — Inglês B2')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Visualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cert 2: OCA Atendimento Público -->
+    <div class="cert-card fade-up d1">
+      <div class="cert-header">
+        <div class="cert-icon">🏛</div>
+        <div class="cert-meta">
+          <span class="cert-type pdf">PDF</span>
+          <p class="cert-title">Boas Práticas no Atendimento Público</p>
+          <p class="cert-issuer">OCA — Centros de Atendimento · 2023</p>
+        </div>
+      </div>
+      <div class="cert-body">
+        <p class="cert-desc">Treinamento em Linguagem Simples, Gestão da Qualidade, Posturas e Comportamento no diálogo com o cidadão e Gestão da Informação.</p>
+        <div class="cert-actions">
+          <a href="assets/pdf/certificado-servidorpublico.pdf" target="_blank" rel="noopener" class="btn btn-pdf">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Abrir PDF
+          </a>
+          <button class="btn btn-g" onclick="openCertModal('assets/pdf/certificado-servidorpublico.pdf','Boas Práticas — OCA')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Visualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cert 3: Placeholder para imagem -->
+    <div class="cert-card fade-up d2" style="border-style:dashed;opacity:.7">
+      <div class="cert-header">
+        <div class="cert-icon">🖼</div>
+        <div class="cert-meta">
+          <span class="cert-type img">IMG</span>
+          <p class="cert-title">Certificado por Imagem</p>
+          <p class="cert-issuer">Adicionar em components/certificados/</p>
+        </div>
+      </div>
+      <div class="cert-body">
+        <div class="cert-img-wrap" style="min-height:120px">
+          <div style="font-family:var(--dm);font-size:9px;color:var(--text-dim);text-align:center;letter-spacing:.1em;text-transform:uppercase;padding:1rem">
+            Coloque o arquivo de imagem<br>em <code style="color:var(--em)">assets/img/</code><br>e atualize o <code style="color:var(--em)">src</code> abaixo
+          </div>
+        </div>
+        <div class="cert-actions" style="margin-top:.5rem">
+          <span style="font-family:var(--dm);font-size:9px;color:var(--text-dim)">
+            &lt;img src="assets/img/cert-exemplo.jpg"&gt;
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── CERTIFICATE MODAL ──────────────────────────────── -->
+<div id="certModal" class="cert-modal" role="dialog" aria-modal="true" tabindex="-1">
+  <div class="cert-modal-inner">
+    <div class="cert-modal-bar">
+      <span id="cert-modal-title" style="color:var(--text)">Certificado</span>
+      <button class="cert-modal-close" onclick="closeCertModal()" aria-label="Fechar certificado">✕</button>
+    </div>
+    <iframe id="cert-frame" src="" title="Visualizador de certificado"></iframe>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 08 / CONTATO ──────────────────────────────────── -->
+<section id="contato">
+  <div class="sec-header fade-up">
+    <span class="sec-num">08 /</span>
+    <h2 class="sec-title">Contato</h2>
+  </div>
+
+  <p class="fade-up" style="font-size:14px;color:var(--text);max-width:480px;line-height:1.7">
+    Aberto para colaborações em projetos de impacto real —
+    acessibilidade, transparência pública, educação, cultura indígena.
+    Prefiro comunicação direta.
+  </p>
+
+  <div class="contact-row fade-up d1">
+    <a href="mailto:willianalbarello@gmail.com" class="contact-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+      willianalbarello@gmail.com
+    </a>
+    <a href="https://github.com/walbarellos" target="_blank" rel="noopener" class="contact-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.84 10.91.57.11.78-.25.78-.55 0-.27-.01-1.17-.02-2.12-3.19.69-3.86-1.54-3.86-1.54-.52-1.33-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.28 1.18-3.08-.12-.29-.51-1.47.11-3.07 0 0 .97-.31 3.18 1.17A11.12 11.12 0 0 1 12 6.8c.98.01 1.97.13 2.9.38 2.2-1.48 3.17-1.17 3.17-1.17.63 1.6.24 2.78.12 3.07.74.8 1.18 1.82 1.18 3.08 0 4.43-2.69 5.41-5.25 5.7.42.37.77 1.1.77 2.22 0 1.6-.02 2.9-.02 3.29 0 .3.21.66.79.55A11.52 11.52 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+      github.com/walbarellos
+    </a>
+    <a href="https://crack-lab.vercel.app/" target="_blank" rel="noopener" class="contact-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      crack-lab.vercel.app
+    </a>
+    <a href="https://falacomigo-br.netlify.app/" target="_blank" rel="noopener" class="contact-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      falacomigo-br.netlify.app
+    </a>
+    <a href="https://qoto.org/@wepiphany" target="_blank" rel="noopener" class="contact-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.43 11.14c0 5.49-3.38 6.97-6.65 7.46-1.69.25-3.2.48-4.8.39-2.69-.14-4.7-.65-4.7-.65v-2.08s2.14.57 4.6.5c2.41-.07 4.67-.26 4.67-2.27V12h-6.52v-2h6.52v-1.7H7.85V6.27h6.52V5.13c0-1.92.84-2.6 2.54-2.6.87 0 1.78.15 1.78.15v1.92h-1.01c-.91 0-1.14.43-1.14 1.12v1.21h2.29v2h-2.29v5.66c0 1.39.91 1.6 2.29 1.21 1.24-.34 2.03-1.23 2.03-3.42v-1.02h1.38v.62Z"/></svg>
+      Mastodon @wepiphany
+    </a>
+    <a href="https://github.com/walbarellos/Acre-Acessibilidade" target="_blank" rel="noopener" class="contact-link" style="color:var(--em);border-color:rgba(52,211,153,.2)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 8v4l3 3"/></svg>
+      Acre Acessível
+    </a>
+    <a href="assets/pdf/Willian_Albarello_Curriculo.pdf" target="_blank" rel="noopener" class="contact-link" style="color:var(--amber);border-color:rgba(251,191,36,.2)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Currículo PDF
+    </a>
+    <a href="assets/pdf/isf-declaracao.pdf" target="_blank" rel="noopener" class="contact-link" style="color:var(--blue);border-color:rgba(96,165,250,.2)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Inglês B2 · TOEFL
+    </a>
+    <a href="assets/pdf/certificado-servidorpublico.pdf" target="_blank" rel="noopener" class="contact-link" style="color:var(--em);border-color:rgba(52,211,153,.2)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Cert. Atendimento OCA
+    </a>
+  </div>
+</section>
+
+<footer class="fade-up">
+  <span class="footer-left">© 2026 Willian Albarello · Rio Branco, Acre, Brasil</span>
+  <span class="footer-right">construído com propósito</span>
+</footer>
+
+</main>
+
+<!-- ── HERO STYLES (inline to avoid FOUC) ────────────── -->
+<style>
+#hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 4rem 0 3rem; }
+.hero-tag { font-family: var(--dm); font-size: 10px; letter-spacing: .22em; color: var(--em); text-transform: uppercase; margin-bottom: 1.2rem; display: flex; align-items: center; gap: .6rem; }
+.hero-tag::before { content: ''; display: block; width: 28px; height: 1px; background: var(--em); }
+.hero-top { display: flex; align-items: center; gap: 4rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+.hero-text { flex: 1; min-width: 320px; }
+.hero-avatar { flex-shrink: 0; width: clamp(160px,15vw,220px); height: clamp(160px,15vw,220px); border-radius: 50%; border: 2px solid var(--border-h); overflow: hidden; box-shadow: 0 0 0 8px rgba(52,211,153,.06), 0 0 40px rgba(52,211,153,.08); }
+.hero-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.hero-name { font-family: var(--sans); font-size: clamp(3.5rem,10vw,6.5rem); font-weight: 800; line-height: .95; color: var(--text-hi); letter-spacing: -2px; }
+.hero-name span { color: var(--em); }
+.hero-role { margin-top: 1.2rem; font-family: var(--dm); font-size: 12px; color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; line-height: 2.2; }
+.hero-role strong { color: var(--text); font-weight: 500; }
+.hero-desc { margin-top: 1.8rem; max-width: 680px; font-size: 17px; line-height: 1.75; color: var(--text); }
+.hero-links { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .8rem; }
+</style>
+
+<script src="js/carousel.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

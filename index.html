@@ -16,6 +16,34 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
+/* skip link style */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 20px;
+  background: var(--em);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  z-index: 10000;
+  font-family: var(--dm);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border-radius: 4px;
+  text-decoration: none;
+  border: 1px solid var(--em);
+  transition: top 0.2s ease;
+}
+body.light-theme .skip-link {
+  color: #ffffff;
+  background: #065f46;
+}
+.skip-link:focus {
+  top: 20px;
+  outline: 2px solid var(--em);
+  outline-offset: 3px;
+}
+
 /* ── TOKENS ──────────────────────────────────────── */
 :root {
   --bg:#080c0a; --bg-card:#0d1410; --bg-card2:#111812;
@@ -24,6 +52,8 @@
   --blue:#60a5fa; --amber:#fbbf24; --purple:#a78bfa; --rose:#fb7185;
   --text:#c8d5ce; --text-dim:#5a7068; --text-hi:#ecfdf5;
   --mono:'Space Mono',monospace; --sans:'Syne',sans-serif; --dm:'DM Mono',monospace;
+  --bg-img-wrap:rgba(0,0,0,.35);
+  --radial-glow:rgba(52,211,153,.07);
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -79,7 +109,22 @@ body::before{
   writing-mode:vertical-rl;font-family:var(--dm);font-size:9px;
   letter-spacing:.14em;color:var(--text-dim);text-transform:uppercase;
 }
-@media(max-width:700px){#sidebar{display:none}}
+@media(max-width:700px){
+  #sidebar {
+    position:fixed;top:auto;bottom:0;left:0;width:100vw;height:52px;
+    border-right:0;border-top:1px solid var(--border);
+    flex-direction:row;justify-content:space-around;align-items:center;
+    padding:0 1rem;gap:0;z-index:100;
+    background:rgba(8,12,10,.96);
+  }
+  .side-lbl { display:none; }
+  .theme-toggle-btn { margin-top:0 !important; width:36px; height:36px; }
+  .side-dot {
+    width:10px;height:10px;padding:8px;
+    background-clip:content-box;
+  }
+  body { padding-left:0; padding-bottom:52px; }
+}
 
 /* ── LAYOUT ──────────────────────────────────────── */
 main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 2.5rem}
@@ -157,12 +202,106 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 2.5rem
   display:inline-flex;align-items:center;gap:.4rem;
 }
 .btn:focus-visible{outline:2px solid var(--em);outline-offset:3px}
-.btn-p{background:var(--em);color:#041a10;border-color:var(--em);font-weight:700}
-.btn-p:hover{background:transparent;color:var(--em)}
+.btn-p{background:var(--em);color:#041a10;border-color:var(--em);font-weight:700;box-shadow:0 2px 8px rgba(52,211,153,.15)}
+.btn-p:hover{background:transparent;color:var(--em);box-shadow:0 0 15px rgba(52,211,153,.25)}
+.btn-p-outline{background:transparent;color:var(--em);border-color:rgba(52,211,153,.35)}
+.btn-p-outline:hover{background:rgba(52,211,153,.06);border-color:var(--em);box-shadow:0 0 12px rgba(52,211,153,.12)}
 .btn-g{background:transparent;color:var(--text);border-color:var(--border)}
-.btn-g:hover{border-color:var(--em);color:var(--em)}
+.btn-g:hover{border-color:var(--text-hi);color:var(--text-hi);background:rgba(255,255,255,.02)}
 .btn-pdf{background:transparent;color:var(--amber);border-color:rgba(251,191,36,.3)}
-.btn-pdf:hover{border-color:var(--amber);background:rgba(251,191,36,.06)}
+.btn-pdf:hover{border-color:var(--amber);background:rgba(251,191,36,.06);box-shadow:0 0 12px rgba(251,191,36,.12)}
+
+/* theme toggle */
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+}
+.theme-toggle-btn:hover {
+  border-color: var(--em);
+  color: var(--em);
+  background: rgba(52, 211, 153, 0.05);
+}
+.theme-toggle-btn .moon-icon { display: none; }
+.theme-toggle-btn .sun-icon { display: block; }
+
+body.light-theme .theme-toggle-btn .moon-icon { display: block; }
+body.light-theme .theme-toggle-btn .sun-icon { display: none; }
+
+/* Light Theme Variables Override */
+body.light-theme {
+  --bg:#f4f7f5;
+  --bg-card:#ffffff;
+  --bg-card2:#edf1ee;
+  --border:rgba(4,47,31,.09);
+  --border-h:rgba(4,47,31,.25);
+  --em:#065f46;
+  --em-dim:rgba(6,95,70,.15);
+  --blue:#1d4ed8;
+  --amber:#b45309;
+  --purple:#6d28d9;
+  --rose:#be123c;
+  --text:#24332c;
+  --text-dim:#54665e;
+  --text-hi:#061510;
+  --bg-img-wrap:rgba(0,0,0,.03);
+  --radial-glow:rgba(16,185,129,.04);
+}
+body.light-theme #sidebar {
+  background: rgba(244, 247, 245, 0.92);
+}
+body.light-theme .theme-toggle-btn:hover {
+  background: rgba(16, 185, 129, 0.05);
+}
+body.light-theme .terminal-mock {
+  background: rgba(230, 235, 232, 0.85);
+  border-color: var(--border);
+}
+body.light-theme .t-line {
+  color: #4b5f54;
+}
+body.light-theme #sidebar {
+  background: rgba(244, 247, 245, 0.96);
+}
+body.light-theme .stack-bar-wrap {
+  background: rgba(4, 47, 31, 0.08);
+}
+body.light-theme .tech-tag,
+body.light-theme .gal-pill {
+  color: var(--text);
+  border-color: rgba(4, 47, 31, 0.16);
+  background: rgba(4, 47, 31, 0.02);
+}
+body.light-theme .chip {
+  color: var(--text-dim);
+  border-color: rgba(4, 47, 31, 0.12);
+}
+body.light-theme .chip:hover {
+  border-color: var(--em);
+  color: var(--em);
+}
+body.light-theme .chip.em { border-color: rgba(6, 95, 70, 0.25); color: var(--em); }
+body.light-theme .chip.bl { border-color: rgba(29, 78, 216, 0.25); color: var(--blue); }
+body.light-theme .chip.am { border-color: rgba(180, 83, 9, 0.25); color: var(--amber); }
+body.light-theme .chip.pu { border-color: rgba(109, 40, 217, 0.25); color: var(--purple); }
+body.light-theme .chip.ro { border-color: rgba(190, 18, 60, 0.25); color: var(--rose); }
+
+/* smooth theme transition */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.proj-card, .cert-card, .gal-card, .status-card, #sidebar, .timeline::before, .timeline, .btn, .tech-tag, .chip, .badge, .divider {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.25s, box-shadow 0.25s;
+}
 
 /* ── SECTIONS ────────────────────────────────────── */
 section{padding:5rem 0}
@@ -171,56 +310,62 @@ section{padding:5rem 0}
 .sec-title{font-family:var(--sans);font-size:1.75rem;font-weight:700;color:var(--text-hi);letter-spacing:-1px}
 .divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:1rem 0}
 
-/* ── FEATURED CARD ───────────────────────────────── */
-.featured-card{
-  border:1px solid var(--border-h);border-radius:16px;
-  background:linear-gradient(135deg,#0b1810 0%,#0d1520 100%);
-  overflow:hidden;position:relative;
-}
-.featured-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--em),transparent);
-}
-.featured-inner{display:grid;grid-template-columns:1fr 1fr;min-height:400px}
-@media(max-width:680px){.featured-inner{grid-template-columns:1fr}}
-.featured-copy{padding:2.5rem;display:flex;flex-direction:column;justify-content:space-between}
-.featured-badge{font-family:var(--dm);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--em);margin-bottom:1rem}
-.featured-title{font-size:2.2rem;font-weight:800;color:var(--text-hi);letter-spacing:-1px;line-height:1.1}
-.featured-desc{margin-top:.9rem;font-size:14px;line-height:1.7;color:var(--text)}
-.featured-pills{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.1rem}
-.pill{
-  font-family:var(--dm);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
-  padding:.28rem .55rem;border-radius:4px;border:1px solid var(--border);color:var(--text-dim);
-}
-.featured-links{display:flex;gap:.6rem;margin-top:1.4rem;flex-wrap:wrap}
-.featured-visual{
-  background:radial-gradient(ellipse at 60% 40%,rgba(52,211,153,.1) 0%,transparent 70%),
-              linear-gradient(135deg,#0d1815,#0b1020);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:1.5rem;border-left:1px solid var(--border);
-  position:relative;overflow:hidden;gap:1rem;
-}
-@media(max-width:680px){.featured-visual{border-left:0;border-top:1px solid var(--border);min-height:280px}}
+/* ── SHOWCASE GALERIA ────────────────────────────── */
+#galeria{padding:5rem 0}
+.gal-card{border:1px solid var(--border-h);border-radius:16px;background:linear-gradient(135deg,var(--bg-card) 0%,var(--bg-card2) 100%);overflow:hidden;position:relative}
+.gal-carousel{position:relative;width:100%;height:500px;overflow:hidden}
+@media(max-width:850px){.gal-carousel{height:auto;min-height:550px}}
 
-/* ── FALA COMIGO CAROUSEL ────────────────────────── */
-.fc-carousel{position:relative;width:130px;height:260px;margin:0 auto}
-.fc-slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .4s ease;display:flex;flex-direction:column;align-items:center;gap:6px}
-.fc-slide.active{opacity:1;pointer-events:auto}
-
-.fc-phone{
-  width:120px;height:230px;border-radius:14px;
-  border:1px solid var(--border);
-  background:linear-gradient(180deg,#0a1f14 0%,#061510 100%);
-  display:flex;flex-direction:column;padding:10px 8px 8px;
-  box-shadow:0 8px 28px rgba(0,0,0,.6);gap:6px;
+.gal-slide{
+  position:absolute;inset:0;opacity:0;transition:opacity .6s ease;
+  display:grid;grid-template-columns:1.1fr 1fr;pointer-events:none;
 }
-.fc-phone-bar{font-family:var(--dm);font-size:7px;color:var(--em);letter-spacing:.1em;text-transform:uppercase;text-align:center;border-bottom:1px solid rgba(52,211,153,.15);padding-bottom:5px}
-.fc-phone-search{font-family:var(--dm);font-size:7px;color:var(--text-dim);background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:4px;padding:3px 5px;display:flex;align-items:center;gap:4px}
-.fc-phone-play{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:5px;font-family:var(--dm);font-size:7px;color:var(--em);text-align:center;padding:4px;flex-shrink:0}
-.fc-phone-foot{font-family:var(--dm);font-size:6px;color:var(--text-dim);text-align:center;flex-shrink:0}
-.fc-setting-row{display:flex;justify-content:space-between;font-family:var(--dm);font-size:7px;color:var(--text-dim);border-bottom:1px solid rgba(255,255,255,.04);padding:3px 0}
+@media(max-width:850px){
+  .gal-slide{
+    position:relative;display:flex;flex-direction:column;opacity:0;height:0;overflow:hidden;pointer-events:none;transition:opacity .4s ease;
+  }
+  .gal-slide.active{height:auto;pointer-events:auto;opacity:1}
+}
+.gal-slide.active{opacity:1;pointer-events:auto}
 
-.fc-controls{display:flex;gap:.5rem;justify-content:center;margin-top:.6rem;align-items:center}
+.gal-img-container{
+  padding:1.5rem;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 50%,var(--radial-glow) 0%,transparent 70%);
+  border-right:1px solid var(--border);
+}
+@media(max-width:850px){
+  .gal-img-container{border-right:0;border-bottom:1px solid var(--border);padding:1.5rem;min-height:240px}
+}
+
+.gal-img-wrap{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;border-radius:8px;border:1px solid var(--border);
+  background:var(--bg-img-wrap);position:relative;cursor:pointer;
+}
+.gal-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .4s ease}
+.gal-slide.active .gal-img-wrap:hover img{transform:scale(1.04)}
+
+.gal-img-overlay {
+  position:absolute;inset:0;background:rgba(4,26,16,.6);opacity:0;
+  display:flex;align-items:center;justify-content:center;transition:opacity .25s ease;
+  font-family:var(--dm);font-size:10px;color:var(--em);text-transform:uppercase;
+  letter-spacing:.1em;gap:6px;z-index:2;
+}
+.gal-img-wrap:hover .gal-img-overlay {opacity:1}
+
+.gal-info{padding:1.8rem;display:flex;flex-direction:column;justify-content:space-between;gap:0.8rem}
+@media(max-width:850px){.gal-info{padding:1.5rem}}
+
+.gal-cat{font-family:var(--dm);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--em)}
+.gal-title{font-size:1.75rem;font-weight:800;color:var(--text-hi);letter-spacing:-1px;line-height:1.1;margin-top:.3rem}
+.gal-desc{font-size:13px;line-height:1.6;color:var(--text);margin-top:.3rem}
+.gal-pills{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.gal-pill{
+  font-family:var(--dm);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border);color:var(--text-dim);
+}
+.gal-links{display:flex;gap:.6rem;margin-top:.6rem}
+
 .fc-btn{
   width:28px;height:28px;border-radius:50%;border:1px solid var(--border);
   background:transparent;color:var(--text-dim);cursor:pointer;font-size:12px;
@@ -234,18 +379,6 @@ section{padding:5rem 0}
   cursor:pointer;transition:background .2s,transform .2s;border:none;padding:0;
 }
 .fc-dot.active{background:var(--em);transform:scale(1.4)}
-
-/* ── GALLERY ─────────────────────────────────────── */
-#galeria{padding:5rem 0}
-.gal-card{border:1px solid var(--border-h);border-radius:16px;background:linear-gradient(135deg,#0d1410 0%,#080c0a 100%);overflow:hidden;position:relative}
-.gal-carousel{position:relative;width:100%;height:500px;overflow:hidden}
-@media(max-width:700px){.gal-carousel{height:320px}}
-.gal-slide{position:absolute;inset:0;opacity:0;transition:opacity .6s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;pointer-events:none}
-.gal-slide.active{opacity:1;pointer-events:auto}
-.gal-img-wrap{width:100%;height:85%;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,.3)}
-.gal-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .4s ease}
-.gal-slide.active .gal-img-wrap img{transform:scale(1.02)}
-.gal-caption{margin-top:1rem;font-family:var(--dm);font-size:10px;color:var(--em);text-transform:uppercase;letter-spacing:.14em;text-align:center}
 
 /* contador de slides */
 .gal-counter{font-family:var(--dm);font-size:9px;color:var(--text-dim);letter-spacing:.1em}
@@ -338,24 +471,83 @@ footer{
 .t-line{color:var(--text-dim)}.t-line .em{color:var(--em)}.t-line .bl{color:var(--blue)}.t-line .am{color:var(--amber)}
 .t-cursor{display:inline-block;width:7px;height:13px;background:var(--em);animation:blink 1.1s step-end infinite;vertical-align:middle}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── CERTIFICADOS ────────────────────────────────── */
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.cert-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+  padding:1rem;transition:border-color .25s,transform .25s,box-shadow .25s;
+  display:flex;flex-direction:column;position:relative;overflow:hidden;
+}
+.cert-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--em);opacity:0;transition:opacity .25s}
+.cert-card:hover{border-color:var(--border-h);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.cert-card:hover::after{opacity:1}
+.cert-img-container{
+  position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1.41/1;
+  background:rgba(0,0,0,.4);border:1px solid var(--border);cursor:pointer;
+}
+.cert-img-container img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+.cert-img-container:hover img{transform:scale(1.05)}
+.cert-overlay{
+  position:absolute;inset:0;background:rgba(4,26,16,.7);opacity:0;
+  display:flex;align-items:center;justify-content:center;transition:opacity .2s ease;
+  font-family:var(--dm);font-size:10px;color:var(--em);text-transform:uppercase;
+  letter-spacing:.1em;gap:6px;
+}
+.cert-img-container:hover .cert-overlay{opacity:1}
+.cert-info{margin-top:1rem;flex-grow:1;display:flex;flex-direction:column;justify-content:space-between;gap:.5rem}
+.cert-title-text{font-size:13px;font-weight:700;color:var(--text-hi);line-height:1.4}
+.cert-meta{display:flex;justify-content:space-between;align-items:center;font-family:var(--dm);font-size:9px;color:var(--text-dim)}
+.cert-hours{color:var(--amber);border:1px solid rgba(251,191,36,.25);padding:1px 6px;border-radius:4px;background:rgba(251,191,36,.04)}
+
+/* ── LIGHTBOX MODAL ──────────────────────────────── */
+.lightbox-modal{
+  position:fixed;inset:0;background:rgba(4,6,5,.95);z-index:1000;opacity:0;
+  pointer-events:none;transition:opacity .3s ease;display:flex;align-items:center;
+  justify-content:center;padding:2rem;backdrop-filter:blur(10px);
+}
+.lightbox-modal.active{opacity:1;pointer-events:auto}
+.lightbox-content{position:relative;max-width:90vw;max-height:85vh;display:flex;flex-direction:column;align-items:center;transform:scale(.95);transition:transform .3s ease}
+.lightbox-modal.active .lightbox-content{transform:scale(1)}
+.lightbox-img{max-width:100%;max-height:80vh;object-fit:contain;border-radius:8px;border:1px solid var(--border-h);box-shadow:0 10px 40px rgba(0,0,0,.8)}
+.lightbox-caption{margin-top:1rem;font-family:var(--dm);font-size:11px;color:#34d399;text-transform:uppercase;letter-spacing:.15em;text-align:center}
+.lightbox-close{position:absolute;top:-40px;right:0;background:transparent;border:none;color:#5a7068;font-size:28px;cursor:pointer;transition:color .2s}
+.lightbox-close:hover{color:#fb7185}
   </style>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+<script>
+  // Prevents style flash by applying theme before page render. Default is light.
+  const storedTheme = localStorage.getItem('theme');
+  if (storedTheme === 'light' || storedTheme === null) {
+    document.body.classList.add('light-theme');
+  }
+</script>
 
 <!-- SIDEBAR -->
 <nav id="sidebar" aria-label="Navegação principal">
   <span class="side-lbl" aria-hidden="true">nav</span>
-  <a href="#hero"     class="side-dot active" data-s="hero"     title="Início"     aria-label="Ir para Início"></a>
-  <a href="#destaque" class="side-dot"         data-s="destaque" title="Destaque"   aria-label="Ir para Projeto em Destaque"></a>
-  <a href="#projetos" class="side-dot"         data-s="projetos" title="Projetos"   aria-label="Ir para Projetos"></a>
-  <a href="#galeria"  class="side-dot"         data-s="galeria"  title="Galeria"    aria-label="Ir para Galeria"></a>
-  <a href="#agora"    class="side-dot"         data-s="agora"    title="Agora"      aria-label="Ir para Agora"></a>
-  <a href="#stack"    class="side-dot"         data-s="stack"    title="Stack"      aria-label="Ir para Stack"></a>
-  <a href="#historia" class="side-dot"         data-s="historia" title="Histórico"  aria-label="Ir para Histórico"></a>
-  <a href="#contato"  class="side-dot"         data-s="contato"  title="Contato"    aria-label="Ir para Contato"></a>
+  <a href="#hero"         class="side-dot active" data-s="hero"         title="Início"         aria-label="Ir para Início"></a>
+  <a href="#galeria"      class="side-dot"         data-s="galeria"      title="Destaques"      aria-label="Ir para Galeria de Destaques"></a>
+  <a href="#projetos"     class="side-dot"         data-s="projetos"     title="Projetos"       aria-label="Ir para Projetos"></a>
+  <a href="#agora"        class="side-dot"         data-s="agora"        title="Agora"          aria-label="Ir para Agora"></a>
+  <a href="#stack"        class="side-dot"         data-s="stack"        title="Stack"          aria-label="Ir para Stack"></a>
+  <a href="#certificados" class="side-dot"         data-s="certificados" title="Certificados"   aria-label="Ir para Certificados"></a>
+  <a href="#historia"     class="side-dot"         data-s="historia"     title="Histórico"      aria-label="Ir para Histórico"></a>
+  <a href="#contato"      class="side-dot"         data-s="contato"      title="Contato"        aria-label="Ir para Contato"></a>
+  
+  <button id="themeToggle" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  </button>
 </nav>
 
-<main>
+<main id="main-content">
 
 <!-- ── HERO ──────────────────────────────────────── -->
 <section id="hero">
@@ -379,16 +571,31 @@ footer{
         Autônomo, orientado a produto, foco em impacto real.
       </p>
 
-      <!-- chips curados: os 8 mais representativos -->
+      <!-- Chips de stacks organizados por categoria de cores -->
       <div class="chip-cloud">
+        <!-- Verde: Mobile & Core Moderno -->
         <span class="chip em">Kotlin · Android</span>
         <span class="chip em">Jetpack Compose</span>
-        <span class="chip ro">Assembly x86 · C/C++</span>
-        <span class="chip bl">Python · FastAPI</span>
+        <span class="chip em">Rust</span>
+        
+        <!-- Rosa: Baixo Nível, Hardware & Reversão -->
+        <span class="chip ro">Assembly x86/64</span>
+        <span class="chip ro">C / C++</span>
+        <span class="chip ro">ELF Reversing</span>
+        <span class="chip ro">raylib</span>
+        
+        <!-- Azul: Python, Dados, Frontend & TypeScript -->
+        <span class="chip bl">TypeScript</span>
         <span class="chip bl">React · Next.js</span>
-        <span class="chip am">Linux · Docker</span>
-        <span class="chip pu">ELF Reversing</span>
-        <span class="chip pu">PostgreSQL · DuckDB</span>
+        <span class="chip bl">Python · FastAPI</span>
+        <span class="chip bl">Pandas · NumPy · Scikit-Learn</span>
+        <span class="chip bl">Selenium · Scraping</span>
+
+        <!-- Amarelo: Banco de Dados, Infra & Automação -->
+        <span class="chip am">PostgreSQL · DuckDB · Redis</span>
+        <span class="chip am">Linux · Bash</span>
+        <span class="chip am">Docker · DevOps</span>
+        <span class="chip am">n8n · Integrations</span>
       </div>
 
       <div class="ctx-badges">
@@ -398,9 +605,18 @@ footer{
       </div>
 
       <div class="hero-links">
-        <a href="https://github.com/walbarellos" target="_blank" rel="noopener" class="btn btn-p">GitHub</a>
-        <a href="#destaque" class="btn btn-p" style="background:transparent;color:var(--em)">Projeto Principal</a>
-        <a href="#projetos" class="btn btn-g">Ver projetos</a>
+        <a href="https://github.com/walbarellos" target="_blank" rel="noopener" class="btn btn-p">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          GitHub
+        </a>
+        <a href="#galeria" class="btn btn-p-outline">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Destaques
+        </a>
+        <a href="#projetos" class="btn btn-g">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+          Ver projetos
+        </a>
         <a href="assets/pdf/Willian_Albarello_Curriculo.pdf" target="_blank" rel="noopener" class="btn btn-pdf">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
           Currículo PDF
@@ -425,116 +641,154 @@ footer{
   </div>
 </section>
 
-<div class="divider"></div>
-
-<!-- ── FALA COMIGO ────────────────────────────────── -->
-<section id="destaque">
+<!-- ── GALERIA DE DESTAQUES (Showcase de 4 slides) ──── -->
+<section id="galeria">
   <div class="sec-header fade-up">
     <span class="sec-num">01 /</span>
-    <h2 class="sec-title">Projeto em Destaque</h2>
+    <h2 class="sec-title">Galeria de Destaques</h2>
   </div>
 
-  <div class="featured-card fade-up d1">
-    <div class="featured-inner">
-      <div class="featured-copy">
-        <div>
-          <p class="featured-badge">Android · Acessibilidade · GPL-3.0 · 2026</p>
-          <h3 class="featured-title">Fala Comigo</h3>
-          <p class="featured-desc">
-            App brasileiro de Comunicação Aumentativa e Alternativa (CAA),
-            offline-first, para pessoas autistas não-verbais e neurodivergentes.
-            Pranchas visuais ARASAAC, voz em português do Brasil, 60 FPS garantidos.
-            APK v0.3.0 auditado — <strong style="color:var(--em)">0/72 detecções no VirusTotal</strong>.
-            Parceiro no Rio de Janeiro fez fork para uso educacional.
-          </p>
-          <div class="featured-pills">
-            <span class="pill">Kotlin</span>
-            <span class="pill">Jetpack Compose</span>
-            <span class="pill">Room</span>
-            <span class="pill">Hilt</span>
-            <span class="pill">Coil 2.6</span>
-            <span class="pill">Drag &amp; Drop</span>
-            <span class="pill">Offline-first</span>
-            <span class="pill">CAA / ARASAAC</span>
-            <span class="pill">GPL-3.0</span>
+  <div class="gal-card fade-up d1">
+    <div class="gal-carousel" id="galCarousel" role="region" aria-label="Galeria de destaques">
+
+      <!-- Slide 1: Fala Comigo -->
+      <div class="gal-slide active">
+        <div class="gal-img-container">
+          <div class="gal-img-wrap open-lightbox" data-src="assets/img/fala-comigo-banner.png" data-caption="Fala Comigo — Comunicação Aumentativa e Alternativa">
+            <img src="assets/img/fala-comigo-banner.png" alt="Banner principal do app Fala Comigo">
+            <div class="gal-img-overlay">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Ampliar
+            </div>
           </div>
         </div>
-        <div class="featured-links">
-          <a href="https://github.com/walbarellos/FalaComigo" target="_blank" rel="noopener" class="btn btn-p">Repositório</a>
-          <a href="https://falacomigo-br.netlify.app/" target="_blank" rel="noopener" class="btn btn-g">Site</a>
-          <a href="https://github.com/walbarellos/FalaComigo/wiki" target="_blank" rel="noopener" class="btn btn-g">Wiki</a>
+        <div class="gal-info">
+          <div>
+            <p class="gal-cat">Android · Acessibilidade</p>
+            <h3 class="gal-title">Fala Comigo</h3>
+            <p class="gal-desc">
+              Aplicativo de Comunicação Aumentativa e Alternativa (CAA) voltado para pessoas autistas não-verbais e neurodivergentes. Totalmente offline com vozes customizáveis em português.
+            </p>
+            <div class="gal-pills">
+              <span class="gal-pill">Kotlin</span>
+              <span class="gal-pill">Compose</span>
+              <span class="gal-pill">Room</span>
+              <span class="gal-pill">Hilt</span>
+              <span class="gal-pill">Offline-first</span>
+            </div>
+            <div class="gal-links">
+              <a href="https://github.com/walbarellos/FalaComigo" target="_blank" rel="noopener" class="btn btn-p">Repositório</a>
+              <a href="https://falacomigo-br.netlify.app/" target="_blank" rel="noopener" class="btn btn-g">Acessar</a>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="featured-visual">
-        <div class="fc-carousel" id="fcCarousel" aria-label="Prévia do app Fala Comigo" role="region">
-
-          <!-- Slide 0: Tela de Pranchas -->
-          <div class="fc-slide" data-label="Pranchas" aria-hidden="false">
-            <div class="fc-phone">
-              <div class="fc-phone-bar">Fala Comigo</div>
-              <div class="fc-phone-search">
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                buscar prancha...
-              </div>
-              <div style="flex:1;overflow:hidden;border-radius:6px;border:1px solid rgba(52,211,153,.15);background:#000">
-                <img src="assets/img/falacomigo-preview.png" alt="Interface de pranchas do Fala Comigo" style="width:100%;height:100%;object-fit:cover;object-position:top">
-              </div>
-              <div class="fc-phone-play">▶ reproduzir voz</div>
-              <div class="fc-phone-foot">offline · ARASAAC</div>
+      <!-- Slide 2: Acre Acessibilidade -->
+      <div class="gal-slide">
+        <div class="gal-img-container">
+          <div class="gal-img-wrap open-lightbox" data-src="assets/img/acre-acessibilidade.webp" data-caption="Acre Acessibilidade — Plataforma de Acessibilidade Digital e Física">
+            <img src="assets/img/acre-acessibilidade.webp" alt="Interface do painel Acre Acessibilidade">
+            <div class="gal-img-overlay">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Ampliar
             </div>
           </div>
-
-          <!-- Slide 1: Configurações -->
-          <div class="fc-slide" data-label="Configurar" aria-hidden="true">
-            <div class="fc-phone">
-              <div class="fc-phone-bar">⚙ Configurações</div>
-              <div style="display:flex;flex-direction:column;gap:5px;flex:1;padding:4px 0">
-                <div class="fc-setting-row"><span>Voz</span><span style="color:var(--em)">Feminina BR</span></div>
-                <div class="fc-setting-row"><span>Velocidade</span><span style="color:var(--em)">Normal</span></div>
-                <div class="fc-setting-row"><span>Tamanho grade</span><span style="color:var(--em)">4×4</span></div>
-                <div class="fc-setting-row"><span>Offline</span><span style="color:var(--em)">✓ ativo</span></div>
-                <div class="fc-setting-row"><span>Tema</span><span style="color:var(--em)">Escuro</span></div>
-                <div class="fc-setting-row"><span>ARASAAC</span><span style="color:var(--em)">sincronizado</span></div>
-              </div>
-              <div class="fc-phone-play">salvar preferências</div>
-              <div class="fc-phone-foot">v0.3.0 · GPL-3.0</div>
-            </div>
-          </div>
-
-          <!-- Slide 2: Auditoria -->
-          <div class="fc-slide" data-label="Auditoria" aria-hidden="true">
-            <div class="fc-phone" style="background:rgba(0,0,0,.7);font-family:var(--dm)">
-              <div style="display:flex;gap:4px;margin-bottom:6px">
-                <div style="width:7px;height:7px;border-radius:50%;background:#ff5f56"></div>
-                <div style="width:7px;height:7px;border-radius:50%;background:#ffbd2e"></div>
-                <div style="width:7px;height:7px;border-radius:50%;background:#27c93f"></div>
-              </div>
-              <div style="font-size:8px;color:var(--text-dim);line-height:2;flex:1">
-                <div><span style="color:var(--em)">$</span> sha256sum apk</div>
-                <div style="color:var(--em)">29b688f3...</div>
-                <div style="color:var(--text-dim)">✓ íntegro</div>
-                <div style="margin-top:4px"><span style="color:var(--em)">$</span> virustotal</div>
-                <div><span style="color:var(--em);font-size:11px;font-weight:700">0</span><span style="color:var(--text-dim)">/72 engines</span></div>
-                <div style="color:var(--em)">✓ limpo</div>
-                <div style="margin-top:4px;color:var(--text-dim)">version: <span style="color:var(--amber)">v0.3.0</span></div>
-                <div style="color:var(--text-dim)">license: <span style="color:var(--em)">GPL-3.0</span></div>
-                <div style="display:inline-block;width:6px;height:11px;background:var(--em);animation:blink 1.1s step-end infinite;vertical-align:middle;margin-top:4px"></div>
-              </div>
-            </div>
-          </div>
-
         </div>
-
-        <div class="fc-controls">
-          <button class="fc-btn" id="fcPrev" aria-label="Slide anterior">&#8592;</button>
-          <div class="fc-dots" id="fcDots" role="tablist" aria-label="Slides do carrossel"></div>
-          <button class="fc-btn" id="fcNext" aria-label="Próximo slide">&#8594;</button>
-        </div>
-        <div style="font-family:var(--dm);font-size:8px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:.3rem">
-          v0.3.0 · Kotlin · Jetpack Compose · Room
+        <div class="gal-info">
+          <div>
+            <p class="gal-cat">Acessibilidade · Dados Públicos</p>
+            <h3 class="gal-title">Acre Acessibilidade</h3>
+            <p class="gal-desc">
+              Plataforma para mapeamento e fomento de acessibilidade digital e física em órgãos e espaços públicos no Acre. Catalogação de dados abertos e auditorias em conformidade com a LBI.
+            </p>
+            <div class="gal-pills">
+              <span class="gal-pill">Next.js</span>
+              <span class="gal-pill">Tailwind</span>
+              <span class="gal-pill">Python</span>
+              <span class="gal-pill">GeoJSON</span>
+              <span class="gal-pill">Leaflet</span>
+            </div>
+            <div class="gal-links">
+              <a href="https://github.com/walbarellos/Acre-Acessibilidade" target="_blank" rel="noopener" class="btn btn-p">Repositório</a>
+              <span class="btn btn-g" style="opacity:.45;cursor:default;pointer-events:none">Em breve</span>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- Slide 3: Sentinela -->
+      <div class="gal-slide">
+        <div class="gal-img-container">
+          <div class="gal-img-wrap open-lightbox" data-src="assets/img/Sentinal.png" data-caption="Sentinela — Monitor de Licitações de Rio Branco">
+            <img src="assets/img/Sentinal.png" alt="Interface do painel Sentinela">
+            <div class="gal-img-overlay">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Ampliar
+            </div>
+          </div>
+        </div>
+        <div class="gal-info">
+          <div>
+            <p class="gal-cat">Transparência Pública · Auditoria</p>
+            <h3 class="gal-title">Sentinela</h3>
+            <p class="gal-desc">
+              Monitor inteligente de contratos e licitações do Município de Rio Branco. Detecção automática de anomalias estatísticas com DuckDB e envio de alertas no Telegram.
+            </p>
+            <div class="gal-pills">
+              <span class="gal-pill">Python</span>
+              <span class="gal-pill">DuckDB</span>
+              <span class="gal-pill">n8n</span>
+              <span class="gal-pill">OSINT</span>
+              <span class="gal-pill">Telegram API</span>
+            </div>
+            <div class="gal-links">
+              <a href="https://github.com/walbarellos/Sentinela" target="_blank" rel="noopener" class="btn btn-p">Repositório</a>
+              <span class="btn btn-g" style="opacity:.45;cursor:default;pointer-events:none">Em breve</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4: wErpy -->
+      <div class="gal-slide">
+        <div class="gal-img-container">
+          <div class="gal-img-wrap open-lightbox" data-src="assets/img/wErpy.png" data-caption="wErpy — Sistema ERP Corporativo de Alta Integridade">
+            <img src="assets/img/wErpy.png" alt="Interface do ERP wErpy">
+            <div class="gal-img-overlay">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Ampliar
+            </div>
+          </div>
+        </div>
+        <div class="gal-info">
+          <div>
+            <p class="gal-cat">Gestão · ERP</p>
+            <h3 class="gal-title">wErpy</h3>
+            <p class="gal-desc">
+              Sistema ERP focado no controle financeiro, de vendas e estoque de alta integridade. Arquitetura modular robusta com controle rígido de acessos e fluxos auditáveis.
+            </p>
+            <div class="gal-pills">
+              <span class="gal-pill">Rust</span>
+              <span class="gal-pill">React</span>
+              <span class="gal-pill">PostgreSQL</span>
+              <span class="gal-pill">Docker</span>
+            </div>
+            <div class="gal-links">
+              <a href="https://github.com/walbarellos/wErpy" target="_blank" rel="noopener" class="btn btn-p">Repositório</a>
+              <span class="btn btn-g" style="opacity:.45;cursor:default;pointer-events:none">Em breve</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="gal-controls">
+      <button class="fc-btn" id="galPrev" aria-label="Imagem anterior">&#8592;</button>
+      <div class="fc-dots" id="galDots" role="tablist" aria-label="Imagens da galeria"></div>
+      <span class="gal-counter" id="galCounter" aria-live="polite">1 / 4</span>
+      <button class="fc-btn" id="galNext" aria-label="Próxima imagem">&#8594;</button>
     </div>
   </div>
 </section>
@@ -579,6 +833,10 @@ footer{
         <span class="tech-tag">n8n</span><span class="tech-tag">OSINT</span>
         <span class="tech-tag">Telegram API</span>
       </div>
+      <a href="https://github.com/walbarellos/Sentinela" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/Sentinela
+      </a>
     </div>
 
     <div class="proj-card fade-up d2" style="--accent:var(--em)">
@@ -592,11 +850,33 @@ footer{
         <span class="tech-tag">Python</span><span class="tech-tag">FastAPI</span>
         <span class="tech-tag">PostgreSQL</span><span class="tech-tag">Redis</span><span class="tech-tag">Docker</span>
       </div>
+      <a href="https://github.com/walbarellos/Acre-Processos-Licitatorios" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/Acre-Processos-Licitatorios
+      </a>
     </div>
 
-    <div class="proj-card fade-up d3" style="--accent:var(--rose)">
+    <div class="proj-card fade-up d3" style="--accent:var(--blue)">
+      <p class="proj-cat" style="color:var(--blue)">Acessibilidade · Dados Públicos</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/Acre-Acessibilidade" target="_blank" rel="noopener">Acre Acessibilidade</a></p>
+      <p class="proj-desc">
+        Plataforma voltada ao mapeamento e fomento da acessibilidade digital e física no Acre.
+        Catalogação de dados abertos de inclusão e auditoria de conformidade (LBI/WCAG) em portais públicos.
+      </p>
+      <div class="proj-tech">
+        <span class="tech-tag">Next.js</span><span class="tech-tag">Tailwind CSS</span>
+        <span class="tech-tag">Python</span><span class="tech-tag">GeoJSON</span>
+        <span class="tech-tag">Leaflet</span>
+      </div>
+      <a href="https://github.com/walbarellos/Acre-Acessibilidade" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/Acre-Acessibilidade
+      </a>
+    </div>
+
+    <div class="proj-card fade-up" style="--accent:var(--rose)">
       <p class="proj-cat" style="color:var(--rose)">Preservação Cultural · Linguística</p>
-      <p class="proj-name">VIVA — Vozes Indígenas Vivas do Acre</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/VIVA" target="_blank" rel="noopener">VIVA — Vozes Indígenas Vivas do Acre</a></p>
       <p class="proj-desc">
         Projeto de conservação e digitalização de línguas indígenas acreanas em risco de extinção.
         Gravação, catalogação e acervo público de vocabulários, histórias e cantos
@@ -607,11 +887,15 @@ footer{
         <span class="tech-tag">PostgreSQL</span><span class="tech-tag">Supabase</span>
         <span class="tech-tag">Áudio/Vídeo</span>
       </div>
+      <a href="https://github.com/walbarellos/VIVA" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/VIVA
+      </a>
     </div>
 
-    <div class="proj-card fade-up" style="--accent:var(--purple)">
+    <div class="proj-card fade-up d1" style="--accent:var(--purple)">
       <p class="proj-cat" style="color:var(--purple)">Game · C++ / raylib</p>
-      <p class="proj-name">Kite Game</p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/Kite-Game" target="_blank" rel="noopener">Kite Game</a></p>
       <p class="proj-desc">
         Jogo multiplayer com modos KiteBall, Race e Territory (paper.io-style).
         Física de cauda de pipa via trail histórico + Catmull-Rom. DQN AI agent.
@@ -621,9 +905,13 @@ footer{
         <span class="tech-tag">C++</span><span class="tech-tag">raylib</span>
         <span class="tech-tag">Python DQN</span><span class="tech-tag">Android</span>
       </div>
+      <a href="https://github.com/walbarellos/Kite-Game" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/Kite-Game
+      </a>
     </div>
 
-    <div class="proj-card fade-up d1" style="--accent:var(--blue)">
+    <div class="proj-card fade-up d2" style="--accent:var(--blue)">
       <p class="proj-cat" style="color:var(--blue)">OSINT · Análise Comportamental</p>
       <p class="proj-name"><a href="https://github.com/walbarellos/shomer-OSINT" target="_blank" rel="noopener">Shomer OSINT</a></p>
       <p class="proj-desc">
@@ -634,11 +922,15 @@ footer{
         <span class="tech-tag">Python</span><span class="tech-tag">Selenium</span>
         <span class="tech-tag">FastAPI</span><span class="tech-tag">React</span><span class="tech-tag">TypeScript</span>
       </div>
+      <a href="https://github.com/walbarellos/shomer-OSINT" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/shomer-OSINT
+      </a>
     </div>
 
-    <div class="proj-card fade-up d2" style="--accent:var(--amber)">
+    <div class="proj-card fade-up d3" style="--accent:var(--amber)">
       <p class="proj-cat" style="color:var(--amber)">Android · Game · Educação</p>
-      <p class="proj-name">O Grande Atlas <span style="font-size:.7rem;color:var(--text-dim)">(em dev)</span></p>
+      <p class="proj-name"><a href="https://github.com/walbarellos/O-Grande-Atlas" target="_blank" rel="noopener">O Grande Atlas</a> <span style="font-size:.7rem;color:var(--text-dim)">(em dev)</span></p>
       <p class="proj-desc">
         RPG gamificado para aprendizado de matemática no Android.
         Jetpack Compose + StateFlow + missões em JSON. Estética dungeon,
@@ -648,9 +940,13 @@ footer{
         <span class="tech-tag">Kotlin</span><span class="tech-tag">Jetpack Compose</span>
         <span class="tech-tag">StateFlow</span><span class="tech-tag">JSON</span>
       </div>
+      <a href="https://github.com/walbarellos/O-Grande-Atlas" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/O-Grande-Atlas
+      </a>
     </div>
 
-    <div class="proj-card fade-up d3" style="--accent:var(--em)">
+    <div class="proj-card fade-up" style="--accent:var(--em)">
       <p class="proj-cat" style="color:var(--em)">Gestão · ERP</p>
       <p class="proj-name"><a href="https://github.com/walbarellos/wErpy" target="_blank" rel="noopener">wErpy</a></p>
       <p class="proj-desc">
@@ -661,9 +957,13 @@ footer{
         <span class="tech-tag">Rust</span><span class="tech-tag">React</span>
         <span class="tech-tag">PostgreSQL</span><span class="tech-tag">Docker</span>
       </div>
+      <a href="https://github.com/walbarellos/wErpy" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/wErpy
+      </a>
     </div>
 
-    <div class="proj-card fade-up" style="--accent:var(--blue)">
+    <div class="proj-card fade-up d1" style="--accent:var(--blue)">
       <p class="proj-cat" style="color:var(--blue)">Segurança · Automação</p>
       <p class="proj-name"><a href="https://github.com/walbarellos/RTSP-Scanner-Pro" target="_blank" rel="noopener">RTSP Scanner Pro</a></p>
       <p class="proj-desc">
@@ -674,9 +974,13 @@ footer{
         <span class="tech-tag">Python</span><span class="tech-tag">Networking</span>
         <span class="tech-tag">RTSP</span><span class="tech-tag">Automation</span>
       </div>
+      <a href="https://github.com/walbarellos/RTSP-Scanner-Pro" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/RTSP-Scanner-Pro
+      </a>
     </div>
 
-    <div class="proj-card fade-up d1" style="--accent:var(--amber)">
+    <div class="proj-card fade-up d2" style="--accent:var(--amber)">
       <p class="proj-cat" style="color:var(--amber)">Automação · API</p>
       <p class="proj-name"><a href="https://github.com/walbarellos/Youtube-Transcript" target="_blank" rel="noopener">Youtube Transcript</a></p>
       <p class="proj-desc">
@@ -687,66 +991,21 @@ footer{
         <span class="tech-tag">Python</span><span class="tech-tag">YouTube API</span>
         <span class="tech-tag">Data Mining</span>
       </div>
+      <a href="https://github.com/walbarellos/Youtube-Transcript" target="_blank" rel="noopener" class="proj-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        github.com/walbarellos/Youtube-Transcript
+      </a>
     </div>
 
   </div>
 </section>
 
-<!-- ── GALERIA (curada: 6 slides) ──────────────────── -->
-<section id="galeria">
-  <div class="sec-header fade-up">
-    <span class="sec-num">03 /</span>
-    <h2 class="sec-title">Galeria de Resultados</h2>
-  </div>
-
-  <div class="gal-card fade-up d1">
-    <div class="gal-carousel" id="galCarousel" role="region" aria-label="Galeria de projetos">
-
-      <div class="gal-slide active" data-label="Fala Comigo — Banner">
-        <div class="gal-img-wrap"><img src="assets/img/fala-comigo-banner.png" alt="Banner principal do app Fala Comigo — Comunicação Aumentativa e Alternativa"></div>
-        <p class="gal-caption">Fala Comigo — Banner Principal</p>
-      </div>
-
-      <div class="gal-slide" data-label="Fala Comigo — Interface">
-        <div class="gal-img-wrap"><img src="assets/img/falacomigo-preview.png" alt="Interface de pranchas do app Fala Comigo"></div>
-        <p class="gal-caption">Fala Comigo — Interface do App</p>
-      </div>
-
-      <div class="gal-slide" data-label="Sentinela — Monitor">
-        <div class="gal-img-wrap"><img src="assets/img/Sentinal.png" alt="Dashboard do Sentinela, monitor de licitações públicas"></div>
-        <p class="gal-caption">Sentinela — Monitor de Licitações</p>
-      </div>
-
-      <div class="gal-slide" data-label="wErpy">
-        <div class="gal-img-wrap"><img src="assets/img/wErpy.png" alt="Sistema ERP wErpy — visão geral"></div>
-        <p class="gal-caption">wErpy — Visão Geral</p>
-      </div>
-
-      <div class="gal-slide" data-label="Portal de Transparência">
-        <div class="gal-img-wrap"><img src="assets/img/portalfg.png" alt="Mockup do Portal de Transparência"></div>
-        <p class="gal-caption">Portal de Transparência — Mockup</p>
-      </div>
-
-      <div class="gal-slide" data-label="Knowledge Graph">
-        <div class="gal-img-wrap"><img src="assets/img/projects.png" alt="Grafo de conhecimento dos projetos de Willian Albarello"></div>
-        <p class="gal-caption">Developer Knowledge Graph</p>
-      </div>
-
-    </div>
-
-    <div class="gal-controls">
-      <button class="fc-btn" id="galPrev" aria-label="Imagem anterior">&#8592;</button>
-      <div class="fc-dots" id="galDots" role="tablist" aria-label="Imagens da galeria"></div>
-      <span class="gal-counter" id="galCounter" aria-live="polite">1 / 6</span>
-      <button class="fc-btn" id="galNext" aria-label="Próxima imagem">&#8594;</button>
-    </div>
-  </div>
-</section>
+<div class="divider"></div>
 
 <!-- ── AGORA ────────────────────────────────────── -->
 <section id="agora">
   <div class="sec-header fade-up">
-    <span class="sec-num">04 /</span>
+    <span class="sec-num">03 /</span>
     <h2 class="sec-title">O que estou fazendo agora</h2>
   </div>
 
@@ -778,33 +1037,32 @@ footer{
       </p>
     </div>
 
-    <div class="status-card fade-up d2">
+    <div class="status-card full fade-up d2">
       <div class="status-card-header">
-        <div class="status-dot" style="background:var(--amber);animation-delay:.5s"></div>
-        <span class="status-label" style="color:var(--amber)">Em Desenvolvimento</span>
+        <div class="status-dot" style="background:var(--em);animation-delay:.3s"></div>
+        <span class="status-label" style="color:var(--em)">Desenvolvimento Ativo</span>
       </div>
-      <p class="status-title">O Grande Atlas</p>
-      <p class="status-desc">
-        RPG Android de matemática. Próximo passo:
-        <code style="font-size:11px;color:var(--em);font-family:var(--dm)">LearningViewModel.kt</code>
-        para consumir missões JSON via StateFlow.
-      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.4rem">
+        <div style="padding:.7rem .9rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-card)">
+          <p style="font-size:13px;font-weight:700;color:var(--text-hi);margin-bottom:.25rem">Fala Comigo</p>
+          <p style="font-size:11.5px;color:var(--text);line-height:1.5">v0.3.x — Comunicação Aumentativa e Alternativa</p>
+        </div>
+        <div style="padding:.7rem .9rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-card)">
+          <p style="font-size:13px;font-weight:700;color:var(--text-hi);margin-bottom:.25rem">Acre-Acessibilidade</p>
+          <p style="font-size:11.5px;color:var(--text);line-height:1.5">Mapeamento de acessibilidade digital e fisica</p>
+        </div>
+        <div style="padding:.7rem .9rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-card)">
+          <p style="font-size:13px;font-weight:700;color:var(--text-hi);margin-bottom:.25rem">Sentinela</p>
+          <p style="font-size:11.5px;color:var(--text);line-height:1.5">Patches de auditoria em contratos publicos</p>
+        </div>
+        <div style="padding:.7rem .9rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-card)">
+          <p style="font-size:13px;font-weight:700;color:var(--text-hi);margin-bottom:.25rem">Kite Game</p>
+          <p style="font-size:11.5px;color:var(--text);line-height:1.5">Otimizacao Android + ShopUI</p>
+        </div>
+      </div>
     </div>
 
     <div class="status-card fade-up d3">
-      <div class="status-card-header">
-        <div class="status-dot" style="background:var(--em);animation-delay:.3s"></div>
-        <span class="status-label" style="color:var(--em)">Manutenção Ativa</span>
-      </div>
-      <p class="status-title">Fala Comigo · Sentinela · Kite</p>
-      <p class="status-desc">
-        Três projetos simultâneos:
-        Fala Comigo v0.3.x, Sentinela (patches de auditoria),
-        Kite Game (otimização Android + ShopUI).
-      </p>
-    </div>
-
-    <div class="status-card full fade-up">
       <div class="status-card-header">
         <div class="status-dot" style="background:var(--purple);animation-delay:.7s"></div>
         <span class="status-label" style="color:var(--purple)">Estudo Contínuo</span>
@@ -823,7 +1081,7 @@ footer{
 <!-- ── STACK ────────────────────────────────────── -->
 <section id="stack">
   <div class="sec-header fade-up">
-    <span class="sec-num">05 /</span>
+    <span class="sec-num">04 /</span>
     <h2 class="sec-title">Stack Real</h2>
   </div>
 
@@ -866,6 +1124,222 @@ footer{
   </div>
 </section>
 
+<div class="divider"></div>
+
+<!-- ── CERTIFICADOS ────────────────────────────── -->
+<section id="certificados">
+  <div class="sec-header fade-up">
+    <span class="sec-num">05 /</span>
+    <h2 class="sec-title">Certificações</h2>
+  </div>
+
+  <p class="fade-up" style="font-size:14px;color:var(--text);max-width:680px;line-height:1.7;margin-bottom:2rem">
+    Especialização e aprendizado contínuo. Conclusão de trilhas de capacitação focadas em Cibersegurança, inteligência de dados e desenvolvimento ágil, incluindo o <strong>Bootcamp Bradesco - GenAI, Dados & Cyber</strong> pela DIO.
+  </p>
+
+  <div class="cert-grid">
+
+    <!-- Certificado 1 -->
+    <div class="cert-card fade-up">
+      <div class="cert-img-container open-lightbox" data-src="components/certificados/canvas.png" data-caption="Cibersegurança Essencial: Bases para Seus Projetos com Dados e IA — 8h">
+        <img src="components/certificados/canvas.png" alt="Certificado Cibersegurança Essencial">
+        <div class="cert-overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ampliar
+        </div>
+      </div>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Cibersegurança Essencial: Bases para Seus Projetos com Dados e IA</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">8 horas</span>
+          <span>Cód: OAOWYSJQ</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 2 -->
+    <div class="cert-card fade-up d1">
+      <div class="cert-img-container open-lightbox" data-src="components/certificados/canvas-7.png" data-caption="Fundamentos da IA Moderna: Machine Learning, LLMs, IA Generativa e Agentes — 2h">
+        <img src="components/certificados/canvas-7.png" alt="Certificado Fundamentos da IA Moderna">
+        <div class="cert-overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ampliar
+        </div>
+      </div>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Fundamentos da IA Moderna: Machine Learning, LLMs, IA Generativa e Agentes</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">2 horas</span>
+          <span>Cód: OEGPBSEG</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 3 -->
+    <div class="cert-card fade-up d2">
+      <div class="cert-img-container open-lightbox" data-src="components/certificados/canvas-6.png" data-caption="Fundamentos de Modelos de Linguagem de Grande Escala (LLMs) — 1h">
+        <img src="components/certificados/canvas-6.png" alt="Certificado Fundamentos de LLMs">
+        <div class="cert-overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ampliar
+        </div>
+      </div>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Fundamentos de Modelos de Linguagem de Grande Escala (LLMs)</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">1 hora</span>
+          <span>Cód: VCSGQIKT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 4 -->
+    <div class="cert-card fade-up d3">
+      <div class="cert-img-container open-lightbox" data-src="components/certificados/canvas-5.png" data-caption="Princípios da Cibersegurança — 2h">
+        <img src="components/certificados/canvas-5.png" alt="Certificado Princípios da Cibersegurança">
+        <div class="cert-overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ampliar
+        </div>
+      </div>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Princípios da Cibersegurança</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">2 horas</span>
+          <span>Cód: SRAPFZXY</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 5 -->
+    <div class="cert-card fade-up">
+      <div class="cert-img-container open-lightbox" data-src="components/certificados/canvas-3.png" data-caption="Introdução à Coleta e Análise de Dados em Segurança Cibernética — 2h">
+        <img src="components/certificados/canvas-3.png" alt="Certificado Introdução à Coleta e Análise de Dados">
+        <div class="cert-overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ampliar
+        </div>
+      </div>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Introdução à Coleta e Análise de Dados em Segurança Cibernética</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">2 horas</span>
+          <span>Cód: FR6XK8KF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 6 -->
+    <div class="cert-card fade-up d1">
+      <div class="cert-img-container open-lightbox" data-src="components/certificados/canvas-2.png" data-caption="Tópicos em Engenharia Social — 1h">
+        <img src="components/certificados/canvas-2.png" alt="Certificado Tópicos em Engenharia Social">
+        <div class="cert-overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ampliar
+        </div>
+      </div>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Tópicos em Engenharia Social</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">1 hora</span>
+          <span>Cód: HYJVKEPB</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 7 -->
+    <div class="cert-card fade-up d2">
+      <div class="cert-img-container open-lightbox" data-src="components/certificados/canvas-1.png" data-caption="Introdução ao DevSecOps — 1h">
+        <img src="components/certificados/canvas-1.png" alt="Certificado Introdução ao DevSecOps">
+        <div class="cert-overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ampliar
+        </div>
+      </div>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Introdução ao DevSecOps</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">1 hora</span>
+          <span>Cód: 5CAAE2BP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 8 -->
+    <div class="cert-card fade-up d3">
+      <div class="cert-img-container open-lightbox" data-src="components/certificados/canvas-4.png" data-caption="Conceitos e Práticas de Sistemas Operacionais e Máquinas Virtuais — 2h">
+        <img src="components/certificados/canvas-4.png" alt="Certificado Sistemas Operacionais e Máquinas Virtuais">
+        <div class="cert-overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ampliar
+        </div>
+      </div>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Conceitos e Práticas de Sistemas Operacionais e Máquinas Virtuais</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">2 horas</span>
+          <span>Cód: DMYI5T4H</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 9 -->
+    <div class="cert-card fade-up">
+      <div class="cert-img-container open-lightbox" data-src="components/certificados/canvas-8.png" data-caption="Boas-vindas ao Bootcamp Bradesco - GenAI, Dados & Cyber — 1h">
+        <img src="components/certificados/canvas-8.png" alt="Certificado Boas-vindas ao Bootcamp">
+        <div class="cert-overlay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Ampliar
+        </div>
+      </div>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Boas-vindas ao Bootcamp Bradesco - GenAI, Dados & Cyber</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">1 hora</span>
+          <span>Cód: ADJECAOU</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 10: Ingles B2 (PDF) -->
+    <div class="cert-card fade-up d1">
+      <a href="assets/pdf/isf-declaracao.pdf" target="_blank" rel="noopener" class="cert-img-container" style="text-decoration:none">
+        <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg-card2),var(--bg-card));gap:.6rem">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span style="font-family:var(--dm);font-size:9px;color:var(--blue);letter-spacing:.14em;text-transform:uppercase">Ver PDF</span>
+        </div>
+      </a>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Certificação de Inglês — TOEFL ITP</h3>
+        <div class="cert-meta">
+          <span class="cert-hours" style="color:var(--blue);border-color:rgba(96,165,250,.25);background:rgba(96,165,250,.04)">Nível B2</span>
+          <span>Idiomas sem Fronteiras</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificado 11: Atendimento Publico (PDF) -->
+    <div class="cert-card fade-up d2">
+      <a href="assets/pdf/certificado-servidorpublico.pdf" target="_blank" rel="noopener" class="cert-img-container" style="text-decoration:none">
+        <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg-card2),var(--bg-card));gap:.6rem">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--em)" stroke-width="1.5" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span style="font-family:var(--dm);font-size:9px;color:var(--em);letter-spacing:.14em;text-transform:uppercase">Ver PDF</span>
+        </div>
+      </a>
+      <div class="cert-info">
+        <h3 class="cert-title-text">Boas Práticas no Atendimento Público</h3>
+        <div class="cert-meta">
+          <span class="cert-hours">Capacitação</span>
+          <span>OCA — Governo do Acre</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
 <!-- ── HISTÓRICO ────────────────────────────────── -->
 <section id="historia">
   <div class="sec-header fade-up">
@@ -888,6 +1362,14 @@ footer{
       <p class="tl-title">Sistemas para Internet — IFAC</p>
       <p class="tl-sub">Instituto Federal do Acre · Campus Rio Branco · 1º Período</p>
       <p class="tl-desc">Ingresso em 2026. Cursando bases de redes, desenvolvimento e álgebra matricial. Projetos práticos com aplicação institucional paralelos ao curso.</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot active"></div>
+      <p class="tl-date">2026</p>
+      <p class="tl-title">Acre-Acessibilidade — Concepção</p>
+      <p class="tl-sub">github.com/walbarellos/Acre-Acessibilidade · Dados Abertos · LBI</p>
+      <p class="tl-desc">Idealizado após ingresso na FEM Cultura, focado em auditar e mapear a acessibilidade digital e física em órgãos e espaços públicos no Acre.</p>
     </div>
 
     <div class="tl-item">
@@ -962,18 +1444,6 @@ footer{
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       falacomigo-br.netlify.app
     </a>
-    <a href="assets/pdf/Willian_Albarello_Curriculo.pdf" target="_blank" rel="noopener" class="contact-link" style="color:var(--amber);border-color:rgba(251,191,36,.2)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      Currículo PDF
-    </a>
-    <a href="assets/pdf/isf-declaracao.pdf" target="_blank" rel="noopener" class="contact-link" style="color:var(--blue);border-color:rgba(96,165,250,.2)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      Inglês B2
-    </a>
-    <a href="assets/pdf/certificado-servidorpublico.pdf" target="_blank" rel="noopener" class="contact-link" style="color:var(--em);border-color:rgba(52,211,153,.2)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Atendimento Público
-    </a>
     <a href="https://qoto.org/@wepiphany" target="_blank" rel="noopener" class="contact-link">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.43 11.14c0 5.49-3.38 6.97-6.65 7.46-1.69.25-3.2.48-4.8.39-2.69-.14-4.7-.65-4.7-.65v-2.08s2.14.57 4.6.5c2.41-.07 4.67-.26 4.67-2.27V12h-6.52v-2h6.52v-1.7H7.85V6.27h6.52V5.13c0-1.92.84-2.6 2.54-2.6.87 0 1.78.15 1.78.15v1.92h-1.01c-.91 0-1.14.43-1.14 1.12v1.21h2.29v2h-2.29v5.66c0 1.39.91 1.6 2.29 1.21 1.24-.34 2.03-1.23 2.03-3.42v-1.02h1.38v.62Z"/></svg>
       Mastodon
@@ -987,6 +1457,15 @@ footer{
 </footer>
 
 </main>
+
+<!-- Lightbox Modal -->
+<div id="lightboxModal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Visualização do certificado">
+  <div class="lightbox-content">
+    <button id="lightboxClose" class="lightbox-close" aria-label="Fechar">&times;</button>
+    <img id="lightboxImg" class="lightbox-img" src="" alt="Certificado ampliado">
+    <p id="lightboxCaption" class="lightbox-caption"></p>
+  </div>
+</div>
 
 <script>
 // ── Fade-up observer
@@ -1080,9 +1559,59 @@ function makeCarousel({ carouselId, dotsId, prevId, nextId, autoDelay = 3500, co
   startAuto();
 }
 
-makeCarousel({ carouselId: 'fcCarousel',  dotsId: 'fcDots',  prevId: 'fcPrev',  nextId: 'fcNext',  autoDelay: 3500 });
 makeCarousel({ carouselId: 'galCarousel', dotsId: 'galDots', prevId: 'galPrev', nextId: 'galNext', autoDelay: 5000, counterEl: document.getElementById('galCounter') });
+
+// ── Lightbox logic
+const lightboxModal = document.getElementById('lightboxModal');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxCaption = document.getElementById('lightboxCaption');
+const lightboxClose = document.getElementById('lightboxClose');
+
+document.querySelectorAll('.open-lightbox').forEach(el => {
+  el.addEventListener('click', () => {
+    const src = el.getAttribute('data-src');
+    const caption = el.getAttribute('data-caption');
+    if (src) {
+      lightboxImg.src = src;
+      lightboxCaption.textContent = caption || '';
+      lightboxModal.classList.add('active');
+    }
+  });
+});
+
+function closeLightbox() {
+  lightboxModal.classList.remove('active');
+  setTimeout(() => { lightboxImg.src = ''; }, 300);
+}
+
+if (lightboxClose) {
+  lightboxClose.addEventListener('click', closeLightbox);
+}
+lightboxModal.addEventListener('click', (e) => {
+  if (e.target === lightboxModal) closeLightbox();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && lightboxModal.classList.contains('active')) {
+    closeLightbox();
+  }
+});
+
+// ── Theme toggle logic
+const themeToggle = document.getElementById('themeToggle');
+const currentTheme = localStorage.getItem('theme');
+
+// Checked by inline script at the top, kept here for logic sync
+if (currentTheme === 'light' || currentTheme === null) {
+  document.body.classList.add('light-theme');
+}
+
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    const theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+    localStorage.setItem('theme', theme);
+  });
+}
 </script>
 </body>
 </html>
-ml>
