@@ -1564,7 +1564,7 @@ if (themeToggle) {
 
 <script src="js/acessibilidade.js"></script>
 <script>
-  window.AcreAcessivelConfig = { backendUrl: 'http://localhost:8001' };
+  window.AcreAcessivelConfig = { backendUrl: window.location.protocol + '//' + window.location.hostname + ':8001' };
   if (window.AcreAcessivel) {
     window.AcreAcessivel.init({ libras: true });
   }

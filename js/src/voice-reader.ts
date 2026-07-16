@@ -614,6 +614,14 @@ export class VoiceReader {
 
     this.updateMediaSessionMetadata(rawText, this.currentIndex);
 
+    if (this.useServerTts && this.synth) {
+      const voices = this.synth.getVoices();
+      if (voices.length > 0) {
+        const hasPt = voices.some(v => v.lang.toLowerCase().startsWith('pt'));
+        if (hasPt) this.useServerTts = false;
+      }
+    }
+
     if (this.useServerTts) {
       const chunks = TextNormalizer.normalizeToChunks(rawText);
       this.readChunksViaServer(chunks, 0, this.currentIndex, () => {
@@ -640,6 +648,14 @@ export class VoiceReader {
     if (!text.trim()) return;
 
     this.updateMediaSessionMetadata(text, this.currentIndex);
+
+    if (this.useServerTts && this.synth) {
+      const voices = this.synth.getVoices();
+      if (voices.length > 0) {
+        const hasPt = voices.some(v => v.lang.toLowerCase().startsWith('pt'));
+        if (hasPt) this.useServerTts = false;
+      }
+    }
 
     if (this.useServerTts) {
       const chunks = TextNormalizer.normalizeToChunks(text);
