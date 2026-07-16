@@ -70,13 +70,21 @@ export class VoiceReader {
     this.audioPlayer = typeof document !== 'undefined' ? document.createElement('audio') : null;
     if (this.audioPlayer) {
       const unlock = () => {
-        if (!this.audioPlayer) return;
-        this.audioPlayer.play().catch(() => {});
-        this.audioPlayer.pause();
+        if (this.audioPlayer) {
+          this.audioPlayer.play().catch(() => {});
+          this.audioPlayer.pause();
+        }
+        if (this.synth) {
+          const u = new SpeechSynthesisUtterance('');
+          u.volume = 0;
+          this.synth.speak(u);
+        }
         document.removeEventListener('click', unlock);
+        document.removeEventListener('touchstart', unlock);
         document.removeEventListener('keydown', unlock);
       };
       document.addEventListener('click', unlock);
+      document.addEventListener('touchstart', unlock, { passive: true });
       document.addEventListener('keydown', unlock);
     }
   }

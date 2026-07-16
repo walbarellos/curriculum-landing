@@ -165,6 +165,11 @@ export class AcreAccessibilityPanel extends HTMLElement {
       z-index: 999999;
       font-family: var(--font);
     }
+    @media (max-width: 700px) {
+      :host {
+        bottom: 72px;
+      }
+    }
 
     /* ── Mascote / Trigger ── */
     .mascot-trigger {
