@@ -750,8 +750,10 @@ export class AcreAccessibilityPanel extends HTMLElement {
         });
 
           // Seleção de texto — bloqueada durante leitura sequencial
+          let selectionTimeout: number | null = null;
           const handleTextSelection = () => {
-            setTimeout(() => {
+            if (selectionTimeout) window.clearTimeout(selectionTimeout);
+            selectionTimeout = window.setTimeout(() => {
               if (this.reader.isSequentialReading) return;
               const text = window.getSelection()?.toString().trim();
               if (!text || text.length <= 2) return;
@@ -766,10 +768,29 @@ export class AcreAccessibilityPanel extends HTMLElement {
                 ) return;
               }
               this.reader.readTextDirectly(text);
-            }, 80);
+            }, 800); // 800ms debounce para dar tempo de arrastar a seleção no celular
           };
-          document.addEventListener('mouseup', handleTextSelection);
-          document.addEventListener('touchend', handleTextSelection);
+          document.addEventListener('selectionchange', handleTextSelection);
+
+          // Tap/Click para mobile (Ler ao apontar)
+          document.addEventListener('click', e => {
+            if (!this.readOnHover || this.reader.isSequentialReading) return;
+            const target = e.target as HTMLElement;
+            if (
+              target.closest('acre-accessibility-panel') ||
+              target.closest('capi-mascot') ||
+              target.closest('.audio-player-wrapper') ||
+              target.closest('audio') ||
+              target.closest('[vw]') ||
+              target.closest('#vlibras-div')
+            ) return;
+            const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,a,button,img[alt],[role="button"]';
+            const readable = target.closest(selector) as HTMLElement;
+            if (readable) {
+              if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
+              this.reader.readSpecificElement(readable, false);
+            }
+          });
 
           // Hover — bloqueado durante leitura sequencial
           document.addEventListener('mouseover', e => {
