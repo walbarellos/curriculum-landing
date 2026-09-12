@@ -560,12 +560,22 @@ export class VoiceReader {
     }
 
     let finished = false;
-    const nextStep = () => {
-      if (finished) return;
-      finished = true;
+    let keepAliveTimer: any = null;
+
+    const cleanup = () => {
+      if (keepAliveTimer) {
+        clearInterval(keepAliveTimer);
+        keepAliveTimer = null;
+      }
       if (typeof window !== 'undefined' && (window as any).__acre_active_utterance === utterance) {
         (window as any).__acre_active_utterance = null;
       }
+    };
+
+    const nextStep = () => {
+      if (finished) return;
+      finished = true;
+      cleanup();
       if (chunk.pauseAfterMs > 0) {
         setTimeout(() => {
           this.speakChunks(chunks, profile, chunkIdx + 1, elementIndex, onAllDone, onError);
@@ -591,6 +601,17 @@ export class VoiceReader {
         this.synth.resume();
       }
       this.synth.speak(utterance);
+      // Bug comum no Chrome e Firefox: a síntese pausa silenciosamente se demorar mais de alguns segundos.
+      // Manter um keepAlive chamando synth.resume() a cada 5s garante reprodução contínua.
+      keepAliveTimer = setInterval(() => {
+        if (!finished && this.synth && this.synth.speaking) {
+          if (this.synth.paused) {
+            this.synth.resume();
+          }
+        } else {
+          cleanup();
+        }
+      }, 5000);
     } catch (err) {
       console.error('🦫 Erro ao chamar synth.speak:', err);
       onError(err);
