@@ -136,21 +136,29 @@ export class VoiceReader {
   }
 
   private detectVoiceSupport() {
-    this.useServerTts = false;
+    // Tenta primeiro o servidor Azure (voz Francisca Neural) que tem qualidade máxima
+    const backendUrl = this.getBackendUrl();
+    fetch(backendUrl + '/', { method: 'GET' })
+      .then(res => {
+        if (res.ok) {
+          this.useServerTts = true;
+          console.log('🦫 Backend TTS (Azure Francisca) detectado e ativado!');
+        }
+      })
+      .catch(() => {
+        console.log('🦫 Backend TTS não detectado, usando sintetizador nativo do navegador.');
+      });
 
     if (!this.synth) {
-      console.warn('🦫 SpeechSynthesis indisponível no navegador.');
+      this.useServerTts = true;
       return;
     }
     
     const checkVoices = () => {
       const voices = this.synth.getVoices();
-      console.log(`🦫 detectVoiceSupport: ${voices.length} vozes disponíveis no navegador.`);
       const ptVoice = this.getBestPtVoice();
       if (ptVoice) {
-        console.log(`🦫 Voz pt local selecionada: ${ptVoice.name} (${ptVoice.lang})`);
-      } else if (voices.length > 0) {
-        console.log(`🦫 Nenhuma voz explicitamente pt encontrada, usando voz padrão do sistema: ${voices[0].name}`);
+        console.log(`🦫 Voz nativa do navegador: ${ptVoice.name} (${ptVoice.lang})`);
       }
     };
 
@@ -497,7 +505,7 @@ export class VoiceReader {
 
     console.log(`🦫 [${index}] (${tag}) "${rawText.substring(0, 60)}${rawText.length > 60 ? '...' : ''}" — ${chunks.length} frase(s)`);
 
-    if (this.useServerTts && false) {
+    if (this.useServerTts) {
       // No modo servidor, usa os mesmos chunks normalizados (com pausas entre frases)
       // — cada chunk vira um POST separado, mantendo prosódia equivalente ao modo local.
       this.readChunksViaServer(chunks, 0, index, () => {
@@ -663,15 +671,9 @@ export class VoiceReader {
 
     this.updateMediaSessionMetadata(rawText, this.currentIndex);
 
-    if (this.useServerTts && this.synth) {
-      const voices = this.synth.getVoices();
-      if (voices.length > 0) {
-        const hasPt = voices.some(v => v.lang.toLowerCase().startsWith('pt'));
-        if (hasPt) this.useServerTts = false;
-      }
-    }
+// Azure backend prioritizado quando disponível
 
-    if (this.useServerTts && false) {
+    if (this.useServerTts) {
       const chunks = TextNormalizer.normalizeToChunks(rawText);
       this.readChunksViaServer(chunks, 0, this.currentIndex, () => {
         this.removeHighlight();
@@ -698,15 +700,9 @@ export class VoiceReader {
 
     this.updateMediaSessionMetadata(text, this.currentIndex);
 
-    if (this.useServerTts && this.synth) {
-      const voices = this.synth.getVoices();
-      if (voices.length > 0) {
-        const hasPt = voices.some(v => v.lang.toLowerCase().startsWith('pt'));
-        if (hasPt) this.useServerTts = false;
-      }
-    }
+// Azure backend prioritizado quando disponível
 
-    if (this.useServerTts && false) {
+    if (this.useServerTts) {
       const chunks = TextNormalizer.normalizeToChunks(text);
       this.readChunksViaServer(chunks, 0, this.currentIndex, () => this.updateState('idle'));
       return;
