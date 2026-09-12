@@ -1630,9 +1630,15 @@ if (themeToggle) {
 }
 </script>
 
+<script>
+  // Configuração do Acre Acessível: em produção usa a rota serverless /api/tts no Netlify; localmente usa a porta 8001
+  const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  window.AcreAcessivelConfig = {
+    backendUrl: isLocalDev ? 'http://localhost:8001' : ''
+  };
+</script>
 <script src="js/acessibilidade.js"></script>
 <script>
-  window.AcreAcessivelConfig = { backendUrl: window.location.protocol + '//' + window.location.hostname + ':8001' };
   if (window.AcreAcessivel) {
     window.AcreAcessivel.init({ libras: true });
   }

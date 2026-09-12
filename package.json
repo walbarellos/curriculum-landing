@@ -1,0 +1,15 @@
+{
+  "name": "curriculum-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Curriculum landing page with Acre Acessivel widget and Azure Neural TTS",
+  "scripts": {
+    "build": "esbuild js/src/index.ts --bundle --minify --format=iife --outfile=js/acessibilidade.js"
+  },
+  "dependencies": {
+    "edge-tts-universal": "^1.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

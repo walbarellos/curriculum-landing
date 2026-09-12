@@ -39,8 +39,8 @@ export class VoiceReader {
   // Flag de modo sequencial — bloqueia triggers ad-hoc (click, hover, selection)
   private _isSequentialReading: boolean = false;
 
-  // Fallback do servidor (false = usa SpeechSynthesis local por padrão)
-  private useServerTts = false;
+  // Fallback do servidor (true = prioriza Azure Neural Francisca em produção e dev)
+  private useServerTts = true;
   private audioPlayer: HTMLAudioElement | null = null;
 
   constructor(config: VoiceReaderConfig = {}) {
@@ -104,13 +104,15 @@ export class VoiceReader {
    * o backend está em outro servidor — então a URL precisa ser configurada
    * explicitamente via window.AcreAcessivelConfig.backendUrl (setado pelo loader
    * a partir do atributo data-acre-backend da tag <script>, ou pela extensão).
+   * Em produção (Netlify), string vazia usa rota relativa /api/tts.
    */
   private getBackendUrl(): string {
     if (typeof window !== 'undefined') {
       // @ts-ignore
       const configured = window.AcreAcessivelConfig?.backendUrl;
-      if (configured) return configured.replace(/\/$/, '');
-      return `${window.location.protocol}//${window.location.hostname}:8001`;
+      if (configured !== undefined && configured !== null) return configured.replace(/\/$/, '');
+      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      return isLocalHost ? 'http://localhost:8001' : '';
     }
     return 'http://localhost:8001';
   }
@@ -136,17 +138,40 @@ export class VoiceReader {
   }
 
   private detectVoiceSupport() {
-    // Tenta primeiro o servidor Azure (voz Francisca Neural) que tem qualidade máxima
     const backendUrl = this.getBackendUrl();
-    fetch(backendUrl + '/', { method: 'GET' })
+    const probeUrl = backendUrl ? `${backendUrl}/api/tts` : '/api/tts';
+
+    fetch(probeUrl, { method: 'GET' })
       .then(res => {
         if (res.ok) {
           this.useServerTts = true;
-          console.log('🦫 Backend TTS (Azure Francisca) detectado e ativado!');
+          console.log('🦫 Backend TTS Neural (Azure Francisca) ativo!');
+        } else if (backendUrl) {
+          fetch(backendUrl + '/', { method: 'GET' })
+            .then(r2 => {
+              if (r2.ok) {
+                this.useServerTts = true;
+                console.log('🦫 Backend TTS local ativo!');
+              }
+            })
+            .catch(() => this.checkBrowserFallback());
+        } else {
+          this.checkBrowserFallback();
         }
       })
       .catch(() => {
-        console.log('🦫 Backend TTS não detectado, usando sintetizador nativo do navegador.');
+        if (backendUrl) {
+          fetch(backendUrl + '/', { method: 'GET' })
+            .then(r2 => {
+              if (r2.ok) {
+                this.useServerTts = true;
+                console.log('🦫 Backend TTS local ativo!');
+              }
+            })
+            .catch(() => this.checkBrowserFallback());
+        } else {
+          this.checkBrowserFallback();
+        }
       });
 
     if (!this.synth) {
@@ -155,10 +180,9 @@ export class VoiceReader {
     }
     
     const checkVoices = () => {
-      const voices = this.synth.getVoices();
       const ptVoice = this.getBestPtVoice();
       if (ptVoice) {
-        console.log(`🦫 Voz nativa do navegador: ${ptVoice.name} (${ptVoice.lang})`);
+        console.log(`🦫 Voz nativa do navegador disponível: ${ptVoice.name} (${ptVoice.lang})`);
       }
     };
 
@@ -169,6 +193,15 @@ export class VoiceReader {
     }
     Promise.resolve().then(checkVoices);
     checkVoices();
+  }
+
+  private checkBrowserFallback() {
+    if (this.synth && this.getBestPtVoice()) {
+      console.log('🦫 Backend TTS não alcançado, usando sintetizador nativo do navegador.');
+      this.useServerTts = false;
+    } else {
+      console.log('🦫 Mantendo modo de áudio remoto/servidor.');
+    }
   }
 
   public setRate(rate: number) {
@@ -828,8 +861,14 @@ export class VoiceReader {
         audio.onerror = () => {
           setTimeout(() => URL.revokeObjectURL(url), 100);
           if (signal.aborted) return;
-          console.error('🦫 Erro ao reproduzir áudio do servidor.');
-          this.stop();
+          console.warn('🦫 Erro ao reproduzir áudio do servidor.');
+          if (this.synth) {
+            console.log('🦫 Alternando para voz nativa do navegador...');
+            this.useServerTts = false;
+            this.speakChunks(chunks, { rateMultiplier: 1.0, pitch: 1.0 }, chunkIdx, elementIndex, onAllDone);
+          } else {
+            this.stop();
+          }
         };
 
         audio.play().catch(err => {
@@ -842,8 +881,14 @@ export class VoiceReader {
       .catch(err => {
         this.clearWaitingFeedback();
         if (err.name === 'AbortError' || signal.aborted) return;
-        console.error('🦫 Erro no fetch TTS:', err);
-        this.stop();
+        console.warn('🦫 Erro no fetch TTS do servidor:', err);
+        if (this.synth) {
+          console.log('🦫 Alternando para voz nativa do navegador...');
+          this.useServerTts = false;
+          this.speakChunks(chunks, { rateMultiplier: 1.0, pitch: 1.0 }, chunkIdx, elementIndex, onAllDone);
+        } else {
+          this.stop();
+        }
       });
   }
 
