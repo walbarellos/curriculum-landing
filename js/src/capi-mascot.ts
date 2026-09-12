@@ -241,8 +241,8 @@ export class CapiMascot extends HTMLElement {
     /* Balão de Fala do Capi */
     .speech-bubble {
       position: absolute;
-      bottom: 110px;
-      right: 0px;
+      bottom: 25px;
+      right: 105px;
       max-width: min(220px, 70vw);
       width: max-content;
       background: white;
@@ -257,7 +257,7 @@ export class CapiMascot extends HTMLElement {
       white-space: normal;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       opacity: 0;
-      transform: translateY(10px) scale(0.9);
+      transform: translateX(10px) scale(0.9);
       transition: opacity 0.3s, transform 0.3s;
       pointer-events: none;
     }
@@ -265,11 +265,12 @@ export class CapiMascot extends HTMLElement {
     .speech-bubble::after {
       content: '';
       position: absolute;
-      bottom: -8px;
-      right: 35px;
-      border-width: 8px 8px 0;
+      top: 50%;
+      right: -8px;
+      margin-top: -6px;
+      border-width: 6px 0 6px 8px;
       border-style: solid;
-      border-color: white transparent;
+      border-color: transparent transparent transparent white;
       display: block;
       width: 0;
     }
@@ -277,11 +278,12 @@ export class CapiMascot extends HTMLElement {
     .speech-bubble::before {
       content: '';
       position: absolute;
-      bottom: -11px;
-      right: 34px;
-      border-width: 9px 9px 0;
+      top: 50%;
+      right: -11px;
+      margin-top: -8px;
+      border-width: 8px 0 8px 10px;
       border-style: solid;
-      border-color: #1b4332 transparent;
+      border-color: transparent transparent transparent #1b4332;
       display: block;
       width: 0;
       z-index: -1;
@@ -289,7 +291,7 @@ export class CapiMascot extends HTMLElement {
 
     :host(:hover) .speech-bubble {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateX(0) scale(1);
     }
 
     .muted-indicator {
@@ -464,11 +466,11 @@ export class CapiMascot extends HTMLElement {
     if (state === 'speaking') {
       bubble.innerText = 'Estou lendo para você...';
       bubble.style.opacity = '1';
-      bubble.style.transform = 'translateY(0) scale(1)';
+      bubble.style.transform = 'translateX(0) scale(1)';
     } else if (state === 'reading') {
       bubble.innerText = 'Modo leitura ativo!';
       bubble.style.opacity = '1';
-      bubble.style.transform = 'translateY(0) scale(1)';
+      bubble.style.transform = 'translateX(0) scale(1)';
     } else {
       // idle — volta ao estado padrão (hover mostra via CSS)
       bubble.innerText = 'Olá! Sou o Capi. Clique em mim!';
