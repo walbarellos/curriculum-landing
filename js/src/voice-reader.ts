@@ -39,8 +39,8 @@ export class VoiceReader {
   // Flag de modo sequencial — bloqueia triggers ad-hoc (click, hover, selection)
   private _isSequentialReading: boolean = false;
 
-  // Fallback do servidor
-  private useServerTts = true;
+  // Fallback do servidor (false = usa SpeechSynthesis local por padrão)
+  private useServerTts = false;
   private audioPlayer: HTMLAudioElement | null = null;
 
   constructor(config: VoiceReaderConfig = {}) {
@@ -135,11 +135,13 @@ export class VoiceReader {
   }
 
   private detectVoiceSupport() {
-    // Restaurado: O Portal FEM vai rodar o backend Python localmente ou em produção.
-    this.useServerTts = true; // assume servidor por padrão para segurança
+    // Começa com SpeechSynthesis local (mais rápido, sem latência de rede, sem backend necessário).
+    // Só troca para servidor se não houver voz pt-BR disponível no navegador.
+    this.useServerTts = false;
 
     if (!this.synth) {
       console.warn('🦫 SpeechSynthesis indisponível. Usando servidor.');
+      this.useServerTts = true;
       return;
     }
     
@@ -147,7 +149,7 @@ export class VoiceReader {
       const voices = this.synth.getVoices();
       console.log(`🦫 detectVoiceSupport: ${voices.length} vozes disponíveis no navegador.`);
       if (voices.length === 0) {
-        // Se ainda não carregou nenhuma voz, mantém useServerTts = true por segurança
+        // Ainda não carregou vozes — mantém useServerTts = false, vai tentar mesmo assim
         return;
       }
       const hasPt = voices.some(v => v.lang.toLowerCase().startsWith('pt'));

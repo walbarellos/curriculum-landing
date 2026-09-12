@@ -321,20 +321,20 @@ export class AcreAccessibilityPanel extends HTMLElement {
 
     /* ── Bolinha Capi ── */
     .capi-bubble {
-      position: absolute; bottom: 115px; right: 0;
+      position: absolute; bottom: 20px; right: 95px;
       background: var(--primary); color: white;
-      border-radius: 10px 10px 0 10px; padding: 9px 13px;
+      border-radius: 10px 10px 10px 0; padding: 9px 13px;
       font-size: 12px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      opacity: 0; transform: translateY(8px) scale(0.95);
+      opacity: 0; transform: translateX(8px) scale(0.95);
       transition: opacity 0.25s ease, transform 0.25s ease;
       pointer-events: none; max-width: 200px; white-space: normal;
       line-height: 1.5; z-index: 20;
     }
-    .capi-bubble.visible { opacity: 1; transform: translateY(0) scale(1); }
+    .capi-bubble.visible { opacity: 1; transform: translateX(0) scale(1); }
     .capi-bubble::after {
-      content: ''; position: absolute; bottom: -7px; right: 12px;
+      content: ''; position: absolute; right: -7px; bottom: 12px;
       width: 0; height: 0;
-      border-left: 7px solid transparent; border-top: 7px solid var(--primary);
+      border-top: 7px solid transparent; border-left: 7px solid var(--primary);
     }
 
     /* ── Alto Contraste ── */
@@ -344,7 +344,7 @@ export class AcreAccessibilityPanel extends HTMLElement {
       --text: #ffffff; --text-muted: #cccccc; --border: #555555; --border-strong: #ffffff;
     }
     :host(.high-contrast) .capi-bubble { background: #FFFF00; color: #000; }
-    :host(.high-contrast) .capi-bubble::after { border-top-color: #FFFF00; }
+    :host(.high-contrast) .capi-bubble::after { border-left-color: #FFFF00; }
     :host(.high-contrast) .panel-btn.active { background: #FFFF00; color: #000; border-color: #FFFF00; }
     :host(.high-contrast) .transport-btn.primary { background: #FFFF00; color: #000; border-color: #FFFF00; }
     :host(.high-contrast) .toggle-badge.on { background: #FFFF00; color: #000; }
