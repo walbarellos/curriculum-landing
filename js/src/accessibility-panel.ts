@@ -321,20 +321,20 @@ export class AcreAccessibilityPanel extends HTMLElement {
 
     /* ── Bolinha Capi ── */
     .capi-bubble {
-      position: absolute; bottom: 20px; right: 95px;
+      position: absolute; bottom: 115px; right: 0;
       background: var(--primary); color: white;
-      border-radius: 10px 10px 10px 0; padding: 9px 13px;
+      border-radius: 10px 10px 0 10px; padding: 9px 13px;
       font-size: 12px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      opacity: 0; transform: translateX(8px) scale(0.95);
+      opacity: 0; transform: translateY(8px) scale(0.95);
       transition: opacity 0.25s ease, transform 0.25s ease;
       pointer-events: none; max-width: 200px; white-space: normal;
       line-height: 1.5; z-index: 20;
     }
-    .capi-bubble.visible { opacity: 1; transform: translateX(0) scale(1); }
+    .capi-bubble.visible { opacity: 1; transform: translateY(0) scale(1); }
     .capi-bubble::after {
-      content: ''; position: absolute; right: -7px; bottom: 12px;
+      content: ''; position: absolute; bottom: -7px; right: 12px;
       width: 0; height: 0;
-      border-top: 7px solid transparent; border-left: 7px solid var(--primary);
+      border-left: 7px solid transparent; border-top: 7px solid var(--primary);
     }
 
     /* ── Alto Contraste ── */
@@ -344,7 +344,7 @@ export class AcreAccessibilityPanel extends HTMLElement {
       --text: #ffffff; --text-muted: #cccccc; --border: #555555; --border-strong: #ffffff;
     }
     :host(.high-contrast) .capi-bubble { background: #FFFF00; color: #000; }
-    :host(.high-contrast) .capi-bubble::after { border-left-color: #FFFF00; }
+    :host(.high-contrast) .capi-bubble::after { border-top-color: #FFFF00; }
     :host(.high-contrast) .panel-btn.active { background: #FFFF00; color: #000; border-color: #FFFF00; }
     :host(.high-contrast) .transport-btn.primary { background: #FFFF00; color: #000; border-color: #FFFF00; }
     :host(.high-contrast) .toggle-badge.on { background: #FFFF00; color: #000; }
@@ -615,8 +615,9 @@ export class AcreAccessibilityPanel extends HTMLElement {
       });
 
       // Boas-vindas visual — balão + animação do mascote
+      // Só exibe se o painel estiver fechado E o leitor não estiver falando
       setTimeout(() => {
-        if (!this.isOpen) {
+        if (!this.isOpen && this.reader.state === 'idle') {
           capiBubble.classList.add('visible');
           setTimeout(() => capiBubble.classList.remove('visible'), 6000);
           // Acena o mascote via referência direta ao custom element
@@ -893,6 +894,8 @@ export class AcreAccessibilityPanel extends HTMLElement {
       playPauseBtn.setAttribute('aria-label', 'Pausar leitura');
       playPauseBtn.setAttribute('title', 'Pausar leitura (Alt+P)');
       this.setMascotState('speaking');
+      // Esconde o balão de boas-vindas para não sobrepor o balão de fala do Capi
+      shadow.getElementById('capiBubble')?.classList.remove('visible');
     } else if (state === 'paused') {
       iconPlay.setAttribute('viewBox', '0 0 24 24');
       iconPlay.setAttribute('fill', 'currentColor');
