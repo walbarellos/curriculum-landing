@@ -59,7 +59,9 @@ export class VoiceReader {
 
     if (this.synth) {
       try {
-        this.synth.cancel();
+        if (this.synth.speaking || this.synth.pending) {
+          this.synth.cancel();
+        }
       } catch (e) {}
     }
 
@@ -68,21 +70,20 @@ export class VoiceReader {
     this.setupMediaSession();
 
     this.audioPlayer = typeof document !== 'undefined' ? document.createElement('audio') : null;
-    if (this.audioPlayer) {
-      const unlock = () => {
-        if (this.audioPlayer) {
-          this.audioPlayer.play().catch(() => {});
-          this.audioPlayer.pause();
-        }
-        if (this.synth) {
-          const u = new SpeechSynthesisUtterance('');
-          u.volume = 0;
-          this.synth.speak(u);
-        }
-        document.removeEventListener('click', unlock);
-        document.removeEventListener('touchstart', unlock);
-        document.removeEventListener('keydown', unlock);
-      };
+    const unlock = () => {
+      if (this.synth) {
+        try {
+          if (this.synth.paused) {
+            this.synth.resume();
+          }
+          // Garante que o sintetizador está pronto sem falar utterance vazia com volume 0
+        } catch (e) {}
+      }
+      document.removeEventListener('click', unlock);
+      document.removeEventListener('touchstart', unlock);
+      document.removeEventListener('keydown', unlock);
+    };
+    if (typeof document !== 'undefined') {
       document.addEventListener('click', unlock);
       document.addEventListener('touchstart', unlock, { passive: true });
       document.addEventListener('keydown', unlock);
@@ -135,33 +136,29 @@ export class VoiceReader {
   }
 
   private detectVoiceSupport() {
-    // Começa com SpeechSynthesis local (mais rápido, sem latência de rede, sem backend necessário).
-    // Só troca para servidor se não houver voz pt-BR disponível no navegador.
     this.useServerTts = false;
 
     if (!this.synth) {
-      console.warn('🦫 SpeechSynthesis indisponível. Usando servidor.');
-      this.useServerTts = true;
+      console.warn('🦫 SpeechSynthesis indisponível no navegador.');
       return;
     }
     
     const checkVoices = () => {
       const voices = this.synth.getVoices();
       console.log(`🦫 detectVoiceSupport: ${voices.length} vozes disponíveis no navegador.`);
-      if (voices.length === 0) {
-        // Ainda não carregou vozes — mantém useServerTts = false, vai tentar mesmo assim
-        return;
-      }
-      const hasPt = voices.some(v => v.lang.toLowerCase().startsWith('pt'));
-      this.useServerTts = !hasPt;
-      if (!hasPt) {
-        console.warn('🦫 Sem voz pt-BR local. Fallback para servidor.');
-      } else {
-        console.log('🦫 Voz pt local encontrada. Usando SpeechSynthesis local.');
+      const ptVoice = this.getBestPtVoice();
+      if (ptVoice) {
+        console.log(`🦫 Voz pt local selecionada: ${ptVoice.name} (${ptVoice.lang})`);
+      } else if (voices.length > 0) {
+        console.log(`🦫 Nenhuma voz explicitamente pt encontrada, usando voz padrão do sistema: ${voices[0].name}`);
       }
     };
 
-    this.synth.addEventListener('voiceschanged', checkVoices);
+    if (typeof this.synth.addEventListener === 'function') {
+      this.synth.addEventListener('voiceschanged', checkVoices);
+    } else {
+      this.synth.onvoiceschanged = checkVoices;
+    }
     Promise.resolve().then(checkVoices);
     checkVoices();
   }
@@ -500,7 +497,7 @@ export class VoiceReader {
 
     console.log(`🦫 [${index}] (${tag}) "${rawText.substring(0, 60)}${rawText.length > 60 ? '...' : ''}" — ${chunks.length} frase(s)`);
 
-    if (this.useServerTts) {
+    if (this.useServerTts && false) {
       // No modo servidor, usa os mesmos chunks normalizados (com pausas entre frases)
       // — cada chunk vira um POST separado, mantendo prosódia equivalente ao modo local.
       this.readChunksViaServer(chunks, 0, index, () => {
@@ -545,16 +542,30 @@ export class VoiceReader {
 
     const chunk = chunks[chunkIdx];
     const utterance = new SpeechSynthesisUtterance(chunk.text);
-    utterance.lang = this.config.lang;
-    utterance.rate = this.config.rate * profile.rateMultiplier;
-    utterance.volume = this.config.volume;
+    utterance.rate = Math.max(0.5, Math.min(2.0, this.config.rate * profile.rateMultiplier));
+    utterance.volume = Math.max(0.1, Math.min(1.0, this.config.volume));
     utterance.pitch = this.clampPitch(this.config.pitch * profile.pitch);
+
     const voice = this.getBestPtVoice();
-    if (voice) utterance.voice = voice;
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang || 'pt-BR';
+    } else {
+      utterance.lang = 'pt-BR';
+    }
 
     this.currentUtterance = utterance;
+    if (typeof window !== 'undefined') {
+      (window as any).__acre_active_utterance = utterance;
+    }
 
-    utterance.onend = () => {
+    let finished = false;
+    const nextStep = () => {
+      if (finished) return;
+      finished = true;
+      if (typeof window !== 'undefined' && (window as any).__acre_active_utterance === utterance) {
+        (window as any).__acre_active_utterance = null;
+      }
       if (chunk.pauseAfterMs > 0) {
         setTimeout(() => {
           this.speakChunks(chunks, profile, chunkIdx + 1, elementIndex, onAllDone, onError);
@@ -564,12 +575,27 @@ export class VoiceReader {
       }
     };
 
-    utterance.onerror = event => {
-      if (event.error === 'interrupted') return;
-      onError(event);
+    utterance.onend = () => {
+      nextStep();
     };
 
-    this.synth.speak(utterance);
+    utterance.onerror = (event: any) => {
+      if (event?.error === 'interrupted' || event?.error === 'canceled') return;
+      console.warn('🦫 Utterance error:', event?.error);
+      onError(event);
+      nextStep();
+    };
+
+    try {
+      if (this.synth.paused) {
+        this.synth.resume();
+      }
+      this.synth.speak(utterance);
+    } catch (err) {
+      console.error('🦫 Erro ao chamar synth.speak:', err);
+      onError(err);
+      nextStep();
+    }
   }
 
   private clampPitch(pitch: number): number {
@@ -624,7 +650,7 @@ export class VoiceReader {
       }
     }
 
-    if (this.useServerTts) {
+    if (this.useServerTts && false) {
       const chunks = TextNormalizer.normalizeToChunks(rawText);
       this.readChunksViaServer(chunks, 0, this.currentIndex, () => {
         this.removeHighlight();
@@ -659,7 +685,7 @@ export class VoiceReader {
       }
     }
 
-    if (this.useServerTts) {
+    if (this.useServerTts && false) {
       const chunks = TextNormalizer.normalizeToChunks(text);
       this.readChunksViaServer(chunks, 0, this.currentIndex, () => this.updateState('idle'));
       return;
@@ -873,28 +899,23 @@ export class VoiceReader {
 
   private handleSpeechError(event: any, retry: () => void) {
     const errorType = event.error;
-    if (errorType === 'interrupted') return;
+    if (errorType === 'interrupted' || errorType === 'canceled') return;
 
-    this.stop();
-
-    if (
-      errorType === 'synthesis-failed' ||
-      errorType === 'language-unavailable' ||
-      errorType === 'network' ||
-      !errorType
-    ) {
-      console.warn('🦫 Chaveando para servidor TTS.');
-      this.useServerTts = true;
-      if (this._isSequentialReading) {
-        this._isSequentialReading = true; // mantém o modo
+    console.warn(`🦫 SpeechSynthesis error: ${errorType}`);
+    // Se o sintetizador falhou por voz incompatível, tenta sem forçar voz específica
+    if (errorType === 'language-unavailable' || errorType === 'synthesis-failed') {
+      if (this.currentUtterance) {
+        this.currentUtterance.voice = null;
+        this.currentUtterance.lang = '';
       }
-      retry();
     }
   }
 
   private getBestPtVoice(): SpeechSynthesisVoice | null {
     if (!this.synth) return null;
     const voices = this.synth.getVoices();
+    if (voices.length === 0) return null;
+
     const priorities = [
       // Vozes "Natural" ou "Online" (altíssima qualidade de nuvem gratuita oferecida pelos navegadores como Edge/Chrome)
       (v: SpeechSynthesisVoice) => {
@@ -915,12 +936,13 @@ export class VoiceReader {
       },
       (v: SpeechSynthesisVoice) => v.lang.toLowerCase().replace('_', '-').startsWith('pt-br'),
       (v: SpeechSynthesisVoice) => v.lang.toLowerCase().startsWith('pt'),
+      (v: SpeechSynthesisVoice) => v.default,
     ];
     for (const fn of priorities) {
       const found = voices.find(fn);
       if (found) return found;
     }
-    return null;
+    return voices[0] || null;
   }
 
   public get state() {
