@@ -52,7 +52,7 @@
 
       <p class="hero-role">
         <strong>Desenvolvedor de Sistemas</strong> ·
-        Estudante IFAC — Sistemas para Internet (1º período) ·
+        Estudante IFAC — Sistemas para Internet (2º período) ·
         Rio Branco, Acre
       </p>
 
@@ -77,7 +77,7 @@
 
       <div class="ctx-badges">
         <span class="badge bg">● Rio Branco, Acre</span>
-        <span class="badge bb">IFAC · 1º Período</span>
+        <span class="badge bb">IFAC · 2º Período</span>
         <span class="badge ba">Estágio FEM Cultura</span>
       </div>
 
@@ -579,7 +579,7 @@
         <div class="status-dot" style="background:var(--blue);animation-delay:.3s"></div>
         <span class="status-label" style="color:var(--blue)">Em Curso</span>
       </div>
-      <p class="status-title">IFAC — 1º Período</p>
+      <p class="status-title">IFAC — 2º Período</p>
       <p class="status-desc">Sistemas para Internet · Campus Rio Branco · ingresso 2026. Cursando Álgebra Matricial e bases de desenvolvimento. Projetos práticos institucionais paralelos ao curso.</p>
     </div>
 
@@ -678,7 +678,7 @@
       <div class="tl-dot active"></div>
       <p class="tl-date">2026 — Presente</p>
       <p class="tl-title">Sistemas para Internet — IFAC</p>
-      <p class="tl-sub">Instituto Federal do Acre · Campus Rio Branco · 1º Período</p>
+      <p class="tl-sub">Instituto Federal do Acre · Campus Rio Branco · 2º Período</p>
       <p class="tl-desc">Ingresso em 2026. Cursando bases de redes, desenvolvimento e álgebra matricial. Projetos práticos com aplicação institucional paralelos ao curso.</p>
     </div>
 
@@ -860,26 +860,30 @@
       </div>
     </div>
 
-    <!-- Cert 3: Placeholder para imagem -->
-    <div class="cert-card fade-up d2" style="border-style:dashed;opacity:.7">
+    <!-- Cert 5: NASA Roman Space Telescope - Adote um Pixel -->
+    <div class="cert-card fade-up d4">
       <div class="cert-header">
-        <div class="cert-icon">🖼</div>
+        <div class="cert-icon">🔭</div>
         <div class="cert-meta">
           <span class="cert-type img">IMG</span>
-          <p class="cert-title">Certificado por Imagem</p>
-          <p class="cert-issuer">Adicionar em components/certificados/</p>
+          <p class="cert-title">Nancy Grace Roman Space Telescope — Adote um Pixel</p>
+          <p class="cert-issuer">NASA · 2026</p>
         </div>
       </div>
       <div class="cert-body">
-        <div class="cert-img-wrap" style="min-height:120px">
-          <div style="font-family:var(--dm);font-size:9px;color:var(--text-dim);text-align:center;letter-spacing:.1em;text-transform:uppercase;padding:1rem">
-            Coloque o arquivo de imagem<br>em <code style="color:var(--em)">assets/img/</code><br>e atualize o <code style="color:var(--em)">src</code> abaixo
-          </div>
+        <div class="cert-img-wrap" style="aspect-ratio:1.41/1;margin-bottom:.8rem">
+          <img src="components/certificados/preview-nasa-roman.png" alt="Certificado NASA Nancy Grace Roman Space Telescope — Adote um Pixel">
         </div>
-        <div class="cert-actions" style="margin-top:.5rem">
-          <span style="font-family:var(--dm);font-size:9px;color:var(--text-dim)">
-            &lt;img src="assets/img/cert-exemplo.jpg"&gt;
-          </span>
+        <p class="cert-desc">Adoção oficial de um pixel das primeiras imagens capturadas pelo Telescópio Espacial Nancy Grace Roman da NASA. Identificação única: 00634488.</p>
+        <div class="cert-actions">
+          <a href="assets/img/roman-pixel-certificate.jpg" target="_blank" rel="noopener" class="btn btn-g">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Ver Imagem
+          </a>
+          <button class="btn btn-g" onclick="openCertModal('assets/img/roman-pixel-certificate.jpg','NASA — Adote um Pixel')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Visualizar
+          </button>
         </div>
       </div>
     </div>
@@ -957,6 +961,10 @@
     <a href="assets/pdf/sieli-ifac-seminario-internacional-estudos-linguisticos-internacionalizacao.pdf" target="_blank" rel="noopener" class="contact-link" style="color:var(--amber);border-color:rgba(251,191,36,.2)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       SIELI · IFAC
+    </a>
+    <a href="assets/img/roman-pixel-certificate.jpg" target="_blank" rel="noopener" class="contact-link" style="color:var(--purple);border-color:rgba(167,139,250,.2)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+      NASA · Adote um Pixel
     </a>
   </div>
 </section>
