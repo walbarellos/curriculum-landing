@@ -75,14 +75,14 @@ export class TextNormalizer {
    * uma lista de "chunks" (frases) já normalizados, prontos para serem
    * enfileirados em utterances separadas.
    */
-  public static normalizeToChunks(rawText: string): SentenceChunk[] {
-    const expanded = this.expandAll(rawText);
+  public static normalizeToChunks(rawText: string, lang: string = 'pt-BR'): SentenceChunk[] {
+    const expanded = this.expandAll(rawText, lang);
     return this.splitIntoSentences(expanded);
   }
 
   /** Normaliza sem quebrar em frases (usado por quem só precisa do texto plano, ex: backend) */
-  public static normalize(rawText: string): string {
-    return this.expandAll(rawText);
+  public static normalize(rawText: string, lang: string = 'pt-BR'): string {
+    return this.expandAll(rawText, lang);
   }
 
   /** Perfil de voz (rate/pitch relativos) sugerido para uma tag semântica */
@@ -112,16 +112,18 @@ export class TextNormalizer {
   // Expansão (números, moeda, datas, siglas, pontuação problemática)
   // ---------------------------------------------------------------------------------
 
-  private static expandAll(text: string): string {
+  private static expandAll(text: string, lang: string = 'pt-BR'): string {
     let t = text;
 
-    t = this.expandCurrency(t);
-    t = this.expandDates(t);
-    t = this.expandPercentages(t);
-    t = this.expandOrdinals(t);
-    t = this.expandAbbreviations(t);
-    t = this.expandAcronyms(t);
-    t = this.expandDecimalNumbers(t);
+    if (lang.toLowerCase().startsWith('pt')) {
+      t = this.expandCurrency(t);
+      t = this.expandDates(t);
+      t = this.expandPercentages(t);
+      t = this.expandOrdinals(t);
+      t = this.expandAbbreviations(t);
+      t = this.expandAcronyms(t);
+      t = this.expandDecimalNumbers(t);
+    }
     t = this.normalizePunctuationForProsody(t);
 
     return t.replace(/\s+/g, ' ').trim();

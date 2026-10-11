@@ -6,7 +6,20 @@ import type { Lang } from "@/lib/i18n";
 import { LangSwitch, LangToast, PrintSheet, PrintToolbar } from "@/components/portfolio-extras";
 import { HeroPortrait } from "@/components/hero-portrait";
 
-type AcreAcessivelApi = { init: (opts: { libras: boolean }) => void };
+type AcreAcessivelApi = {
+  init: (opts: { libras: boolean }) => void;
+  setLanguage?: (lang: string) => void;
+  readBlocks?: (
+    blocks: { id?: string; elementId?: string; text: string }[],
+    startIndex?: number,
+    onBlockStart?: (idx: number, block: any) => void,
+    onComplete?: () => void
+  ) => void;
+  stop?: () => void;
+  pause?: () => void;
+  resume?: () => void;
+  reader?: any;
+};
 type CapiWindow = Window & {
   AcreAcessivelConfig?: { backendUrl: string };
   AcreAcessivel?: AcreAcessivelApi;
@@ -289,12 +302,13 @@ export function Portfolio() {
   // Capi (mascote Acre Acessível): carregamento único + init
   useEffect(() => {
     const w = window as CapiWindow;
-    const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-    w.AcreAcessivelConfig = { backendUrl: isLocal ? "http://localhost:8001" : "" };
+    w.AcreAcessivelConfig = { backendUrl: "" };
 
     const init = () => {
       try {
         w.AcreAcessivel?.init({ libras: false });
+        const speechLang = LANGS.find((l) => l.id === lang)?.speech ?? "pt-BR";
+        w.AcreAcessivel?.setLanguage?.(speechLang);
       } catch (e) {
         console.warn("Capi init warning:", e);
       }
@@ -512,6 +526,9 @@ export function Portfolio() {
     stopReading();
     setLang(next);
     applyLang(next);
+    const speechLang = LANGS.find((l) => l.id === next)?.speech ?? "pt-BR";
+    const w = window as CapiWindow;
+    w.AcreAcessivel?.setLanguage?.(speechLang);
     setSuggest(null);
     try {
       localStorage.setItem("wa-lang", next);
@@ -586,6 +603,12 @@ export function Portfolio() {
 
   // ───── Leitor de voz com feedback visual ─────
   function stopReading() {
+    const w = window as CapiWindow;
+    try {
+      w.AcreAcessivel?.stop?.();
+    } catch {
+      /* ignore */
+    }
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     document.querySelectorAll(".reading-active").forEach((el) => el.classList.remove("reading-active"));
     setReadingState("idle");
@@ -594,17 +617,29 @@ export function Portfolio() {
   }
 
   function pauseReading() {
+    const w = window as CapiWindow;
+    try {
+      w.AcreAcessivel?.pause?.();
+    } catch {
+      /* ignore */
+    }
     if ("speechSynthesis" in window) {
       window.speechSynthesis.pause();
-      setReadingState("paused");
     }
+    setReadingState("paused");
   }
 
   function resumeReading() {
+    const w = window as CapiWindow;
+    try {
+      w.AcreAcessivel?.resume?.();
+    } catch {
+      /* ignore */
+    }
     if ("speechSynthesis" in window) {
       window.speechSynthesis.resume();
-      setReadingState("reading");
     }
+    setReadingState("reading");
   }
 
   function playBlock(index: number) {
@@ -628,28 +663,26 @@ export function Portfolio() {
       }
     }
 
-    const utterance = new SpeechSynthesisUtterance(block.text);
-    utterance.lang = LANGS.find((l) => l.id === lang)?.speech ?? "pt-BR";
-    utterance.rate = 1.05;
-    utterance.onend = () => playBlock(index + 1);
-    utterance.onerror = () => stopReading();
-    window.speechSynthesis.speak(utterance);
+    if ("speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(block.text);
+      utterance.lang = LANGS.find((l) => l.id === lang)?.speech ?? "pt-BR";
+      utterance.rate = 1.05;
+      utterance.onend = () => playBlock(index + 1);
+      utterance.onerror = () => stopReading();
+      window.speechSynthesis.speak(utterance);
+    }
   }
 
   function startReading() {
-    if (!("speechSynthesis" in window)) {
+    const w = window as CapiWindow;
+    const speechLang = LANGS.find((l) => l.id === lang)?.speech ?? "pt-BR";
+    w.AcreAcessivel?.setLanguage?.(speechLang);
+
+    if (!w.AcreAcessivel?.readBlocks && !("speechSynthesis" in window)) {
       alert(t.speechUnsupported);
       return;
     }
-    window.speechSynthesis.cancel();
-
-    // Sem voz instalada para o idioma, o navegador leria com a voz errada: avisa em vez de "ler errado".
-    const prefixes = lang === "he" ? ["he", "iw"] : [lang];
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0 && !voices.some((v) => prefixes.some((px) => v.lang.toLowerCase().startsWith(px)))) {
-      alert(t.noVoice);
-      return;
-    }
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
 
     const blocks: { id: string; text: string; elementId?: string }[] = [];
 
@@ -706,7 +739,31 @@ export function Portfolio() {
     speechBlocksRef.current = blocks;
     setTotalBlocks(blocks.length);
     setReadingState("reading");
-    playBlock(0);
+
+    if (w.AcreAcessivel?.readBlocks) {
+      w.AcreAcessivel.readBlocks(
+        blocks,
+        0,
+        (idx, block) => {
+          currentIndexRef.current = idx;
+          setCurrentBlockIndex(idx + 1);
+          setReadingSnippet(block.text.slice(0, 70) + (block.text.length > 70 ? "..." : ""));
+          document.querySelectorAll(".reading-active").forEach((el) => el.classList.remove("reading-active"));
+          if (block.elementId) {
+            const el = document.getElementById(block.elementId);
+            if (el) {
+              el.classList.add("reading-active");
+              el.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "center" });
+            }
+          }
+        },
+        () => {
+          stopReading();
+        }
+      );
+    } else {
+      playBlock(0);
+    }
   }
 
   // ───── Derivados ─────
@@ -932,15 +989,31 @@ export function Portfolio() {
             className="grid grid-cols-1 items-end gap-10 border-b border-line pb-12 md:grid-cols-[1fr_auto]"
           >
             <div>
-              <div className="mb-5 flex flex-wrap items-center gap-2 reveal">
-                {bioInfo.badges.map((b) => (
-                  <span
-                    key={b}
-                    className="rounded px-2.5 py-0.5 text-xs font-mono tracking-wider bg-surface-2 text-muted border border-line/15"
-                  >
-                    {b}
-                  </span>
-                ))}
+              <div className="mb-5 flex flex-wrap items-center gap-2.5 reveal">
+                {bioInfo.badges.map((b, idx) => {
+                  const isLocation = idx === 0;
+                  return (
+                    <span
+                      key={b}
+                      tabIndex={0}
+                      role="status"
+                      className={`badge-interactive ${
+                        isLocation ? "badge-interactive-location" : "badge-interactive-academic"
+                      }`}
+                      title={isLocation ? "Localizacao atual · Amazonia Ocidental" : "Instituto Federal do Acre · Formacao academica"}
+                    >
+                      <span
+                        className={`badge-indicator-dot ${
+                          isLocation
+                            ? "bg-emerald-600 dark:bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                            : "bg-amber-600 dark:bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                        }`}
+                        aria-hidden="true"
+                      />
+                      <span>{b}</span>
+                    </span>
+                  );
+                })}
               </div>
 
               <h1 className="hero-title" aria-label={bioInfo.name}>
@@ -1011,7 +1084,7 @@ export function Portfolio() {
           <nav
             aria-label={t.navAria}
             style={{ top: barH }}
-            className="sticky z-30 flex flex-nowrap items-center gap-x-6 overflow-x-auto border-b border-line bg-bg/95 py-3 text-sm backdrop-blur-md"
+            className="sticky z-30 flex flex-nowrap items-center gap-x-6 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden border-b border-line bg-bg/95 py-3 text-sm backdrop-blur-md"
           >
             {navItems.map(([id, label]) => (
               <a

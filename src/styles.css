@@ -72,6 +72,86 @@
     font-size: 1.0625rem;
   }
 
+  /* Scrollbar moderno e limpo sem setas / botões de stepper ("controle") */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-fg) 22%, transparent);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-fg) 40%, transparent);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-fg) 22%, transparent) transparent;
+  }
+
+  /* Microinteração refinada dos Badges do Topo (Rio Branco & IFAC) */
+  .badge-interactive {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    background: var(--color-surface-2);
+    color: var(--color-muted);
+    border: 1px solid color-mix(in srgb, var(--color-line) 18%, transparent);
+    transition: all 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    cursor: pointer;
+    outline: none;
+    touch-action: manipulation;
+  }
+  .badge-interactive:hover,
+  .badge-interactive:focus-visible {
+    color: var(--color-fg);
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-surface-2) 70%, var(--color-accent) 15%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  }
+  .badge-interactive:active {
+    transform: scale(0.96) translateY(0);
+  }
+  .badge-interactive-location:hover,
+  .badge-interactive-location:focus-visible {
+    border-color: #1f6b4f;
+    background: color-mix(in srgb, var(--color-surface-2) 75%, #1f6b4f 15%);
+    box-shadow: 0 4px 12px rgba(31, 107, 79, 0.2);
+  }
+  .badge-interactive-academic:hover,
+  .badge-interactive-academic:focus-visible {
+    border-color: #b8381b;
+    background: color-mix(in srgb, var(--color-surface-2) 75%, #b8381b 15%);
+    box-shadow: 0 4px 12px rgba(184, 56, 27, 0.2);
+  }
+  .badge-indicator-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    transition: transform 240ms ease, background-color 240ms ease;
+    flex-shrink: 0;
+  }
+  .badge-interactive:hover .badge-indicator-dot,
+  .badge-interactive:focus-visible .badge-indicator-dot {
+    transform: scale(1.35);
+  }
+
   :focus-visible {
     outline: 3px solid var(--color-accent);
     outline-offset: 3px;

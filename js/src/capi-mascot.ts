@@ -459,21 +459,31 @@ export class CapiMascot extends HTMLElement {
     }));
   }
 
+  private currentLang: string = 'pt-BR';
+
+  public setLanguage(lang: string) {
+    this.currentLang = lang;
+    this.setMascotState('idle');
+  }
+
   private setMascotState(state: string) {
     const bubble = this.shadow.querySelector('.speech-bubble') as HTMLElement;
     if (!bubble) return;
 
+    const isEn = this.currentLang.toLowerCase().startsWith('en');
+    const isHe = this.currentLang.toLowerCase().startsWith('he') || this.currentLang.toLowerCase().startsWith('iw');
+
     if (state === 'speaking') {
-      bubble.innerText = 'Estou lendo para você...';
+      bubble.innerText = isEn ? 'Reading for you...' : isHe ? 'מקריא עבורך...' : 'Estou lendo para você...';
       bubble.style.opacity = '1';
       bubble.style.transform = 'translateX(0) scale(1)';
     } else if (state === 'reading') {
-      bubble.innerText = 'Modo leitura ativo!';
+      bubble.innerText = isEn ? 'Reading mode active!' : isHe ? 'מצב קריאה פעיל!' : 'Modo leitura ativo!';
       bubble.style.opacity = '1';
       bubble.style.transform = 'translateX(0) scale(1)';
     } else {
       // idle — volta ao estado padrão (hover mostra via CSS)
-      bubble.innerText = 'Olá! Sou o Capi. Clique em mim!';
+      bubble.innerText = isEn ? 'Hi! I am Capi. Click on me!' : isHe ? 'היי! אני קאפי. לחץ עליי!' : 'Olá! Sou o Capi. Clique em mim!';
       bubble.style.opacity = '';
       bubble.style.transform = '';
     }

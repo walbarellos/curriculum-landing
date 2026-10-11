@@ -737,6 +737,7 @@ export class AcreAccessibilityPanel extends HTMLElement {
           if (
             target.closest('acre-accessibility-panel') ||
             target.closest('capi-mascot') ||
+            target.closest('.accessibility-bar') ||
             target.closest('.audio-player-wrapper') ||
             target.closest('audio') ||
             target.closest('[vw]') ||
@@ -764,6 +765,7 @@ export class AcreAccessibilityPanel extends HTMLElement {
                 if (
                   parent?.closest('acre-accessibility-panel') ||
                   parent?.closest('capi-mascot') ||
+                  parent?.closest('.accessibility-bar') ||
                   parent?.closest('.vpw-plugin-wrapper') ||
                   parent?.closest('#vlibras-div')
                 ) return;
@@ -780,6 +782,7 @@ export class AcreAccessibilityPanel extends HTMLElement {
             if (
               target.closest('acre-accessibility-panel') ||
               target.closest('capi-mascot') ||
+              target.closest('.accessibility-bar') ||
               target.closest('.audio-player-wrapper') ||
               target.closest('audio') ||
               target.closest('[vw]') ||
@@ -800,6 +803,7 @@ export class AcreAccessibilityPanel extends HTMLElement {
             if (
               target.closest('acre-accessibility-panel') ||
               target.closest('capi-mascot') ||
+              target.closest('.accessibility-bar') ||
               target.closest('.audio-player-wrapper') ||
               target.closest('audio') ||
               target.closest('[vw]') ||
@@ -1081,6 +1085,16 @@ export class AcreAccessibilityPanel extends HTMLElement {
       }
     } catch (e) {
       console.error('Erro ao ler configurações:', e);
+    }
+  }
+
+  public setLanguage(lang: string) {
+    if (this.reader) {
+      this.reader.setLanguage(lang);
+    }
+    const mascot = this.shadow?.getElementById('capiMascot') as any;
+    if (mascot && typeof mascot.setLanguage === 'function') {
+      mascot.setLanguage(lang);
     }
   }
 
