@@ -109,13 +109,13 @@ export class VoiceReader {
    */
   private getBackendUrl(): string {
     if (typeof window !== 'undefined') {
-      // @ts-ignore
-      const configured = window.AcreAcessivelConfig?.backendUrl;
-      if (configured !== undefined && configured !== null) return configured.replace(/\/$/, '');
-      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      return isLocalHost ? 'http://localhost:8001' : '';
+      const configured = (window as any).AcreAcessivelConfig?.backendUrl;
+      if (configured !== undefined && configured !== null && configured !== '') {
+        return configured.replace(/\/$/, '');
+      }
+      return '';
     }
-    return 'http://localhost:8001';
+    return '';
   }
 
   private injectHighlightStyles() {
@@ -231,6 +231,15 @@ export class VoiceReader {
   /** Tom base da voz (1.0 = neutro). Combinado com o perfil por tipo de elemento (ver TextNormalizer). */
   public setPitch(pitch: number) {
     this.config.pitch = pitch;
+  }
+
+  public setLanguage(lang: string) {
+    this.config.lang = lang;
+    console.log(`[Acre Acessivel] Idioma alterado para: ${lang}`);
+  }
+
+  public get language(): string {
+    return this.config.lang;
   }
 
   private getReadableText(element: HTMLElement): string {
@@ -534,7 +543,7 @@ export class VoiceReader {
     this.updateMediaSessionMetadata(rawText, index);
 
     const tag = element.tagName.toLowerCase();
-    const chunks = TextNormalizer.normalizeToChunks(rawText);
+    const chunks = TextNormalizer.normalizeToChunks(rawText, this.config.lang);
     const profile = TextNormalizer.profileForTag(tag);
 
     console.log(`[Acre Acessivel] [${index}] (${tag}) "${rawText.substring(0, 60)}${rawText.length > 60 ? '...' : ''}" — ${chunks.length} frase(s)`);
@@ -732,7 +741,7 @@ export class VoiceReader {
 // Azure backend prioritizado quando disponível
 
     if (this.useServerTts) {
-      const chunks = TextNormalizer.normalizeToChunks(rawText);
+      const chunks = TextNormalizer.normalizeToChunks(rawText, this.config.lang);
       this.readChunksViaServer(chunks, 0, this.currentIndex, () => {
         this.removeHighlight();
         this.updateState('idle');
@@ -741,7 +750,7 @@ export class VoiceReader {
     }
 
     const tag = element.tagName.toLowerCase();
-    const chunks = TextNormalizer.normalizeToChunks(rawText);
+    const chunks = TextNormalizer.normalizeToChunks(rawText, this.config.lang);
     const profile = TextNormalizer.profileForTag(tag);
 
     this.speakChunks(chunks, profile, 0, this.currentIndex, () => {
@@ -761,12 +770,12 @@ export class VoiceReader {
 // Azure backend prioritizado quando disponível
 
     if (this.useServerTts) {
-      const chunks = TextNormalizer.normalizeToChunks(text);
+      const chunks = TextNormalizer.normalizeToChunks(text, this.config.lang);
       this.readChunksViaServer(chunks, 0, this.currentIndex, () => this.updateState('idle'));
       return;
     }
 
-    const chunks = TextNormalizer.normalizeToChunks(text);
+    const chunks = TextNormalizer.normalizeToChunks(text, this.config.lang);
     this.speakChunks(
       chunks,
       { rateMultiplier: 1.0, pitch: 1.0 },
@@ -775,6 +784,76 @@ export class VoiceReader {
       () => this.updateState('idle'),
       (event) => this.handleSpeechError(event, () => this.readTextDirectly(text))
     );
+  }
+
+  /**
+   * Le uma lista estruturada de blocos de resumo (ex: cabeçalho, projetos, stack, certificados).
+   * Sincroniza com destaque visual do elemento correspondente na pagina.
+   */
+  public readBlocks(
+    blocks: { id?: string; elementId?: string; text: string }[],
+    startIndex: number = 0,
+    onBlockStart?: (idx: number, block: any) => void,
+    onComplete?: () => void
+  ) {
+    this.stop();
+    if (!blocks || blocks.length === 0) {
+      if (typeof onComplete === 'function') onComplete();
+      return;
+    }
+
+    this._isSequentialReading = true;
+    let currentIdx = Math.max(0, Math.min(startIndex, blocks.length - 1));
+
+    const playNextBlock = () => {
+      if (!this._isSequentialReading || currentIdx >= blocks.length) {
+        this.removeHighlight();
+        this.updateState('idle');
+        this._isSequentialReading = false;
+        if (typeof onComplete === 'function') onComplete();
+        return;
+      }
+
+      this.currentIndex = currentIdx;
+      const blk = blocks[currentIdx];
+      this.removeHighlight();
+
+      if (blk.elementId) {
+        const targetEl = document.getElementById(blk.elementId);
+        if (targetEl) {
+          targetEl.classList.add(this.highlightClassName);
+          this.config.onElementHighlight(targetEl);
+        }
+      }
+
+      if (typeof onBlockStart === 'function') {
+        onBlockStart(currentIdx, blk);
+      }
+
+      const rawText = blk.text.trim();
+      if (!rawText) {
+        currentIdx++;
+        playNextBlock();
+        return;
+      }
+
+      const chunks = TextNormalizer.normalizeToChunks(rawText, this.config.lang);
+
+      const onDone = () => {
+        currentIdx++;
+        if (this._isSequentialReading) {
+          playNextBlock();
+        }
+      };
+
+      if (this.useServerTts) {
+        this.readChunksViaServer(chunks, 0, currentIdx, onDone);
+      } else {
+        this.speakChunks(chunks, { rateMultiplier: 1.0, pitch: 1.0 }, 0, currentIdx, onDone);
+      }
+    };
+
+    playNextBlock();
   }
 
   /**
@@ -802,7 +881,7 @@ export class VoiceReader {
     return fetch(`${backendUrl}/api/tts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, lang: this.config.lang }),
       signal,
     }).then(res => {
       if (!res.ok) throw new Error(`TTS HTTP ${res.status}`);
@@ -1008,6 +1087,10 @@ export class VoiceReader {
   }
 
   private getBestPtVoice(): SpeechSynthesisVoice | null {
+    return this.getBestVoiceForLang(this.config.lang || 'pt-BR');
+  }
+
+  private getBestVoiceForLang(targetLang: string = 'pt-BR'): SpeechSynthesisVoice | null {
     if (!this.synth) return null;
     const allVoices = this.synth.getVoices();
     if (allVoices.length === 0) return null;
@@ -1015,26 +1098,23 @@ export class VoiceReader {
     const voices = allVoices.filter(v => !this.failedVoiceNames.has(v.name));
     if (voices.length === 0) return null;
 
+    const currentLang = targetLang.toLowerCase().replace('_', '-');
+    const langPrefix = currentLang.split('-')[0];
+
+    const matchLang = (v: SpeechSynthesisVoice) => {
+      const vLang = v.lang.toLowerCase().replace('_', '-');
+      if (langPrefix === 'he' || langPrefix === 'iw') {
+        return vLang.startsWith('he') || vLang.startsWith('iw');
+      }
+      return vLang.startsWith(currentLang) || vLang.startsWith(langPrefix);
+    };
+
     const priorities = [
-      // Vozes "Natural" ou "Online" (altissima qualidade de nuvem gratuita oferecida pelos navegadores como Edge/Chrome)
-      (v: SpeechSynthesisVoice) => {
-        const lang = v.lang.toLowerCase().replace('_', '-');
-        return lang.startsWith('pt-br') && v.name.toLowerCase().includes('natural');
-      },
-      (v: SpeechSynthesisVoice) => {
-        const lang = v.lang.toLowerCase().replace('_', '-');
-        return lang.startsWith('pt-br') && v.name.toLowerCase().includes('online');
-      },
-      (v: SpeechSynthesisVoice) => {
-        const lang = v.lang.toLowerCase().replace('_', '-');
-        return lang.startsWith('pt-br') && v.name.includes('Google');
-      },
-      (v: SpeechSynthesisVoice) => {
-        const lang = v.lang.toLowerCase().replace('_', '-');
-        return lang.startsWith('pt-br') && v.name.includes('Microsoft');
-      },
-      (v: SpeechSynthesisVoice) => v.lang.toLowerCase().replace('_', '-').startsWith('pt-br'),
-      (v: SpeechSynthesisVoice) => v.lang.toLowerCase().startsWith('pt'),
+      (v: SpeechSynthesisVoice) => matchLang(v) && v.name.toLowerCase().includes('natural'),
+      (v: SpeechSynthesisVoice) => matchLang(v) && v.name.toLowerCase().includes('online'),
+      (v: SpeechSynthesisVoice) => matchLang(v) && v.name.includes('Google'),
+      (v: SpeechSynthesisVoice) => matchLang(v) && v.name.includes('Microsoft'),
+      (v: SpeechSynthesisVoice) => matchLang(v),
       (v: SpeechSynthesisVoice) => v.default,
     ];
     for (const fn of priorities) {

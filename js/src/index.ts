@@ -17,6 +17,47 @@ class AcreAcessivelInitializer {
     return this.panelInstance;
   }
 
+  public get reader(): any {
+    return (this.panelInstance as any)?.reader || null;
+  }
+
+  public setLanguage(lang: string) {
+    if (this.panelInstance && typeof (this.panelInstance as any).setLanguage === 'function') {
+      (this.panelInstance as any).setLanguage(lang);
+    } else if (this.reader && typeof this.reader.setLanguage === 'function') {
+      this.reader.setLanguage(lang);
+    }
+  }
+
+  public readBlocks(
+    blocks: { id?: string; elementId?: string; text: string }[],
+    startIndex: number = 0,
+    onBlockStart?: (idx: number, block: any) => void,
+    onComplete?: () => void
+  ) {
+    if (this.reader && typeof this.reader.readBlocks === 'function') {
+      return this.reader.readBlocks(blocks, startIndex, onBlockStart, onComplete);
+    }
+  }
+
+  public stop() {
+    if (this.reader && typeof this.reader.stop === 'function') {
+      this.reader.stop();
+    }
+  }
+
+  public pause() {
+    if (this.reader && typeof this.reader.pause === 'function') {
+      this.reader.pause();
+    }
+  }
+
+  public resume() {
+    if (this.reader && typeof this.reader.resume === 'function') {
+      this.reader.resume();
+    }
+  }
+
   public init(config: AcreAcessivelConfig = {}) {
     // Garante que o inicializador rode no navegador
     if (typeof window === 'undefined') return;

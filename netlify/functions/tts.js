@@ -33,6 +33,11 @@ export async function handler(event, _context) {
         status: 'online',
         service: 'Acre Acessivel Neural TTS',
         defaultVoice: 'pt-BR-FranciscaNeural',
+        supportedVoices: {
+          pt: 'pt-BR-FranciscaNeural',
+          en: 'en-US-JennyNeural',
+          he: 'he-IL-HilaNeural',
+        },
       }),
     };
   }
@@ -60,7 +65,24 @@ export async function handler(event, _context) {
       };
     }
 
-    const voice = payload.voice || 'pt-BR-FranciscaNeural';
+    const VOICE_MAP = {
+      'pt-br': 'pt-BR-FranciscaNeural',
+      'pt': 'pt-BR-FranciscaNeural',
+      'en-us': 'en-US-JennyNeural',
+      'en': 'en-US-JennyNeural',
+      'he-il': 'he-IL-HilaNeural',
+      'he': 'he-IL-HilaNeural',
+      'iw': 'he-IL-HilaNeural',
+    };
+
+    let voice = payload.voice;
+    if (!voice && payload.lang) {
+      const normalizedLang = String(payload.lang).toLowerCase().replace('_', '-');
+      voice = VOICE_MAP[normalizedLang] || VOICE_MAP[normalizedLang.split('-')[0]];
+    }
+    if (!voice) {
+      voice = 'pt-BR-FranciscaNeural';
+    }
     const rate = payload.rate || '+0%';
     const pitch = payload.pitch || '+0Hz';
 

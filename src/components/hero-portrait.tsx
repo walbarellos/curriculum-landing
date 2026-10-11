@@ -199,22 +199,13 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
     };
   }, [isHovering, activeStep, drawGlyphs, drawWaves]);
 
-  // Handlers do mouse
-  const handlePointerEnter = () => {
-    setIsHovering(true);
-    setActiveStep(0); // Troca imediatamente para o primeiro efeito da sequência (Kenê Cultural)
-    stepStartTimeRef.current = performance.now();
-    fillRefs.current.forEach((fill) => {
-      if (fill) fill.style.width = "0%";
-    });
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  // Handlers do mouse e toque (Android / mobile)
+  const updateCoordsFromClient = (clientX: number, clientY: number) => {
     const el = stageRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const clampedX = Math.min(rect.width, Math.max(0, e.clientX - rect.left));
-    const clampedY = Math.min(rect.height, Math.max(0, e.clientY - rect.top));
+    const clampedX = Math.min(rect.width, Math.max(0, clientX - rect.left));
+    const clampedY = Math.min(rect.height, Math.max(0, clientY - rect.top));
     mouseRef.current.x = (clampedX * W) / rect.width;
     mouseRef.current.y = (clampedY * H) / rect.height;
     mouseRef.current.in = true;
@@ -225,9 +216,38 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
     el.style.setProperty("--my", my);
   };
 
+  const handlePointerEnter = () => {
+    setIsHovering(true);
+    setActiveStep(0); // Troca imediatamente para o primeiro efeito da sequência (Kene Cultural)
+    stepStartTimeRef.current = performance.now();
+    fillRefs.current.forEach((fill) => {
+      if (fill) fill.style.width = "0%";
+    });
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    setIsHovering(true);
+    updateCoordsFromClient(e.clientX, e.clientY);
+    if (activeStep === null) {
+      setActiveStep(0);
+      stepStartTimeRef.current = performance.now();
+      fillRefs.current.forEach((fill) => {
+        if (fill) fill.style.width = "0%";
+      });
+    } else {
+      // No toque sequencial com dedo no celular, avanca para o proximo efeito
+      const nextStep = (activeStep + 1) % 4;
+      handleStepClick(nextStep);
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    updateCoordsFromClient(e.clientX, e.clientY);
+  };
+
   const handlePointerLeave = () => {
     setIsHovering(false);
-    setActiveStep(null); // Volta à foto normal natural
+    setActiveStep(null); // Volta a foto normal natural
     mouseRef.current.in = false;
     const el = stageRef.current;
     if (el) {
@@ -237,6 +257,12 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
     fillRefs.current.forEach((fill) => {
       if (fill) fill.style.width = "0%";
     });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length > 0) {
+      updateCoordsFromClient(e.touches[0].clientX, e.touches[0].clientY);
+    }
   };
 
   const handleStepClick = (stepIdx: number) => {
@@ -253,13 +279,15 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
   return (
     <div
       onPointerEnter={handlePointerEnter}
+      onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
+      onTouchMove={handleTouchMove}
       className="hero-seq-wrapper flex flex-col items-center select-none"
     >
       <div
         ref={stageRef}
-        className={`hero-seq-stage relative overflow-hidden cursor-crosshair border border-line/20 hover:border-line transition-[border-color,box-shadow] duration-300 bg-[var(--color-bg)] ${className ?? ""}`}
+        className={`hero-seq-stage relative overflow-hidden cursor-crosshair border border-line/20 hover:border-line transition-[border-color,box-shadow] duration-300 bg-[var(--color-bg)] touch-manipulation ${className ?? ""}`}
         style={{
           aspectRatio: "3 / 4",
           borderRadius: "999px 999px 6px 6px",
@@ -453,18 +481,20 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
             key={stepIdx}
             type="button"
             onClick={() => handleStepClick(stepIdx)}
-            className="group relative flex-1 h-[3.5px] hover:h-[5px] rounded-full overflow-hidden bg-foreground/15 dark:bg-foreground/20 backdrop-blur-[2px] transition-[height] duration-150 cursor-pointer focus:outline-none"
+            className="group relative flex-1 py-2 cursor-pointer focus:outline-none touch-manipulation"
             title={`Quadro ${stepIdx + 1} de 4 (2s)`}
             role="tab"
             aria-selected={activeStep === stepIdx}
           >
-            <div
-              ref={(el) => {
-                fillRefs.current[stepIdx] = el;
-              }}
-              className="absolute inset-y-0 left-0 rounded-full bg-[var(--color-accent,#b8381b)]"
-              style={{ width: "0%" }}
-            />
+            <div className="relative w-full h-[3.5px] group-hover:h-[5px] group-active:h-[5px] rounded-full overflow-hidden bg-foreground/15 dark:bg-foreground/20 backdrop-blur-[2px] transition-[height] duration-150">
+              <div
+                ref={(el) => {
+                  fillRefs.current[stepIdx] = el;
+                }}
+                className="absolute inset-y-0 left-0 rounded-full bg-[var(--color-accent,#b8381b)]"
+                style={{ width: "0%" }}
+              />
+            </div>
           </button>
         ))}
       </div>

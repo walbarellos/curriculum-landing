@@ -142,6 +142,51 @@ function authPopupPlugin(): Plugin {
   };
 }
 
+function localTtsPlugin(): Plugin {
+  return {
+    name: "app-builder:local-tts",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const rawUrl = req.url ?? "";
+        const pathOnly = rawUrl.split("?", 1)[0] ?? "";
+        if (pathOnly !== "/api/tts") {
+          next();
+          return;
+        }
+        try {
+          const mod = (await import("./netlify/functions/tts.js")) as {
+            handler: (event: any, context: any) => Promise<any>;
+          };
+          let body = "";
+          for await (const chunk of req) {
+            body += chunk;
+          }
+          const event = {
+            httpMethod: req.method,
+            body,
+            headers: req.headers,
+          };
+          const response = await mod.handler(event, {});
+          res.statusCode = response.statusCode;
+          for (const [k, v] of Object.entries(response.headers || {})) {
+            res.setHeader(k, v as string);
+          }
+          if (response.isBase64Encoded) {
+            res.end(Buffer.from(response.body, "base64"));
+          } else {
+            res.end(response.body);
+          }
+        } catch (err) {
+          console.error("[local-tts] erro na sintese:", err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: "TTS failed" }));
+        }
+      });
+    },
+  };
+}
+
 // `0.0.0.0:8080` is the live-preview contract — don't change host/port.
 // The dev server starts once `src/router.tsx` and `src/routes/` exist — see
 // AGENTS.md § "First scaffold".
@@ -161,6 +206,7 @@ export default defineConfig(({ command, isPreview }) => ({
     pgliteBootstrapPlugin(),
     // Before tanstackStart so /auth/popup never falls through to the SPA.
     authPopupPlugin(),
+    localTtsPlugin(),
     // Dev-only /__app-env, read by scripts/check-auth-invariant.mjs.
     appEnvPlugin(),
     // PWA head + ?install=1 tutorial page; runs before Start/Nitro.
