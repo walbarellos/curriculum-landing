@@ -19,6 +19,7 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
   const timeRef = useRef(0);
   const stepStartTimeRef = useRef(0);
   const animFrameRef = useRef<number | null>(null);
+  const fillRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const getL = useCallback((x: number, y: number): number => {
     const lum = lumMapRef.current;
@@ -165,14 +166,26 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
       if (!active) return;
       timeRef.current = now;
 
-      if (isHovering) {
+      if (isHovering && activeStep !== null) {
         if (activeStep === 1) drawGlyphs();
         if (activeStep === 2) drawWaves();
 
         const elapsed = now - stepStartTimeRef.current;
+        const progress = Math.min(100, (elapsed / STEP_DURATION) * 100);
+
+        if (fillRefs.current[activeStep]) {
+          fillRefs.current[activeStep]!.style.width = `${progress}%`;
+        }
+
         if (elapsed >= STEP_DURATION) {
           stepStartTimeRef.current = now;
-          setActiveStep((prev) => ((prev ?? 0) + 1) % 4);
+          const nextStep = (activeStep + 1) % 4;
+          fillRefs.current.forEach((fill, idx) => {
+            if (!fill) return;
+            if (idx < nextStep) fill.style.width = "100%";
+            else fill.style.width = "0%";
+          });
+          setActiveStep(nextStep);
         }
       }
 
@@ -191,18 +204,23 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
     setIsHovering(true);
     setActiveStep(0); // Troca imediatamente para o primeiro efeito da sequência (Kenê Cultural)
     stepStartTimeRef.current = performance.now();
+    fillRefs.current.forEach((fill) => {
+      if (fill) fill.style.width = "0%";
+    });
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const el = stageRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    mouseRef.current.x = ((e.clientX - rect.left) * W) / rect.width;
-    mouseRef.current.y = ((e.clientY - rect.top) * H) / rect.height;
+    const clampedX = Math.min(rect.width, Math.max(0, e.clientX - rect.left));
+    const clampedY = Math.min(rect.height, Math.max(0, e.clientY - rect.top));
+    mouseRef.current.x = (clampedX * W) / rect.width;
+    mouseRef.current.y = (clampedY * H) / rect.height;
     mouseRef.current.in = true;
 
-    const mx = (((e.clientX - rect.left) / rect.width) * 2 - 1).toFixed(2);
-    const my = (((e.clientY - rect.top) / rect.height) * 2 - 1).toFixed(2);
+    const mx = (((clampedX / rect.width) * 2 - 1)).toFixed(2);
+    const my = (((clampedY / rect.height) * 2 - 1)).toFixed(2);
     el.style.setProperty("--mx", mx);
     el.style.setProperty("--my", my);
   };
@@ -216,22 +234,39 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
       el.style.setProperty("--mx", "0");
       el.style.setProperty("--my", "0");
     }
+    fillRefs.current.forEach((fill) => {
+      if (fill) fill.style.width = "0%";
+    });
+  };
+
+  const handleStepClick = (stepIdx: number) => {
+    setIsHovering(true);
+    setActiveStep(stepIdx);
+    stepStartTimeRef.current = performance.now();
+    fillRefs.current.forEach((fill, idx) => {
+      if (!fill) return;
+      if (idx < stepIdx) fill.style.width = "100%";
+      else fill.style.width = "0%";
+    });
   };
 
   return (
     <div
-      ref={stageRef}
       onPointerEnter={handlePointerEnter}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
-      className={`hero-seq-stage relative overflow-hidden select-none cursor-crosshair border border-line/20 hover:border-line transition-[border-color,box-shadow] duration-300 bg-[var(--color-bg)] ${className ?? ""}`}
-      style={{
-        aspectRatio: "3 / 4",
-        borderRadius: "999px 999px 6px 6px",
-      }}
-      role="img"
-      aria-label={alt}
+      className="hero-seq-wrapper flex flex-col items-center select-none"
     >
+      <div
+        ref={stageRef}
+        className={`hero-seq-stage relative overflow-hidden cursor-crosshair border border-line/20 hover:border-line transition-[border-color,box-shadow] duration-300 bg-[var(--color-bg)] ${className ?? ""}`}
+        style={{
+          aspectRatio: "3 / 4",
+          borderRadius: "999px 999px 6px 6px",
+        }}
+        role="img"
+        aria-label={alt}
+      >
       {/* ══════════════ ESTADO DE REPOUSO: FOTO NORMAL NATURAL ══════════════ */}
       <div
         className={`hero-seq-layer hero-layer-normal absolute inset-0 transition-opacity duration-400 ease-out ${
@@ -405,6 +440,34 @@ export function HeroPortrait({ alt, className }: { alt: string; className?: stri
           </filter>
         </defs>
       </svg>
+      </div>
+
+      {/* Barra transparente tipo story mostrando o tempo de cada quadro (2s) */}
+      <div
+        className="sequencer-bar flex items-center justify-center gap-1.5 w-48 sm:w-56 md:w-60 px-0.5 mt-2.5 transition-opacity duration-300"
+        role="tablist"
+        aria-label="Controle de estagios da sequencia estilo story"
+      >
+        {[0, 1, 2, 3].map((stepIdx) => (
+          <button
+            key={stepIdx}
+            type="button"
+            onClick={() => handleStepClick(stepIdx)}
+            className="group relative flex-1 h-[3.5px] hover:h-[5px] rounded-full overflow-hidden bg-foreground/15 dark:bg-foreground/20 backdrop-blur-[2px] transition-[height] duration-150 cursor-pointer focus:outline-none"
+            title={`Quadro ${stepIdx + 1} de 4 (2s)`}
+            role="tab"
+            aria-selected={activeStep === stepIdx}
+          >
+            <div
+              ref={(el) => {
+                fillRefs.current[stepIdx] = el;
+              }}
+              className="absolute inset-y-0 left-0 rounded-full bg-[var(--color-accent,#b8381b)]"
+              style={{ width: "0%" }}
+            />
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

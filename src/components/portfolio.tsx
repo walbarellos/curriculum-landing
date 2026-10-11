@@ -987,7 +987,7 @@ export function Portfolio() {
                 alt={t.photoAlt(bioInfo.name)}
                 className="h-56 w-48 sm:h-72 sm:w-56 md:h-80 md:w-60"
               />
-              <span className="mt-4 text-[11px] text-muted font-mono">{t.lattes}: 1326474169012655</span>
+              <span className="mt-2 text-[11px] text-muted font-mono">{t.lattes}: 1326474169012655</span>
             </div>
           </header>
 
