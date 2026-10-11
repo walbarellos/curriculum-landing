@@ -176,7 +176,7 @@ const pt = {
   readStack: (s: string) => `Seção Stack tecnológica: ${s}`,
   readCerts:
     "Seção de Certificações. Cursos de cibersegurança, dados, sensoriamento inteligente e inglês TOEFL ITP.",
-  readHistory: "Seção de Histórico. Dos sistemas para a OCA à graduação no IFAC.",
+  readHistory: "Seção de Histórico. Das capacitações e certificações à graduação no IFAC.",
   readContact: (email: string) => `Seção de Contato. Email: ${email}. GitHub: github.com/walbarellos.`,
 
   pSummary: "Resumo",
@@ -305,7 +305,7 @@ const en: UI = {
   readStack: (s: string) => `Tech stack section: ${s}`,
   readCerts:
     "Certifications section. Courses in cybersecurity, data, smart sensing, and the TOEFL ITP English certificate.",
-  readHistory: "Background section. From systems for OCA to the degree at IFAC.",
+  readHistory: "Background section. From training and certifications to the degree at IFAC.",
   readContact: (email: string) => `Contact section. Email: ${email}. GitHub: github.com/walbarellos.`,
 
   pSummary: "Summary",
@@ -429,7 +429,7 @@ const he: UI = {
     `מערכת ${name}. קטגוריה: ${cat}. ${summary} טכנולוגיות: ${stack}.`,
   readStack: (s: string) => `מקטע טכנולוגיות: ${s}`,
   readCerts: "מקטע הסמכות. קורסים באבטחת סייבר, בנתונים ובחישה חכמה, ותעודת האנגלית TOEFL ITP.",
-  readHistory: "מקטע רקע. ממערכות עבור OCA ועד הלימודים ב-IFAC.",
+  readHistory: "מקטע רקע. מהכשרות ותעודות ועד הלימודים ב-IFAC.",
   readContact: (email: string) => `מקטע יצירת קשר. אימייל: ${email}. GitHub: github.com/walbarellos.`,
 
   pSummary: "תקציר",
@@ -580,12 +580,6 @@ const content: Record<"en" | "he", Overlay> = {
         title: "Training: “Good Practices in Public Service”",
         sub: "Organization Directorate for Service Centers — OCA",
         desc: "Plain Language, Quality Management, posture and conduct in dialogue with citizens, and Information Management.",
-      },
-      {
-        date: "2023 — 2026",
-        title: "Systems for OCA — Freelance Developer",
-        sub: "Organization Directorate for Service Centers — OCA",
-        desc: "Real systems delivered to OCA as a solo developer with no support team.",
       },
     ],
     certs: {
@@ -830,12 +824,6 @@ const content: Record<"en" | "he", Overlay> = {
         title: "הכשרה: “שיטות עבודה מומלצות במתן שירות לציבור”",
         sub: "מנהלת הארגון של מרכזי השירות — OCA",
         desc: "שפה פשוטה, ניהול איכות, יחס והתנהגות בשיח עם האזרח, וניהול מידע.",
-      },
-      {
-        date: "2023 — 2026",
-        title: "מערכות עבור OCA — מפתח עצמאי",
-        sub: "מנהלת הארגון של מרכזי השירות — OCA",
-        desc: "מערכות אמיתיות שנמסרו ל-OCA, כמפתח יחיד וללא צוות תמיכה.",
       },
     ],
     certs: {

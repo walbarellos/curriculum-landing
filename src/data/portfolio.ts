@@ -272,13 +272,6 @@ export const timeline: TimelineItem[] = [
     sub: "Diretoria de Organização em Centros de Atendimento — OCA",
     desc: "Linguagem Simples, Gestão da Qualidade, postura e comportamento no diálogo com o cidadão e Gestão da Informação.",
   },
-  {
-    // TODO: confirmar o período real na OCA. Está em ordem decrescente de início (2023).
-    date: "2023 — 2026",
-    title: "Sistemas para a OCA — Desenvolvedor Autônomo",
-    sub: "Diretoria de Organização em Centros de Atendimento — OCA",
-    desc: "Sistemas reais entregues para a OCA, como desenvolvedor solo e sem equipe de apoio.",
-  },
 ];
 
 export type Certificate = {
