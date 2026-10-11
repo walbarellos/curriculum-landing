@@ -807,43 +807,42 @@ export function Portfolio() {
           {t.skip}
         </a>
 
-        {/* Barra de acessibilidade */}
+        {/* Barra de acessibilidade e ferramentas */}
         <aside
           ref={barRef}
           aria-label={t.a11yBarAria}
-          className="accessibility-bar border-b border-line/30 bg-surface/90 sticky top-0 z-40 backdrop-blur-md"
+          className="accessibility-bar border-b border-line/20 bg-surface/90 sticky top-0 z-40 backdrop-blur-md"
         >
-          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 text-sm">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-2 text-sm flex-wrap md:flex-nowrap">
+            {/* Esquerda: Seletor de Idioma */}
             <LangSwitch lang={lang} onChange={changeLang} />
 
-            <div className="flex items-center gap-3">
-              <span className="font-semibold text-muted tracking-wider text-xs uppercase font-mono">
-                {t.a11yBar}
-              </span>
-
+            {/* Direita: Controles integrados em uma única linha harmoniosa */}
+            <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap justify-end">
+              {/* Leitor de Voz Capi */}
               {readingState === "idle" ? (
                 <button
                   type="button"
-                  className="inline-flex items-center gap-2 underline underline-offset-4 font-medium px-2.5 py-1 rounded hover:bg-surface-2"
+                  className="h-8 px-2.5 rounded-md text-xs font-semibold inline-flex items-center gap-1.5 bg-surface-2 hover:bg-accent hover:text-accent-fg border border-line/20 hover:border-accent transition-all duration-150"
                   onClick={startReading}
                   title={t.readPageTitle}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
                   </svg>
                   <span>{t.readPage}</span>
                 </button>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   {readingState === "reading" ? (
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1.5 underline underline-offset-4 font-bold text-accent px-2.5 py-1 rounded hover:bg-surface-2"
+                      className="h-8 px-2.5 rounded-md text-xs font-bold inline-flex items-center gap-1.5 bg-accent text-accent-fg border border-accent shadow-xs"
                       onClick={pauseReading}
                       title={t.pauseTitle}
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
                         <line x1="6" y1="4" x2="6" y2="20" />
                         <line x1="18" y1="4" x2="18" y2="20" />
                       </svg>
@@ -852,11 +851,11 @@ export function Portfolio() {
                   ) : (
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1.5 underline underline-offset-4 font-bold text-accent px-2.5 py-1 rounded hover:bg-surface-2"
+                      className="h-8 px-2.5 rounded-md text-xs font-bold inline-flex items-center gap-1.5 bg-accent/90 text-accent-fg border border-accent"
                       onClick={resumeReading}
                       title={t.resumeTitle}
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <polygon points="5 3 19 12 5 21 5 3" />
                       </svg>
                       <span>{t.resume}</span>
@@ -864,62 +863,86 @@ export function Portfolio() {
                   )}
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 underline underline-offset-4 px-2 py-1 rounded text-muted hover:text-fg hover:bg-surface-2"
+                    className="h-8 px-2 rounded-md text-xs inline-flex items-center gap-1 text-muted hover:text-fg hover:bg-surface-2 border border-line/20"
                     onClick={stopReading}
                     title={t.stopTitle}
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <rect x="4" y="4" width="16" height="16" />
                     </svg>
                     <span>{t.stop}</span>
                   </button>
                 </div>
               )}
-            </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="min-h-8 px-2 font-mono text-xs rounded border border-line/20 hover:border-line"
-                onClick={() => changeScale(0.1)}
-                aria-label={t.textUp}
+              <div className="h-4 w-px bg-line/20 mx-1 hidden sm:block" aria-hidden="true" />
+
+              {/* Ajuste de Fonte (A- / A+) */}
+              <div
+                className="inline-flex items-center rounded-md border border-line/20 overflow-hidden bg-surface-2 p-0.5"
+                role="group"
+                aria-label="Ajuste de tamanho do texto"
               >
-                A+
-              </button>
-              <button
-                type="button"
-                className="min-h-8 px-2 font-mono text-xs rounded border border-line/20 hover:border-line"
-                onClick={() => changeScale(-0.1)}
-                aria-label={t.textDown}
-              >
-                A−
-              </button>
-              {scale !== 1 && (
-                <button type="button" className="text-xs text-muted underline px-1" onClick={resetScale} title={t.textResetTitle}>
-                  100%
+                <button
+                  type="button"
+                  className="h-7 px-2 font-mono text-xs font-semibold rounded hover:bg-surface text-muted hover:text-fg transition-colors"
+                  onClick={() => changeScale(-0.1)}
+                  aria-label={t.textDown}
+                  title={t.textDown}
+                >
+                  A−
                 </button>
-              )}
+                {scale !== 1 ? (
+                  <button
+                    type="button"
+                    className="h-7 px-1.5 font-mono text-[11px] font-bold text-accent hover:bg-surface rounded transition-colors"
+                    onClick={resetScale}
+                    title={t.textResetTitle}
+                  >
+                    100%
+                  </button>
+                ) : (
+                  <span className="w-px h-3.5 self-center bg-line/15" aria-hidden="true" />
+                )}
+                <button
+                  type="button"
+                  className="h-7 px-2 font-mono text-xs font-semibold rounded hover:bg-surface text-muted hover:text-fg transition-colors"
+                  onClick={() => changeScale(0.1)}
+                  aria-label={t.textUp}
+                  title={t.textUp}
+                >
+                  A+
+                </button>
+              </div>
+
+              {/* Alto Contraste */}
               <button
                 type="button"
-                className={`min-h-8 px-2.5 text-xs rounded border transition-colors ${
-                  contrast ? "font-bold text-accent border-accent bg-surface-2" : "border-line/20 hover:border-line"
+                className={`h-8 px-2.5 text-xs font-medium rounded-md border transition-all ${
+                  contrast
+                    ? "font-bold text-accent border-accent bg-surface-2 shadow-xs"
+                    : "border-line/20 hover:border-line hover:bg-surface-2 text-muted hover:text-fg"
                 }`}
                 onClick={toggleContrast}
                 aria-pressed={contrast}
+                title={t.contrast}
               >
                 {t.contrast}
               </button>
+
+              {/* Tema Escuro / Claro */}
               <button
                 type="button"
-                className="min-h-8 px-2.5 text-xs rounded border border-line/20 hover:border-line inline-flex items-center gap-1.5"
+                className="h-8 px-2.5 text-xs font-medium rounded-md border border-line/20 hover:border-line hover:bg-surface-2 text-muted hover:text-fg inline-flex items-center gap-1.5 transition-all"
                 onClick={toggleTheme}
+                title={theme === "light" ? t.themeDark : t.themeLight}
               >
                 {theme === "light" ? (
                   <>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                     </svg>
-                    <span>{t.themeDark}</span>
+                    <span className="hidden sm:inline">{t.themeDark}</span>
                   </>
                 ) : (
                   <>
@@ -934,14 +957,16 @@ export function Portfolio() {
                       <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
                       <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                     </svg>
-                    <span>{t.themeLight}</span>
+                    <span className="hidden sm:inline">{t.themeLight}</span>
                   </>
                 )}
               </button>
+
+              {/* Modo Impressão */}
               <button
                 ref={printOpenerRef}
                 type="button"
-                className="min-h-8 px-2.5 text-xs font-semibold rounded border border-line/40 hover:border-line inline-flex items-center gap-1.5"
+                className="h-8 px-2.5 text-xs font-semibold rounded-md border border-line/25 hover:border-line hover:bg-surface-2 text-muted hover:text-fg inline-flex items-center gap-1.5 transition-all"
                 onClick={enterPrintMode}
                 title={t.printTitle}
               >
@@ -949,7 +974,7 @@ export function Portfolio() {
                   <path d="M6 9V3h12v6M6 18H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-2" />
                   <rect x="6" y="14" width="12" height="7" />
                 </svg>
-                <span>{t.print}</span>
+                <span className="hidden sm:inline">{t.print}</span>
               </button>
             </div>
           </div>
