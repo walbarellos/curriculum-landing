@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Retrato Interativo · Sequência Cultural 2s</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap">
+  <style>
+    :root {
+      box-sizing: border-box;
+      --bg: #f6f4ef;
+      --fg: #18191a;
+      --mut: #68645c;
+      --border: color-mix(in srgb, var(--fg) 16%, transparent);
+      --s2: #ede9de;
+      --card-bg: #fdfdfc;
+
+      /* Cores Culturais do Acre & Pigmentos da Floresta (FEM / Kenê) */
+      --urucum: #b8381b;      /* Vermelho-telha vibrante do urucum */
+      --urucum-dark: #8c250e; /* Urucum profundo */
+      --jenipapo: #161c1a;    /* Pigmento negro-azulado vegetal profundo */
+      --ocre: #d49424;        /* Argila amarela e açafrão da terra */
+      --argila: #e6b55c;      /* Ouro e argila clara */
+      --terra: #4c2d16;       /* Casca e terra da Amazônia */
+      --mata: #1a4d2e;        /* Verde sumaúma */
+
+      --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #111213;
+      --fg: #f4f4f2;
+      --mut: #a09d96;
+      --border: color-mix(in srgb, var(--fg) 16%, transparent);
+      --s2: #1b1c1d;
+      --card-bg: #161718;
+
+      --urucum: #e04a26;
+      --urucum-dark: #b3361b;
+      --jenipapo: #0d1210;
+      --ocre: #e8a933;
+      --argila: #f2c779;
+      --terra: #6e4222;
+      --mata: #2d7a4c;
+    }
+
+    *, *::before, *::after { box-sizing: inherit; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Barra superior minimalista */
+    .topbar {
+      position: fixed;
+      top: 0;
+      inset-inline: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.5rem;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+    }
+
+    .topbar-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .topbar-tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--mut);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.4rem 0.75rem;
+      background: transparent;
+      color: var(--fg);
+      border: 1.5px solid var(--fg);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+    }
+
+    .btn:hover {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .btn-ghost {
+      border-color: var(--border);
+      color: var(--mut);
+    }
+    .btn-ghost:hover {
+      border-color: var(--fg);
+      color: var(--fg);
+      background: var(--s2);
+    }
+
+    /* Container central limpo */
+    .viewport {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4.5rem 1.5rem 2.5rem;
+      width: 100%;
+      max-width: 44rem;
+    }
+
+    /* Moldura Principal do Retrato */
+    .hero-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .stage {
+      position: relative;
+      width: 310px;
+      aspect-ratio: 3 / 4;
+      background: var(--bg);
+      border-radius: 999px 999px 6px 6px; /* Silhueta em arco majestoso */
+      overflow: hidden;
+      box-shadow: 0 16px 40px -15px rgba(0, 0, 0, 0.22);
+      border: 2px solid var(--border);
+      cursor: crosshair;
+      touch-action: none;
+      transition: box-shadow 300ms ease, border-color 300ms ease;
+    }
+
+    .stage:hover {
+      border-color: var(--fg);
+      box-shadow: 0 22px 50px -15px rgba(0, 0, 0, 0.32);
+    }
+
+    /* Camadas do Retrato (Layers) */
+    .layer {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 400ms cubic-bezier(0.16, 1, 0.3, 1), transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+
+    .layer.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ══════════════ ESTADO DE REPOUSO: FOTO NORMAL NATURAL ══════════════ */
+    .layer-normal {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--argila) 14%, transparent), transparent 75%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .layer-normal img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      border-radius: 999px 999px 0 0;
+      display: block;
+      filter: contrast(1.05) saturate(1.03);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translate(calc(var(--mx, 0) * 4px), calc(var(--my, 0) * 4px));
+    }
+
+    /* ══════════════ ESTÁGIO 1: KENÊ & PLANOS CULTURAIS DO ACRE ══════════════ */
+    .layer-kene {
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* Planos com Kenê */
+    .kene-bg {
+      position: absolute;
+      inset: 0;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Arco Urucum com padrão Kenê tradicional */
+    .kene-plane-uru {
+      position: absolute;
+      width: 82%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background-color: var(--urucum);
+      right: -16%;
+      top: 2%;
+      transform: translate(calc(var(--mx, 0) * 12px), calc(var(--my, 0) * 12px));
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .kene-plane-uru::before {
+      content: "";
+      position: absolute;
+      inset: -20px;
+      background-image: url("data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M24 0 L48 24 L24 48 L0 24 Z' fill='none' stroke='%23e6b55c' stroke-width='2' stroke-opacity='0.45'/%3E%3Cpath d='M24 8 L40 24 L24 40 L8 24 Z' fill='none' stroke='%23e6b55c' stroke-width='1.5' stroke-opacity='0.45'/%3E%3Cpath d='M24 16 L32 24 L24 32 L16 24 Z' fill='%23e6b55c' fill-opacity='0.45'/%3E%3Cpath d='M0 0 L10 10 M48 0 L38 10 M48 48 L38 38 M0 48 L10 38' stroke='%23e6b55c' stroke-width='2' stroke-opacity='0.45'/%3E%3C/svg%3E");
+      background-size: 44px 44px;
+      opacity: 0.95;
+    }
+
+    /* Pilar lateral em Jenipapo (pigmento sagrado vegetal) */
+    .kene-pillar-jeni {
+      position: absolute;
+      left: 0;
+      top: 14%;
+      bottom: 0;
+      width: 24%;
+      background-color: var(--jenipapo);
+      transform: translateX(calc(var(--mx, 0) * -8px));
+      overflow: hidden;
+    }
+    .kene-pillar-jeni::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 16 L16 0 L32 16 L16 32 Z' fill='none' stroke='%23d49424' stroke-width='1.5' stroke-opacity='0.35'/%3E%3C/svg%3E");
+      background-size: 28px 28px;
+    }
+
+    /* Quarto de círculo em Ocre da terra */
+    .kene-plane-ocre {
+      position: absolute;
+      width: 38%;
+      aspect-ratio: 1;
+      left: 8%;
+      bottom: 4%;
+      border-radius: 100% 0 0 0;
+      background-color: var(--ocre);
+      transform: translate(calc(var(--mx, 0) * -16px), calc(var(--my, 0) * -10px));
+    }
+
+    /* Foto recortada em arco puro com mix-blend multiply */
+    .kene-photo {
+      position: absolute;
+      left: 14%;
+      bottom: 0;
+      width: 78%;
+      height: 90%;
+      object-fit: cover;
+      object-position: top;
+      border-radius: 999px 999px 0 0;
+      mix-blend-mode: multiply;
+      filter: grayscale(1) contrast(1.22);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translate(calc(var(--mx, 0) * 4px), calc(var(--my, 0) * 4px));
+      pointer-events: none;
+    }
+
+    /* ══════════════ ESTÁGIO 2: GLIFOS DE CÓDIGO (GLYPHWAVE) ══════════════ */
+    .layer-canvas canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* ══════════════ ESTÁGIO 4: COLAGEM DUOTONE COM KENÊ ══════════════ */
+    .layer-collage {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    .layer-collage img {
+      position: absolute;
+      left: 6%;
+      top: 6%;
+      width: 88%;
+      height: 90%;
+      object-fit: cover;
+      object-position: top;
+    }
+    .layer-collage .t-jeni {
+      filter: url(#duoJeni);
+    }
+    .layer-collage .t-uru {
+      filter: url(#duoUru);
+      mix-blend-mode: multiply;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translate(calc(5px + var(--mx, 0) * 10px), calc(4px + var(--my, 0) * 8px));
+    }
+    .layer-collage .kene-strip {
+      position: absolute;
+      bottom: 4%;
+      inset-inline: 4%;
+      height: 38px;
+      background-color: var(--jenipapo);
+      border: 1px solid var(--argila);
+      background-image: url("data:image/svg+xml,%3Csvg width='36' height='36' viewBox='0 0 36 36' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 18 L9 9 L18 18 L27 9 L36 18 L27 27 L18 18 L9 27 Z' fill='none' stroke='%23e6b55c' stroke-width='1.8' stroke-opacity='0.7'/%3E%3C/svg%3E");
+      background-size: 30px 30px;
+      mix-blend-mode: multiply;
+      opacity: 0.85;
+      transform: rotate(-1.5deg);
+    }
+    .layer-collage .grain-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      mix-blend-mode: multiply;
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    /* Indicador Minimalista de 4 Passos (2s cada) */
+    .sequencer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .seq-step {
+      position: relative;
+      flex: 1;
+      height: 4px;
+      background: color-mix(in srgb, var(--fg) 18%, transparent);
+      border-radius: 999px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: height 200ms ease;
+    }
+
+    .seq-step:hover {
+      height: 6px;
+    }
+
+    .seq-step-fill {
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      background: var(--urucum);
+      border-radius: 999px;
+    }
+
+    .seq-step.active .seq-step-fill {
+      /* Preenchimento contínuo sincronizado de 2 segundos */
+      transition: width 50ms linear;
+    }
+
+    .seq-step.completed .seq-step-fill {
+      width: 100% !important;
+      background: var(--fg);
+    }
+
+    /* Dica sutil em monospace */
+    .hint {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--mut);
+      letter-spacing: 0.04em;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hint-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--urucum);
+      display: inline-block;
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .layer, .kene-plane-uru, .kene-pillar-jeni, .kene-plane-ocre, .kene-photo, .t-uru {
+        transition: none !important;
+        transform: none !important;
+      }
+      .hint-dot { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de topo limpa -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <h1 class="topbar-title">Retrato Interativo</h1>
+      <span class="topbar-tag">Sequência Cultural do Acre (2s)</span>
+    </div>
+
+    <div class="topbar-actions">
+      <button type="button" class="btn btn-ghost" id="themeBtn" title="Alternar tema claro/escuro">
+        Tema
+      </button>
+      <a href="/efeitos-hero.html" class="btn btn-ghost" title="Ver grade comparativa">
+        Grade Completa
+      </a>
+      <a href="/" class="btn" title="Voltar ao site principal">
+        Portfólio
+      </a>
+    </div>
+  </header>
+
+  <!-- Palco Central Limpo (Sem rótulos nem explicações poluindo a imagem) -->
+  <main class="viewport">
+    <div class="hero-container">
+
+      <!-- PALCO DO RETRATO -->
+      <div class="stage" id="stage" aria-label="Retrato de Willian Albarello com sequência visual do Acre" role="img">
+
+        <!-- 0. FOTO NORMAL NATURAL (Estado Padrão de Repouso) -->
+        <div class="layer layer-normal active" id="layer-normal">
+          <img src="/img/perfil.jpg" alt="Retrato natural de Willian Albarello">
+        </div>
+
+        <!-- 1. Kenê Cultural & Planos do Acre (Urucum, Jenipapo, Ocre) -->
+        <div class="layer layer-kene" id="layer-1">
+          <div class="kene-bg">
+            <div class="kene-plane-uru" aria-hidden="true"></div>
+            <div class="kene-pillar-jeni" aria-hidden="true"></div>
+            <div class="kene-plane-ocre" aria-hidden="true"></div>
+          </div>
+          <img src="/img/perfil.jpg" alt="Retrato sob grafismo Kenê e planos do Acre" class="kene-photo">
+        </div>
+
+        <!-- 2. Glifos de Código (GlyphWave / ASCII) -->
+        <div class="layer layer-canvas" id="layer-2">
+          <canvas id="cv-glyphs"></canvas>
+        </div>
+
+        <!-- 3. Linhas em Relevo (Fourier / Ondas Topográficas) -->
+        <div class="layer layer-canvas" id="layer-3">
+          <canvas id="cv-waves"></canvas>
+        </div>
+
+        <!-- 4. Colagem Duotone com Pigmentos Naturais & Kenê -->
+        <div class="layer layer-collage" id="layer-4">
+          <img class="t-jeni" src="/img/perfil.jpg" alt="Foto em pigmento jenipapo">
+          <img class="t-uru" src="/img/perfil.jpg" alt="Foto em pigmento urucum">
+          <svg class="grain-overlay" aria-hidden="true">
+            <rect width="100%" height="100%" filter="url(#grain)"/>
+          </svg>
+          <div class="kene-strip" aria-hidden="true"></div>
+        </div>
+
+      </div>
+
+      <!-- Barra Minimalista de 4 Traços (2s para cada quadro) -->
+      <div class="sequencer-bar" id="seqBar" role="tablist" aria-label="Controle de estágios da sequência">
+        <div class="seq-step active" data-step="0" role="tab" aria-selected="true" title="1. Kenê Cultural do Acre">
+          <div class="seq-step-fill" id="fill-0"></div>
+        </div>
+        <div class="seq-step" data-step="1" role="tab" aria-selected="false" title="2. Glifos de Código (GlyphWave)">
+          <div class="seq-step-fill" id="fill-1"></div>
+        </div>
+        <div class="seq-step" data-step="2" role="tab" aria-selected="false" title="3. Linhas em Relevo (Fourier)">
+          <div class="seq-step-fill" id="fill-2"></div>
+        </div>
+        <div class="seq-step" data-step="3" role="tab" aria-selected="false" title="4. Colagem Duotone Cultural">
+          <div class="seq-step-fill" id="fill-3"></div>
+        </div>
+      </div>
+
+      <div class="hint">
+        <span class="hint-dot"></span>
+        <span id="statusText">Passe o mouse ou toque na foto para iniciar a sequência contínua (2s por quadro)</span>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Filtros SVG com Pigmentos Naturais (Urucum e Jenipapo) -->
+  <svg width="0" height="0" style="position:absolute;pointer-events:none" aria-hidden="true">
+    <defs>
+      <!-- Duotone Jenipapo (preto vegetal profundo) -->
+      <filter id="duoJeni" color-interpolation-filters="sRGB">
+        <feColorMatrix values=".33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 1 0"/>
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues=".086 .965"/>
+          <feFuncG type="table" tableValues=".110 .957"/>
+          <feFuncB type="table" tableValues=".102 .937"/>
+        </feComponentTransfer>
+      </filter>
+
+      <!-- Duotone Urucum (vermelho-telha vibrante) -->
+      <filter id="duoUru" color-interpolation-filters="sRGB">
+        <feColorMatrix values=".33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 1 0"/>
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues=".722 .965"/>
+          <feFuncG type="table" tableValues=".220 .957"/>
+          <feFuncB type="table" tableValues=".106 .937"/>
+        </feComponentTransfer>
+      </filter>
+
+      <!-- Textura de Fibra Natural / Ruído de Papel -->
+      <filter id="grain">
+        <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>
+        <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <script>
+    const W = 310, H = 413;
+    const LW = 75, LH = 100;
+    const STEP_DURATION = 2000; // 2 segundos exatos para cada quadro
+    let lumMap = null;
+
+    const stage = document.getElementById("stage");
+    const layerNormal = document.getElementById("layer-normal");
+    const layers = [
+      document.getElementById("layer-1"),
+      document.getElementById("layer-2"),
+      document.getElementById("layer-3"),
+      document.getElementById("layer-4")
+    ];
+    const stepEls = document.querySelectorAll(".seq-step");
+    const fillEls = [
+      document.getElementById("fill-0"),
+      document.getElementById("fill-1"),
+      document.getElementById("fill-2"),
+      document.getElementById("fill-3")
+    ];
+    const statusText = document.getElementById("statusText");
+
+    const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+    const rm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Estado da Sequência
+    let currentIdx = 0;
+    let isHovering = false;
+    let stepStartTime = 0;
+    let animTimer = null;
+    let m = { x: -999, y: -999, in: false };
+
+    // 1. Carregamento da imagem e mapa de luminância com fallback
+    const FALLBACK_IMG = "data:image/jpeg;base64,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";
+
+    const imgObj = new Image();
+    imgObj.crossOrigin = "anonymous";
+    imgObj.onload = () => {
+      processLuminance();
+    };
+    imgObj.onerror = () => {
+      if (imgObj.src !== FALLBACK_IMG) imgObj.src = FALLBACK_IMG;
+    };
+    imgObj.src = "/img/perfil.jpg";
+
+    function processLuminance() {
+      const oc = document.createElement("canvas");
+      oc.width = LW;
+      oc.height = LH;
+      const ox = oc.getContext("2d");
+      ox.drawImage(imgObj, 0, 0, LW, LH);
+      const id = ox.getImageData(0, 0, LW, LH).data;
+      lumMap = new Float32Array(LW * LH);
+      for (let i = 0; i < LW * LH; i++) {
+        const r = id[i * 4], g = id[i * 4 + 1], b = id[i * 4 + 2];
+        const val = (.2126 * r + .7152 * g + .0722 * b) / 255;
+        lumMap[i] = Math.min(1, Math.max(0, (val - 0.12) / 0.68));
+      }
+      initCanvases();
+    }
+
+    function getL(x, y) {
+      if (!lumMap) return 0.5;
+      const lx = Math.min(LW - 1, Math.max(0, (x / W * LW) | 0));
+      const ly = Math.min(LH - 1, Math.max(0, (y / H * LH) | 0));
+      return lumMap[ly * LW + lx];
+    }
+
+    // 2. Inicialização dos Canvases (Glifos e Linhas)
+    let gCtx = null, wCtx = null;
+    let tTime = 0;
+
+    function initCanvases() {
+      const cvG = document.getElementById("cv-glyphs");
+      const cvW = document.getElementById("cv-waves");
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      cvG.width = W * dpr;
+      cvG.height = H * dpr;
+      gCtx = cvG.getContext("2d");
+      gCtx.scale(dpr, dpr);
+
+      cvW.width = W * dpr;
+      cvW.height = H * dpr;
+      wCtx = cvW.getContext("2d");
+      wCtx.scale(dpr, dpr);
+
+      drawGlyphs();
+      drawWaves();
+    }
+
+    // Renderizador dos Glifos (Layer 2)
+    function drawGlyphs() {
+      if (!gCtx) return;
+      const ink = css("--fg"), uru = css("--urucum"), bg = css("--bg");
+      gCtx.fillStyle = bg;
+      gCtx.fillRect(0, 0, W, H);
+      gCtx.textAlign = "center";
+      gCtx.textBaseline = "middle";
+
+      const s = 7, R = " .:-=+*#%@";
+      for (let y = s / 2; y < H; y += s) {
+        for (let x = s / 2; x < W; x += s) {
+          const l = getL(x, y);
+          const dist = Math.hypot(x - m.x, y - m.y);
+          const n = m.in ? Math.max(0, 1 - dist / 80) : 0;
+          const k = Math.min(9, Math.max(0, ((1 - l) * 9 + n * 3) | 0));
+          if (!k) continue;
+
+          gCtx.fillStyle = n > 0.05 ? uru : ink;
+          gCtx.font = "700 " + (s + n * 6) + "px " + css("--font-mono");
+          gCtx.fillText(n > 0.05 ? (((x * 7 + y * 13 + tTime / 110) | 0) % 2 ? "1" : "0") : R[k], x, y);
+        }
+      }
+    }
+
+    // Renderizador das Linhas em Relevo (Layer 3)
+    function drawWaves() {
+      if (!wCtx) return;
+      const bg = css("--bg"), ink = css("--fg"), ocre = css("--ocre");
+      wCtx.fillStyle = bg;
+      wCtx.fillRect(0, 0, W, H);
+      wCtx.lineWidth = 1.25;
+      wCtx.lineJoin = "round";
+
+      const rows = 56, cols = 110;
+      for (let r = 0; r < rows; r++) {
+        const y0 = 24 + r * (H - 36) / (rows - 1);
+        wCtx.beginPath();
+        for (let c = 0; c <= cols; c++) {
+          const x = c / cols * W;
+          const dk = 1 - getL(x, y0);
+          const dist = Math.hypot(x - m.x, y0 - m.y);
+          const w = m.in ? Math.sin(dist / 10 - tTime / 180) * Math.max(0, 1 - dist / 110) * 5 : 0;
+          const y = y0 - Math.pow(dk, 1.3) * 24 + w;
+          if (c === 0) wCtx.moveTo(x, y);
+          else wCtx.lineTo(x, y);
+        }
+        wCtx.strokeStyle = m.in && Math.abs(y0 - m.y) < 14 ? ocre : ink;
+        wCtx.stroke();
+        wCtx.lineTo(W, H);
+        wCtx.lineTo(0, H);
+        wCtx.closePath();
+        wCtx.fillStyle = bg;
+        wCtx.fill();
+      }
+    }
+
+    // 3. Sequenciador Interativo: Foto Normal no Repouso e Ciclo de 2s no Hover
+    function resetToNormal() {
+      isHovering = false;
+      if (layerNormal) layerNormal.classList.add("active");
+      layers.forEach((l) => l.classList.remove("active"));
+      stepEls.forEach((el) => {
+        el.classList.remove("active", "completed");
+        el.setAttribute("aria-selected", "false");
+      });
+      fillEls.forEach((f) => {
+        f.style.width = "0%";
+      });
+      statusText.textContent = "Passe o mouse ou toque na foto para despertar o retrato";
+    }
+
+    function setStep(idx) {
+      currentIdx = idx;
+      stepStartTime = performance.now();
+      if (layerNormal) layerNormal.classList.remove("active");
+
+      layers.forEach((l, i) => {
+        if (i === currentIdx) {
+          l.classList.add("active");
+        } else {
+          l.classList.remove("active");
+        }
+      });
+
+      stepEls.forEach((el, i) => {
+        el.classList.toggle("active", i === currentIdx);
+        el.classList.toggle("completed", i < currentIdx);
+        el.setAttribute("aria-selected", i === currentIdx ? "true" : "false");
+      });
+
+      fillEls.forEach((f, i) => {
+        if (i < currentIdx) f.style.width = "100%";
+        else if (i > currentIdx) f.style.width = "0%";
+      });
+
+      // Redesenho imediato se for canvas
+      if (currentIdx === 1) drawGlyphs();
+      if (currentIdx === 2) drawWaves();
+    }
+
+    function tick(now) {
+      tTime = now;
+
+      // Animação contínua da camada ativa se houver interação
+      if (currentIdx === 1 && isHovering) drawGlyphs();
+      if (currentIdx === 2 && isHovering) drawWaves();
+
+      if (isHovering && !rm) {
+        const elapsed = now - stepStartTime;
+        const progress = Math.min(100, (elapsed / STEP_DURATION) * 100);
+        if (fillEls[currentIdx]) {
+          fillEls[currentIdx].style.width = progress + "%";
+        }
+
+        if (elapsed >= STEP_DURATION) {
+          // Passa para o próximo quadro na sequência (0 -> 1 -> 2 -> 3 -> 0)
+          setStep((currentIdx + 1) % 4);
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    // 4. Interação do Mouse / Touch no Palco:
+    // Inicia com a foto normal. Ao passar o mouse, a foto normal troca IMEDIATAMENTE para o primeiro efeito da sequência (Kenê)
+    stage.addEventListener("pointerenter", () => {
+      isHovering = true;
+      setStep(0); // Troca imediatamente para a primeira foto da sequência (Kenê) sem delay
+      statusText.textContent = "Sequência em andamento (2 segundos por quadro)...";
+    });
+
+    stage.addEventListener("pointermove", (e) => {
+      const rect = stage.getBoundingClientRect();
+      m.x = (e.clientX - rect.left) * W / rect.width;
+      m.y = (e.clientY - rect.top) * H / rect.height;
+      m.in = true;
+
+      const mx = ((e.clientX - rect.left) / rect.width * 2 - 1).toFixed(2);
+      const my = ((e.clientY - rect.top) / rect.height * 2 - 1).toFixed(2);
+      stage.style.setProperty("--mx", mx);
+      stage.style.setProperty("--my", my);
+    });
+
+    stage.addEventListener("pointerleave", () => {
+      m.in = false;
+      stage.style.setProperty("--mx", 0);
+      stage.style.setProperty("--my", 0);
+      resetToNormal(); // Retorna suavemente à foto normal nítida
+    });
+
+    // Clique manual nos marcadores caso queira inspecionar um efeito específico
+    stepEls.forEach((el) => {
+      el.addEventListener("click", () => {
+        const s = parseInt(el.getAttribute("data-step"), 10);
+        isHovering = true;
+        setStep(s);
+      });
+    });
+
+    // Inicia no estado de repouso com foto normal
+    resetToNormal();
+
+    // Alternador de Tema
+    const themeBtn = document.getElementById("themeBtn");
+    themeBtn.addEventListener("click", () => {
+      const root = document.documentElement;
+      const current = root.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      setTimeout(() => {
+        drawGlyphs();
+        drawWaves();
+      }, 50);
+    });
+  </script>
+</body>
+</html>

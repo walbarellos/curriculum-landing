@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Willian Albarello — Desenvolvedor de Sistemas",
+      "hasCanvas": false,
+      "bodyTextLen": 2609,
+      "bodyTextHash": "2e9436e0d2c854b60b8b0c466b2f113763c3a06f20ef7821661338bf55cf6b9e",
+      "bodyTextPrefix": "Pular para o conteúdo Acessibilidade Ler página A+ A− Contraste ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Willian Albarello — Desenvolvedor de Sistemas",
+      "hasCanvas": false,
+      "bodyTextLen": 2609,
+      "bodyTextHash": "2e9436e0d2c854b60b8b0c466b2f113763c3a06f20ef7821661338bf55cf6b9e",
+      "bodyTextPrefix": "Pular para o conteúdo Acessibilidade Ler página A+ A− Contraste ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
