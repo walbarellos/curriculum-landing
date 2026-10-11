@@ -1,4 +1,22 @@
+# Dependencies
 node_modules/
-.DS_Store
+.node_modules.lock
+
+# Build & Output
+.output/
+.nitro/
+.vercel/
+.vinxi/
+.tanstack/
+dist/
+
+# Logs & Environment
 *.log
-.netlify/
+.DS_Store
+.env
+.env.local
+.env.*.local
+
+# Tooling cache
+.grok/
+artifacts/
