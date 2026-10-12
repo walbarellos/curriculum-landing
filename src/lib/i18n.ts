@@ -62,9 +62,9 @@ export const SUGGEST: Record<"en" | "he", { text: string; action: string; dismis
 
 const pt = {
   langLabel: "Idioma",
-  docTitle: "Willian Albarello — Desenvolvedor de Sistemas",
+  docTitle: "Willian Albarello — Engenheiro de Software & Sistemas",
   docDesc:
-    "Portfólio de Willian Albarello. Apps de acessibilidade digital, CAA, Android nativo e ferramentas de sistemas em Linux/C++. Rio Branco, Acre.",
+    "Portfólio de Willian Albarello. Tecnologia assistiva (Centelha/FINEP), engines de jogos com Fourier/Perlin em C++, engenharia reversa (Linux ELF), redes e arquiteturas em Rust e TypeScript. Rio Branco, Acre.",
   printDocTitle: "Willian Albarello — Currículo",
 
   skip: "Pular para o conteúdo principal",
@@ -191,9 +191,9 @@ export type UI = typeof pt;
 
 const en: UI = {
   langLabel: "Language",
-  docTitle: "Willian Albarello — Systems Developer",
+  docTitle: "Willian Albarello — Software & Systems Engineer",
   docDesc:
-    "Willian Albarello's portfolio. Digital accessibility apps, AAC, native Android and Linux/C++ systems tools. Rio Branco, Acre, Brazil.",
+    "Willian Albarello's portfolio. Assistive technology (Centelha/FINEP), game engines with Fourier/Perlin in C++, reverse engineering (Linux ELF), networking, and architectures in Rust and TypeScript. Rio Branco, Acre, Brazil.",
   printDocTitle: "Willian Albarello — Résumé",
 
   skip: "Skip to main content",
@@ -318,9 +318,9 @@ const en: UI = {
 
 const he: UI = {
   langLabel: "שפה",
-  docTitle: "Willian Albarello — מפתח מערכות",
+  docTitle: "Willian Albarello — מהנדס תוכנה ומערכות",
   docDesc:
-    "תיק העבודות של Willian Albarello. אפליקציות נגישות דיגיטלית, תקשורת תומכת וחליפית, אנדרואיד נייטיב וכלי מערכות בלינוקס ו-C++. ריו ברנקו, אקרי, ברזיל.",
+    "תיק העבודות של Willian Albarello. טכנולוגיה מסייעת (Centelha/FINEP), מנועי משחקים ב-C++, הנדסה הפוכה וארכיטקטורות ב-Rust ו-TypeScript. ריו ברנקו, אקרי, ברזיל.",
   printDocTitle: "Willian Albarello — קורות חיים",
 
   skip: "דילוג לתוכן הראשי",

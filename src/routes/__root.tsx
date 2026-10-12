@@ -3,9 +3,9 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const TITLE = "Willian Albarello — Desenvolvedor de Sistemas";
+const TITLE = "Willian Albarello — Engenheiro de Software & Sistemas";
 const DESC =
-  "Portfólio de Willian Albarello. Apps de acessibilidade digital, CAA, Android nativo e ferramentas de sistemas em Linux/C++. Rio Branco, Acre.";
+  "Portfólio de Willian Albarello. Tecnologia assistiva (Centelha/FINEP), engines de jogos com Fourier/Perlin em C++, engenharia reversa (Linux ELF), redes e arquiteturas em Rust e TypeScript. Rio Branco, Acre.";
 
 const STRUCTURED_DATA = {
   "@context": "https://schema.org",
@@ -18,9 +18,9 @@ const STRUCTURED_DATA = {
       familyName: "Albarello",
       url: "https://walbarellos.is-a.dev",
       image: "https://walbarellos.is-a.dev/img/perfil.jpg",
-      jobTitle: "Desenvolvedor de Sistemas & Engenheiro de Software",
+      jobTitle: "Engenheiro de Software & Sistemas",
       description:
-        "Desenvolvedor de sistemas com foco em acessibilidade digital (CAA), Android nativo, ferramentas de sistemas em Linux/C++ e plataformas cívicas.",
+        "Engenheiro de software e criador de sistemas. Desenvolve tecnologia assistiva e acessibilidade (projetos aprovados pelo Programa Centelha/FINEP), engines de jogos com geração procedural (Fourier e Perlin em C++), ferramentas de engenharia reversa (CrackLab, Linux ELF) e arquiteturas completas em Rust, Kotlin e TypeScript.",
       address: {
         "@type": "PostalAddress",
         addressLocality: "Rio Branco",
@@ -37,23 +37,49 @@ const STRUCTURED_DATA = {
         "http://lattes.cnpq.br/1326474169012655",
         "https://mastodon.social/@walbarellos",
       ],
+      hasOccupation: [
+        {
+          "@type": "Occupation",
+          name: "Software & Systems Engineer",
+          description: "Arquiteturas completas em Rust, Kotlin, TypeScript, C++ e Linux.",
+        },
+        {
+          "@type": "Occupation",
+          name: "Assistive Technology Specialist",
+          description: "Acessibilidade digital, CAA offline-first (Centelha/FINEP) e síntese de voz.",
+        },
+        {
+          "@type": "Occupation",
+          name: "Game Developer & Graphics Programmer",
+          description: "Jogos em C++/raylib e geração procedural com transformadas de Fourier e ruído de Perlin.",
+        },
+        {
+          "@type": "Occupation",
+          name: "Security Researcher & Reverse Engineer",
+          description: "Engenharia reversa em binários Linux ELF 64-bit, Assembly x86-64 e auditoria de redes.",
+        },
+      ],
       knowsAbout: [
-        "TypeScript",
-        "React",
-        "Python",
-        "Android SDK & Kotlin",
-        "C & C++",
-        "Acessibilidade Digital (WCAG, LBI)",
-        "Comunicação Alternativa e Aumentativa (CAA)",
-        "Linux & Wayland",
-        "PostgreSQL",
+        "Engenharia de Software (Software Engineering)",
+        "Tecnologia Assistiva & Acessibilidade Digital (CAA, WCAG 2.1 AA, LBI)",
+        "Desenvolvimento de Jogos & Gamedev (C++, raylib, Android)",
+        "Computação Gráfica & Geração Procedural (Fourier, Perlin noise, Canvas 2D)",
+        "Engenharia Reversa & Cibersegurança (Linux ELF 64-bit, Assembly x86-64, CrackLab)",
+        "Redes & Protocolos (Servidores IRC, Sockets)",
+        "Inteligência Cívica & OSINT (Dados Públicos, TJAC, PNCP)",
+        "C & C++20 (CMake, Wayland, programação nativa de sistemas)",
+        "Rust (ERP modular, backend de sistemas)",
+        "Android nativo & Kotlin (Jetpack Compose, Room, Offline-first)",
+        "Python & FastAPI",
+        "TypeScript, React 19 & TanStack",
+        "Linux & Arquitetura de Sistemas",
       ],
     },
     {
       "@type": "ProfilePage",
       "@id": "https://walbarellos.is-a.dev/#profilepage",
       url: "https://walbarellos.is-a.dev/",
-      name: "Willian Albarello — Portfólio & Currículo Interativo",
+      name: "Willian Albarello — Engenheiro de Software & Sistemas",
       isPartOf: {
         "@type": "WebSite",
         "@id": "https://walbarellos.is-a.dev/#website",
@@ -80,7 +106,7 @@ export const Route = createRootRoute({
       {
         name: "keywords",
         content:
-          "Willian Albarello, desenvolvedor de sistemas, engenheiro de software, acessibilidade digital, CAA, Android nativo, Kotlin, Python, C++, Linux, Wayland, Rio Branco, Acre, portfólio, currículo",
+          "Willian Albarello, engenheiro de software, sistemas, tecnologia assistiva, acessibilidade digital, CAA, Fala Comigo, Centelha FINEP, gamedev, jogos C++, raylib, fourier, perlin noise, engenharia reversa, ciberseguranca, cracklab, irc, rust, android, kotlin, linux, acre, portfolio",
       },
       { name: "author", content: "Willian Albarello" },
       {
@@ -101,7 +127,7 @@ export const Route = createRootRoute({
       { property: "og:image:type", content: "image/jpeg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: "Willian Albarello — Portfólio & Currículo Interativo" },
+      { property: "og:image:alt", content: "Willian Albarello — Engenheiro de Software & Sistemas" },
       // Twitter Card
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: TITLE },
