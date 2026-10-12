@@ -741,10 +741,16 @@ export class AcreAccessibilityPanel extends HTMLElement {
             target.closest('.audio-player-wrapper') ||
             target.closest('audio') ||
             target.closest('[vw]') ||
-            target.closest('#vlibras-div')
+            target.closest('#vlibras-div') ||
+            target.closest('[data-acre-ignore]') ||
+            target.closest('.acre-ignore') ||
+            target.closest('header') ||
+            target.closest('nav') ||
+            target.closest('button') ||
+            target.closest('a')
           ) return;
 
-          const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,a,button,img[alt],[role="button"]';
+          const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,img[alt]';
           const readable = target.closest(selector) as HTMLElement;
           if (readable) {
             this.reader.readSpecificElement(readable, false);
@@ -786,9 +792,15 @@ export class AcreAccessibilityPanel extends HTMLElement {
               target.closest('.audio-player-wrapper') ||
               target.closest('audio') ||
               target.closest('[vw]') ||
-              target.closest('#vlibras-div')
+              target.closest('#vlibras-div') ||
+              target.closest('[data-acre-ignore]') ||
+              target.closest('.acre-ignore') ||
+              target.closest('header') ||
+              target.closest('nav') ||
+              target.closest('button') ||
+              target.closest('a')
             ) return;
-            const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,a,button,img[alt],[role="button"]';
+            const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,img[alt]';
             const readable = target.closest(selector) as HTMLElement;
             if (readable) {
               if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
@@ -807,7 +819,9 @@ export class AcreAccessibilityPanel extends HTMLElement {
               target.closest('.audio-player-wrapper') ||
               target.closest('audio') ||
               target.closest('[vw]') ||
-              target.closest('#vlibras-div')
+              target.closest('#vlibras-div') ||
+              target.closest('[data-acre-ignore]') ||
+              target.closest('.acre-ignore')
             ) return;
             const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,a,button,img[alt],[role="button"]';
             const readable = target.closest(selector) as HTMLElement;
@@ -839,7 +853,13 @@ export class AcreAccessibilityPanel extends HTMLElement {
           document.addEventListener('focusin', e => {
             if (!this.readOnHover || this.reader.isSequentialReading) return;
             const target = e.target as HTMLElement;
-            if (target.closest('acre-accessibility-panel') || target.closest('capi-mascot')) return;
+            if (
+              target.closest('acre-accessibility-panel') ||
+              target.closest('capi-mascot') ||
+              target.closest('.accessibility-bar') ||
+              target.closest('[data-acre-ignore]') ||
+              target.closest('.acre-ignore')
+            ) return;
             const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,a,button,img[alt],[role="button"]';
             const readable = target.closest(selector) as HTMLElement;
             if (readable) {

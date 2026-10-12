@@ -235,6 +235,7 @@ export class VoiceReader {
 
   public setLanguage(lang: string) {
     this.config.lang = lang;
+    this.useServerTts = true;
     console.log(`[Acre Acessivel] Idioma alterado para: ${lang}`);
   }
 
@@ -598,12 +599,12 @@ export class VoiceReader {
     utterance.volume = Math.max(0.1, Math.min(1.0, this.config.volume));
     utterance.pitch = this.clampPitch(this.config.pitch * profile.pitch);
 
-    const voice = this.getBestPtVoice();
+    const voice = this.getBestVoiceForLang(this.config.lang || 'pt-BR');
     if (voice) {
       utterance.voice = voice;
-      utterance.lang = voice.lang || 'pt-BR';
+      utterance.lang = voice.lang || this.config.lang || 'pt-BR';
     } else {
-      utterance.lang = 'pt-BR';
+      utterance.lang = this.config.lang || 'pt-BR';
     }
 
     this.currentUtterance = utterance;
@@ -645,8 +646,7 @@ export class VoiceReader {
       if (event?.error === 'interrupted' || event?.error === 'canceled') return;
       console.warn('[Acre Acessivel] Utterance error:', event?.error);
 
-      // Se a sintese falhou por voz remota incompativel (ex: Google cloud TTS no Chrome),
-      // adiciona a voz a lista negra e tenta novamente com voz padrao do sistema
+      // Tenta recuperar no maximo UMA unica vez trocando a voz para a padrao
       if (
         (event?.error === 'synthesis-failed' || event?.error === 'language-unavailable') &&
         retryCount === 0
@@ -661,14 +661,22 @@ export class VoiceReader {
         } catch {}
         setTimeout(() => {
           this.speakChunks(chunks, profile, chunkIdx, elementIndex, onAllDone, onError, 1);
-        }, 50);
+        }, 100);
         return;
       }
 
+      // Se falhou mesmo com retry (ou erro fatal): interrompe limpo sem reentrar em loop
+      cleanup();
+      console.warn('[Acre Acessivel] Sintese nativa cancelada para este elemento para evitar travamento.');
+      this.removeHighlight();
+      this.updateState('idle');
+      this._isSequentialReading = false;
+      try {
+        this.synth.cancel();
+      } catch {}
       if (typeof onError === 'function') {
         onError(event);
       }
-      nextStep();
     };
 
     try {
@@ -878,15 +886,30 @@ export class VoiceReader {
 
   private fetchChunkAudio(text: string, signal: AbortSignal): Promise<Blob> {
     const backendUrl = this.getBackendUrl();
+    const timeoutCtrl = new AbortController();
+    const timeoutTimer = setTimeout(() => timeoutCtrl.abort(), 5000);
+
+    const onParentAbort = () => {
+      clearTimeout(timeoutTimer);
+      timeoutCtrl.abort();
+    };
+    signal.addEventListener('abort', onParentAbort, { once: true });
+
     return fetch(`${backendUrl}/api/tts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, lang: this.config.lang }),
-      signal,
-    }).then(res => {
-      if (!res.ok) throw new Error(`TTS HTTP ${res.status}`);
-      return res.blob();
-    });
+      signal: timeoutCtrl.signal,
+    })
+      .then(res => {
+        clearTimeout(timeoutTimer);
+        if (!res.ok) throw new Error(`TTS HTTP ${res.status}`);
+        return res.blob();
+      })
+      .catch(err => {
+        clearTimeout(timeoutTimer);
+        throw err;
+      });
   }
 
   /** Garante que o fetch do chunk já esteja em andamento (ou concluído), sem duplicar. */
@@ -1063,12 +1086,11 @@ export class VoiceReader {
     }
   }
 
-  private handleSpeechError(event: any, retry?: () => void) {
+  private handleSpeechError(event: any, _retry?: () => void) {
     const errorType = event?.error;
     if (errorType === 'interrupted' || errorType === 'canceled') return;
 
     console.warn(`[Acre Acessivel] SpeechSynthesis error: ${errorType}`);
-    // Se o sintetizador falhou por voz incompativel, adiciona a voz atual na blacklist
     if (errorType === 'language-unavailable' || errorType === 'synthesis-failed') {
       if (this.currentUtterance?.voice?.name) {
         this.failedVoiceNames.add(this.currentUtterance.voice.name);
@@ -1077,13 +1099,14 @@ export class VoiceReader {
         this.currentUtterance.voice = null;
         this.currentUtterance.lang = '';
       }
-      if (typeof retry === 'function') {
-        try {
-          this.synth.cancel();
-        } catch {}
-        setTimeout(() => retry(), 50);
-      }
     }
+    // Finaliza leitura deste elemento sem reentrar em loop recursivo
+    this.removeHighlight();
+    this.updateState('idle');
+    this._isSequentialReading = false;
+    try {
+      this.synth.cancel();
+    } catch {}
   }
 
   private getBestPtVoice(): SpeechSynthesisVoice | null {

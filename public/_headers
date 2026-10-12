@@ -1,0 +1,10 @@
+/assets/*
+  cache-control: public, max-age=31536000, immutable
+
+/__grok/*.webmanifest
+  content-type: application/manifest+json; charset=utf-8
+  cache-control: public, max-age=86400
+
+/__grok/*.json
+  content-type: application/json; charset=utf-8
+  cache-control: public, max-age=86400
