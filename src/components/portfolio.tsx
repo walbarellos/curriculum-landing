@@ -823,6 +823,7 @@ export function Portfolio() {
               {readingState === "idle" ? (
                 <button
                   type="button"
+                  data-acre-ignore="true"
                   className="h-8 px-2.5 rounded-md text-xs font-semibold inline-flex items-center gap-1.5 bg-surface-2 hover:bg-accent hover:text-accent-fg border border-line/20 hover:border-accent transition-all duration-150"
                   onClick={startReading}
                   title={t.readPageTitle}
@@ -838,6 +839,7 @@ export function Portfolio() {
                   {readingState === "reading" ? (
                     <button
                       type="button"
+                      data-acre-ignore="true"
                       className="h-8 px-2.5 rounded-md text-xs font-bold inline-flex items-center gap-1.5 bg-accent text-accent-fg border border-accent shadow-xs"
                       onClick={pauseReading}
                       title={t.pauseTitle}
@@ -851,6 +853,7 @@ export function Portfolio() {
                   ) : (
                     <button
                       type="button"
+                      data-acre-ignore="true"
                       className="h-8 px-2.5 rounded-md text-xs font-bold inline-flex items-center gap-1.5 bg-accent/90 text-accent-fg border border-accent"
                       onClick={resumeReading}
                       title={t.resumeTitle}
@@ -863,6 +866,7 @@ export function Portfolio() {
                   )}
                   <button
                     type="button"
+                    data-acre-ignore="true"
                     className="h-8 px-2 rounded-md text-xs inline-flex items-center gap-1 text-muted hover:text-fg hover:bg-surface-2 border border-line/20"
                     onClick={stopReading}
                     title={t.stopTitle}
