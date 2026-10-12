@@ -488,7 +488,7 @@ export const bioInfo = {
     github: "https://github.com/walbarellos",
     linkedin: "https://www.linkedin.com/in/willian-albarello-b96361103/",
     lattes: "http://lattes.cnpq.br/1326474169012655",
-    publishedPage: "https://walbarellos-paper.netlify.app",
+    publishedPage: "https://walbarellos.is-a.dev",
     cracklab: "https://crack-lab.vercel.app/",
     falacomigo: "https://falacomigo-br.netlify.app/",
     mastodon: "https://mastodon.social/@walbarellos",
