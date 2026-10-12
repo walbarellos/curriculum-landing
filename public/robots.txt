@@ -1,0 +1,14 @@
+# ==========================================
+# Robots.txt — Willian Albarello Portfolio
+# https://walbarellos.is-a.dev
+# ==========================================
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://walbarellos.is-a.dev/sitemap.xml
+Sitemap: https://walbarellos.pages.dev/sitemap.xml
+
+# Canonical Host
+Host: walbarellos.is-a.dev

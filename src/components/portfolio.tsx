@@ -1457,7 +1457,7 @@ export function Portfolio() {
                       className="h-28 w-28 rounded border border-line/20 bg-white p-1 shadow-sm"
                     />
                     <span className="mt-1 font-mono text-[11px] text-muted">
-                      {qrMode === "curriculo" ? "walbarellos-paper" : "github.com"}
+                      {qrMode === "curriculo" ? "walbarellos.is-a.dev" : "github.com"}
                     </span>
                   </div>
                   <div className="space-y-2">
