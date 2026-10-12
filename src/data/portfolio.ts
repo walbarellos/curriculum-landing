@@ -478,9 +478,9 @@ export const stackGroups = [
 
 export const bioInfo = {
   name: "Willian Albarello",
-  role: "Desenvolvedor de Sistemas",
+  role: "Engenheiro de Software & Sistemas",
   summary:
-    "Construo sistemas com propósito — de apps Android de acessibilidade a ferramentas de transparência pública e plataformas educacionais. Autônomo, orientado a produto, foco em impacto real.",
+    "Engenheiro de software e criador de sistemas. Desenvolvo tecnologia assistiva e acessibilidade (com projetos aprovados pelo Programa Centelha/FINEP), engines de jogos com geração procedural (Fourier e Perlin em C++), ferramentas de engenharia reversa/redes (IRC, Linux ELF) e arquiteturas completas em Rust, Kotlin e TypeScript. Da matemática e baixo nível à interface que as pessoas usam.",
   badges: ["Rio Branco, Acre", "IFAC · 2º Período"],
   availability: "Aberto para freelas e colaborações",
   responseTime: "Resposta em até 24h · UTC−5",

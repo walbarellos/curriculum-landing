@@ -1,6 +1,6 @@
 # Willian Albarello · Portfólio & Currículo Interativo
 
-Portfólio e currículo profissional interativo de Willian Albarello, com foco em desenvolvimento de sistemas, engenharia de software, acessibilidade digital e pesquisa cultural no Acre.
+Portfólio e currículo interativo de Willian Albarello — Engenheiro de Software & Sistemas: tecnologia assistiva (Centelha/FINEP), gamedev/computação gráfica em C++, engenharia reversa e infraestrutura.
 
 ## Tecnologias
 
