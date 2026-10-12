@@ -186,8 +186,6 @@ export function Portfolio() {
   const printOpenerRef = useRef<HTMLButtonElement>(null);
 
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [contrast, setContrast] = useState(false);
-  const [scale, setScale] = useState(1);
 
   const [activeSection, setActiveSection] = useState<string>("projetos");
   const [selectedCategory, setSelectedCategory] = useState<ProjectCategory>("all");
@@ -237,9 +235,9 @@ export function Portfolio() {
       setTheme(nextTheme);
       if (nextTheme === "dark") setHtml("data-theme", "dark");
 
-      const savedContrast = localStorage.getItem("wa-contrast") === "1";
-      setContrast(savedContrast);
-      if (savedContrast) setHtml("data-contrast", "high");
+      if (localStorage.getItem("wa-contrast") === "1") {
+        setHtml("data-contrast", "high");
+      }
     } catch {
       /* storage indisponível */
     }
@@ -496,29 +494,6 @@ export function Portfolio() {
     } catch {
       /* ignore */
     }
-  }
-
-  function toggleContrast() {
-    const next = !contrast;
-    setContrast(next);
-    if (next) setHtml("data-contrast", "high");
-    else document.documentElement.removeAttribute("data-contrast");
-    try {
-      localStorage.setItem("wa-contrast", next ? "1" : "0");
-    } catch {
-      /* ignore */
-    }
-  }
-
-  function changeScale(delta: number) {
-    const next = Math.min(1.4, Math.max(0.9, Math.round((scale + delta) * 20) / 20));
-    setScale(next);
-    document.documentElement.style.fontSize = `${next * 100}%`;
-  }
-
-  function resetScale() {
-    setScale(1);
-    document.documentElement.style.fontSize = "100%";
   }
 
   function changeLang(next: Lang) {
@@ -878,61 +853,6 @@ export function Portfolio() {
                   </button>
                 </div>
               )}
-
-              <div className="h-4 w-px bg-line/20 mx-1 hidden sm:block" aria-hidden="true" />
-
-              {/* Ajuste de Fonte (A- / A+) */}
-              <div
-                className="inline-flex items-center rounded-md border border-line/20 overflow-hidden bg-surface-2 p-0.5"
-                role="group"
-                aria-label="Ajuste de tamanho do texto"
-              >
-                <button
-                  type="button"
-                  className="h-7 px-2 font-mono text-xs font-semibold rounded hover:bg-surface text-muted hover:text-fg transition-colors"
-                  onClick={() => changeScale(-0.1)}
-                  aria-label={t.textDown}
-                  title={t.textDown}
-                >
-                  A−
-                </button>
-                {scale !== 1 ? (
-                  <button
-                    type="button"
-                    className="h-7 px-1.5 font-mono text-[11px] font-bold text-accent hover:bg-surface rounded transition-colors"
-                    onClick={resetScale}
-                    title={t.textResetTitle}
-                  >
-                    100%
-                  </button>
-                ) : (
-                  <span className="w-px h-3.5 self-center bg-line/15" aria-hidden="true" />
-                )}
-                <button
-                  type="button"
-                  className="h-7 px-2 font-mono text-xs font-semibold rounded hover:bg-surface text-muted hover:text-fg transition-colors"
-                  onClick={() => changeScale(0.1)}
-                  aria-label={t.textUp}
-                  title={t.textUp}
-                >
-                  A+
-                </button>
-              </div>
-
-              {/* Alto Contraste */}
-              <button
-                type="button"
-                className={`h-8 px-2.5 text-xs font-medium rounded-md border transition-all ${
-                  contrast
-                    ? "font-bold text-accent border-accent bg-surface-2 shadow-xs"
-                    : "border-line/20 hover:border-line hover:bg-surface-2 text-muted hover:text-fg"
-                }`}
-                onClick={toggleContrast}
-                aria-pressed={contrast}
-                title={t.contrast}
-              >
-                {t.contrast}
-              </button>
 
               {/* Tema Escuro / Claro */}
               <button
