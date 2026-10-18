@@ -500,7 +500,7 @@ export const bioInfo = {
   name: "Willian Albarello",
   role: "Engenheiro de Software & Sistemas",
   summary:
-    "Engenheiro de software e criador de sistemas. Desenvolvo tecnologia assistiva e acessibilidade (proposta selecionada na 1ª fase do Programa Centelha/FINEP), sistemas para transparência pública e dados abertos, e o jornal investigativo ATA Acre (onde atuo na apuração documental e infraestrutura técnica). Crio também engines de jogos procedurais (Fourier e Perlin em C++), ferramentas de engenharia reversa (Linux ELF) e arquiteturas em Rust, Kotlin e TypeScript.",
+    "Engenheiro de software e criador de sistemas. Desenvolvo tecnologia assistiva e acessibilidade (proposta selecionada na 1ª fase do Programa Centelha/FINEP), sistemas para transparência pública e dados abertos (como a plataforma documental ATA Acre). Crio também engines de jogos procedurais (Fourier e Perlin em C++), ferramentas de engenharia reversa (Linux ELF) e arquiteturas em Rust, Kotlin e TypeScript.",
   badges: ["Rio Branco, Acre", "IFAC · 2º Período"],
   availability: "Aberto para freelas e colaborações",
   responseTime: "Resposta em até 24h · UTC−5",
