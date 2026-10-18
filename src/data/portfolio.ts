@@ -40,12 +40,12 @@ export const projects: Project[] = [
     href: "https://ataacre.netlify.app/",
     category: "dados-osint",
     categoryLabel: "Dados Públicos",
-    kind: "Jornalismo Investigativo · Transparência",
+    kind: "Plataforma Documental · Transparência",
     summary:
-      "Veículo documental sobre fiscalização orçamentária e dados abertos no Acre. Integra o leitor de tela neural Acre-Acessibilidade com o mascote Capi.",
+      "Plataforma documental sobre fiscalização orçamentária e dados abertos no Acre. Integra o leitor de tela neural Acre-Acessibilidade com o mascote Capi.",
     stack: ["TypeScript", "TanStack Start", "WCAG", "Dados Abertos"],
     featured: true,
-    highlight: "Jornalismo de Dados",
+    highlight: "Dados Públicos & Orçamento",
   },
   {
     id: "fala-comigo",
@@ -249,9 +249,9 @@ export type TimelineItem = {
 export const timeline: TimelineItem[] = [
   {
     date: "2026 — Presente",
-    title: "ATA Acre — Jornalismo de Dados & Transparência",
+    title: "ATA Acre — Plataforma Documental & Transparência",
     sub: "Fundador & Mantenedor · ataacre.netlify.app",
-    desc: "Criação do veículo, apuração e análise de dados orçamentários públicos, redação documental e desenvolvimento da infraestrutura.",
+    desc: "Criação da plataforma, apuração e análise de dados orçamentários públicos e desenvolvimento da infraestrutura.",
     active: true,
   },
   {
