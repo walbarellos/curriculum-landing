@@ -511,6 +511,7 @@ export const bioInfo = {
     publishedPage: "https://walbarellos.is-a.dev",
     cracklab: "https://crack-lab.vercel.app/",
     falacomigo: "https://falacomigo-br.netlify.app/",
+    lexnode: "https://github.com/walbarellos/LexNode",
     mastodon: "https://mastodon.social/@walbarellos",
     email: "willianalbarello@gmail.com",
   },
