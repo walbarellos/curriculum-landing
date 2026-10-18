@@ -767,10 +767,10 @@ export function Portfolio() {
 
   const socials: { label: string; handle: string; href: string }[] = [
     { label: "Lattes", handle: "ID 1326474169012655", href: bioInfo.links.lattes },
-    { label: "Mastodon", handle: "@walbarellos", href: bioInfo.links.mastodon },
-    { label: "GitHub", handle: "github.com/walbarellos", href: bioInfo.links.github },
     { label: "ATA Acre", handle: "ataacre.netlify.app", href: bioInfo.links.ataacre },
+    { label: "Mastodon", handle: "@walbarellos", href: bioInfo.links.mastodon },
     { label: "Fala Comigo", handle: "falacomigo-br.netlify.app", href: bioInfo.links.falacomigo },
+    { label: "GitHub", handle: "github.com/walbarellos", href: bioInfo.links.github },
     { label: "LexNode", handle: "github.com/walbarellos/LexNode", href: bioInfo.links.lexnode },
   ];
 
