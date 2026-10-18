@@ -467,8 +467,8 @@ const content: Record<"en" | "he", Overlay> = {
       "fala-comigo": {
         kind: "Android · AAC · GPL-3.0",
         summary:
-          "Communication app for non-verbal people, autistic people and educators. Works 100% offline, free and open source. A partner in Rio de Janeiro forked it for educational use, and the system was approved in the Centelha Program (FAPEAC/FINEP).",
-        highlight: "v0.3.0 · Centelha phase 2",
+          "Communication app for non-verbal people, autistic people and educators. Works 100% offline, free and open source. A partner in Rio de Janeiro forked it for educational use, and the proposal was selected in Phase 1 of the Centelha Program (FAPEAC/FINEP).",
+        highlight: "v0.3.0 · Centelha Phase 1",
       },
       sentinela: {
         kind: "Public Transparency",
@@ -561,7 +561,7 @@ const content: Record<"en" | "he", Overlay> = {
         date: "2026",
         title: "Fala Comigo v0.3.0 — Production",
         sub: "Android AAC app · GPL-3.0 · VirusTotal 0/72",
-        desc: "Communication app for non-verbal people. Educational fork by a partner in Rio de Janeiro. Approved in the Centelha Program (FAPEAC/FINEP).",
+        desc: "Communication app for non-verbal people. Educational fork by a partner in Rio de Janeiro. Proposal selected in Phase 1 of the Centelha Program (FAPEAC/FINEP).",
       },
       {
         date: "2026",

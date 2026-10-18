@@ -20,7 +20,7 @@ const STRUCTURED_DATA = {
       image: "https://walbarellos.is-a.dev/img/perfil.jpg",
       jobTitle: "Engenheiro de Software & Sistemas",
       description:
-        "Engenheiro de software e criador de sistemas. Desenvolve tecnologia assistiva e acessibilidade (projetos aprovados pelo Programa Centelha/FINEP), engines de jogos com geração procedural (Fourier e Perlin em C++), ferramentas de engenharia reversa (CrackLab, Linux ELF) e arquiteturas completas em Rust, Kotlin e TypeScript.",
+        "Engenheiro de software e criador de sistemas. Desenvolve tecnologia assistiva e acessibilidade (proposta selecionada na 1ª fase do Programa Centelha/FINEP), engines de jogos com geração procedural (Fourier e Perlin em C++), ferramentas de engenharia reversa (CrackLab, Linux ELF) e arquiteturas completas em Rust, Kotlin e TypeScript.",
       address: {
         "@type": "PostalAddress",
         addressLocality: "Rio Branco",
