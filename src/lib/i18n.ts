@@ -547,6 +547,12 @@ const content: Record<"en" | "he", Overlay> = {
     timeline: [
       {
         date: "2026 — Present",
+        title: "ATA Acre — Data Journalism & Transparency",
+        sub: "Founder & Maintainer · ataacre.netlify.app",
+        desc: "Creation of the outlet, research and analysis of public budget data, documentary reporting and infrastructure development.",
+      },
+      {
+        date: "2026 — Present",
         title: "Systems for Internet — IFAC",
         sub: "Federal Institute of Acre · Rio Branco Campus · 2nd term",
         desc: "Enrolled in 2026. Studying networks, development and matrix algebra, while building real systems alongside the course.",

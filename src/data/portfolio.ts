@@ -250,8 +250,8 @@ export const timeline: TimelineItem[] = [
   {
     date: "2026 — Presente",
     title: "ATA Acre — Jornalismo de Dados & Transparência",
-    sub: "Editor & Desenvolvedor · ataacre.netlify.app",
-    desc: "Pesquisa documental, análise de dados orçamentários públicos e desenvolvimento da plataforma do jornal.",
+    sub: "Fundador & Mantenedor · ataacre.netlify.app",
+    desc: "Criação do veículo, apuração e análise de dados orçamentários públicos, redação documental e desenvolvimento da infraestrutura.",
     active: true,
   },
   {
