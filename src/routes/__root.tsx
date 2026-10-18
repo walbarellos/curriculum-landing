@@ -20,7 +20,7 @@ const STRUCTURED_DATA = {
       image: "https://walbarellos.is-a.dev/img/perfil.jpg",
       jobTitle: "Engenheiro de Software & Sistemas",
       description:
-        "Engenheiro de software e criador de sistemas. Desenvolve tecnologia assistiva e acessibilidade (proposta selecionada na 1ª fase do Programa Centelha/FINEP), engines de jogos com geração procedural (Fourier e Perlin em C++), ferramentas de engenharia reversa (CrackLab, Linux ELF) e arquiteturas completas em Rust, Kotlin e TypeScript.",
+        "Engenheiro de software e criador de sistemas. Desenvolve tecnologia assistiva e acessibilidade (proposta selecionada na 1ª fase do Programa Centelha/FINEP), engines de jogos com geração procedural (Fourier e Perlin em C++), ferramentas de engenharia reversa (Linux ELF) e arquiteturas completas em Rust, Kotlin e TypeScript.",
       address: {
         "@type": "PostalAddress",
         addressLocality: "Rio Branco",
@@ -64,7 +64,7 @@ const STRUCTURED_DATA = {
         "Tecnologia Assistiva & Acessibilidade Digital (CAA, WCAG 2.1 AA, LBI)",
         "Desenvolvimento de Jogos & Gamedev (C++, raylib, Android)",
         "Computação Gráfica & Geração Procedural (Fourier, Perlin noise, Canvas 2D)",
-        "Engenharia Reversa & Cibersegurança (Linux ELF 64-bit, Assembly x86-64, CrackLab)",
+        "Engenharia Reversa & Cibersegurança (Linux ELF 64-bit, Assembly x86-64)",
         "Redes & Protocolos (Servidores IRC, Sockets)",
         "Inteligência Cívica & OSINT (Dados Públicos, TJAC, PNCP)",
         "C & C++20 (CMake, Wayland, programação nativa de sistemas)",
@@ -106,7 +106,7 @@ export const Route = createRootRoute({
       {
         name: "keywords",
         content:
-          "Willian Albarello, engenheiro de software, sistemas, tecnologia assistiva, acessibilidade digital, CAA, Fala Comigo, Centelha FINEP, gamedev, jogos C++, raylib, fourier, perlin noise, engenharia reversa, ciberseguranca, cracklab, irc, rust, android, kotlin, linux, acre, portfolio",
+          "Willian Albarello, engenheiro de software, sistemas, tecnologia assistiva, acessibilidade digital, CAA, Fala Comigo, Centelha FINEP, gamedev, jogos C++, raylib, fourier, perlin noise, engenharia reversa, ciberseguranca, irc, rust, android, kotlin, linux, acre, portfolio",
       },
       { name: "author", content: "Willian Albarello" },
       {
