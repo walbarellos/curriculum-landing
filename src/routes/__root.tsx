@@ -33,7 +33,7 @@ const STRUCTURED_DATA = {
       },
       sameAs: [
         "https://github.com/walbarellos",
-        "https://www.linkedin.com/in/willian-albarello-b96361103/",
+        "https://ataacre.netlify.app",
         "http://lattes.cnpq.br/1326474169012655",
         "https://mastodon.social/@walbarellos",
       ],

@@ -142,7 +142,7 @@ export function PrintSheet({ t, L }: { t: UI; L: Localized }) {
           <li dir="ltr">{links.email}</li>
           <li>{bioInfo.badges[0]}</li>
           <li dir="ltr">{shortUrl(links.github)}</li>
-          <li dir="ltr">{shortUrl(links.linkedin)}</li>
+          <li dir="ltr">{shortUrl(links.ataacre)}</li>
           <li dir="ltr">{shortUrl(links.lattes)}</li>
         </ul>
       </header>
