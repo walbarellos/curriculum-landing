@@ -1,520 +1,342 @@
 /**
- * Acre Acessível - Mascote Capi (Capivarinha)
- * Web Component para o Mascote Interativo Capi.
+ * CapiMascot - Web Component do Mascote Capivara Acreana (Acre-Acessível)
+ * Seguro para SSR: registra Custom Element apenas quando no navegador.
  */
 
-export class CapiMascot extends HTMLElement {
-  private shadow: ShadowRoot;
-  private isMuted: boolean = false;
-  private isExpanded: boolean = false;
-  private greetTimeoutId: number | null = null;
-  private pressTimeoutId: number | null = null;
-  private readonly handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
-      event.preventDefault();
-      this.activate();
-    }
-  };
+export function registerCapiMascot(): void {
+  if (typeof window === 'undefined' || typeof customElements === 'undefined') return;
+  if (customElements.get('capi-mascot')) return;
 
-  constructor() {
-    super();
-    this.shadow = this.attachShadow({ mode: 'open' });
-  }
+  class CapiMascot extends HTMLElement {
+    private shadow: ShadowRoot;
+    private state: 'idle' | 'speaking' | 'listening' = 'idle';
 
-  static get observedAttributes() {
-    return ['state', 'muted'];
-  }
-
-  attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
-    if (name === 'state') {
-      this.setMascotState(newValue);
-    } else if (name === 'muted') {
-      this.isMuted = newValue === 'true';
-      this.updateMutedIcon();
-    }
-  }
-
-  connectedCallback() {
-    // role="button" (não "img"): o elemento é interativo e abre um menu,
-    // então leitores de tela precisam anunciá-lo como acionável.
-    this.setAttribute('role', 'button');
-    this.setAttribute('aria-haspopup', 'menu');
-    this.setAttribute('aria-expanded', 'false');
-    this.setAttribute('aria-label', 'Capi, mascote do Acre Acessível. Ativar para abrir o menu de acessibilidade.');
-    this.setAttribute('tabindex', '0');
-    this.render();
-    this.setupEvents();
-    this.addEventListener('keydown', this.handleKeydown);
-    // Acena após 2s de carregamento
-    this.greetTimeoutId = window.setTimeout(() => this.greet(), 2200);
-  }
-
-  disconnectedCallback() {
-    this.removeEventListener('keydown', this.handleKeydown);
-    if (this.greetTimeoutId !== null) window.clearTimeout(this.greetTimeoutId);
-    if (this.pressTimeoutId !== null) window.clearTimeout(this.pressTimeoutId);
-  }
-
-  private render() {
-    this.shadow.innerHTML = `
-    <style>
-    :host {
-      display: block;
-      width: 90px;
-      height: 110px;
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
-      /* Cores da Bandeira do Acre (aproximação, sem hex oficial publicado em lei) */
-      --ac-green: #0d8a3e;
-      --ac-yellow: #ffd400;
-      --ac-red: #d62828;
+    constructor() {
+      super();
+      this.shadow = this.attachShadow({ mode: 'open' });
     }
 
-    :host(:hover) {
-      transform: scale(1.1) translateY(-5px);
+    static get observedAttributes() {
+      return ['state'];
     }
 
-    :host(:focus-visible) {
-      outline: none;
-      transform: scale(1.06) translateY(-3px);
-    }
-
-    /* Anel de foco visível — essencial num widget de acessibilidade */
-    .focus-ring {
-      fill: none;
-      stroke: var(--ac-yellow);
-      stroke-width: 0;
-      opacity: 0;
-      transition: opacity 0.15s, stroke-width 0.15s;
-    }
-
-    :host(:focus-visible) .focus-ring {
-      opacity: 1;
-      stroke-width: 3;
-      stroke-dasharray: 4 3;
-    }
-
-    :host(.pressed) {
-      transform: scale(0.94) translateY(0);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      :host { transition: none; }
-      :host(:hover) { transform: none; }
-      .animate-float,
-      .eye-group-left,
-      .eye-group-right,
-      .ear-right,
-      .ear-left,
-      .mouth-talk,
-      :host(.greeting) {
-        animation: none !important;
+    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+      if (name === 'state' && oldValue !== newValue) {
+        this.state = newValue as 'idle' | 'speaking' | 'listening';
+        this.updateAnimationState();
       }
     }
 
-    .mascot-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
+    connectedCallback() {
+      this.render();
     }
 
-    /* SVG Animado da Capivara Capi */
-    svg {
-      width: 100%;
-      height: 100%;
-      overflow: visible;
+    public setState(newState: 'idle' | 'speaking' | 'listening') {
+      this.setAttribute('state', newState);
     }
 
-    /* Cores da Capivara */
-    .fur-body { fill: url(#furGradient); transition: fill 0.3s; }
-    .fur-snout { fill: #6E4720; transition: fill 0.3s; }
-    .fur-belly { fill: url(#bellyGradient); transition: fill 0.3s; }
-    .fur-ear-inner { fill: #523416; }
-    .eye { fill: #222; }
-    .eye-shine { fill: #FFF; }
-    .glasses-frame { stroke: var(--ac-green); stroke-width: 2.5; fill: none; opacity: 0; transition: opacity 0.3s, stroke 0.3s; }
-    .glasses-lens { fill: url(#lensGradient); stroke: rgba(135, 206, 250, 0.4); stroke-width: 1; opacity: 0; transition: opacity 0.3s; }
-    .glasses-accent { fill: var(--ac-yellow); opacity: 0; transition: opacity 0.3s; }
-    .cheek { fill: #FF8A8A; opacity: 0.6; }
-    .leaf-main { fill: #2d6a4f; }
-    .leaf-side { fill: #1b4332; }
-    .leaf-center { fill: #347a52; }
-    .leaf-vein { stroke: #14271c; stroke-width: 0.5; opacity: 0.5; fill: none; }
-    .ac-star { fill: var(--ac-red); }
-    .seal-ring { fill: none; stroke: url(#sealGradient); stroke-width: 2; opacity: 0.55; }
-    .seal-ring-inner { fill: none; stroke: var(--ac-yellow); stroke-width: 0.75; opacity: 0.35; stroke-dasharray: 1.5 2.5; }
-
-    /* Boca */
-    .mouth-idle { display: block; }
-    .mouth-talk { display: none; fill: #4A1E00; }
-
-    /* Animações */
-    @keyframes blink {
-      0%, 90%, 100% { transform: scaleY(1); }
-      95% { transform: scaleY(0.1); }
+    private updateAnimationState() {
+      const container = this.shadow.querySelector('.mascot-container');
+      if (container) {
+        container.className = `mascot-container state-${this.state}`;
+      }
     }
 
-    @keyframes ear-wiggle {
-      0%, 90%, 100% { transform: rotate(0deg); }
-      93% { transform: rotate(-8deg); }
-      96% { transform: rotate(8deg); }
-    }
+    private render() {
+      this.shadow.innerHTML = `
+      <style>
+        :host {
+          display: inline-block;
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          z-index: 999999;
+          cursor: pointer;
+          user-select: none;
+          font-family: system-ui, -apple-system, sans-serif;
+          -webkit-tap-highlight-color: transparent;
+        }
 
-    @keyframes talk {
-      0%, 100% { transform: scaleY(0.2); }
-      50% { transform: scaleY(1.3); }
-    }
+        @media (max-width: 640px) {
+          :host {
+            bottom: 16px;
+            right: 16px;
+          }
+        }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
-    }
+        .mascot-container {
+          position: relative;
+          width: 68px;
+          height: 68px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #008040 0%, #00592D 100%);
+          box-shadow: 0 6px 20px rgba(0, 89, 45, 0.35), 0 0 0 3px #FFFFFF, 0 0 0 5px #F2C94C;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+        }
 
+        .mascot-container:hover {
+          transform: scale(1.08) translateY(-3px);
+          box-shadow: 0 12px 28px rgba(0, 89, 45, 0.45), 0 0 0 3px #FFFFFF, 0 0 0 6px #F2C94C;
+        }
 
-    @keyframes greeting-wave {
-      0%, 100% { transform: rotate(0deg) translateY(0); }
-      15% { transform: rotate(-15deg) translateY(-3px); }
-      30% { transform: rotate(12deg) translateY(-5px); }
-      45% { transform: rotate(-10deg) translateY(-3px); }
-      60% { transform: rotate(8deg) translateY(-4px); }
-      75% { transform: rotate(-5deg) translateY(-2px); }
-      90% { transform: rotate(3deg) translateY(-1px); }
-    }
+        .mascot-container:active {
+          transform: scale(0.95);
+        }
 
-    :host(.greeting) {
-      animation: greeting-wave 1.2s ease-in-out;
-    }
+        .mascot-container:focus-visible {
+          outline: 4px solid #EB5757;
+          outline-offset: 4px;
+        }
 
-    .animate-float {
-      animation: float 4s ease-in-out infinite;
-    }
+        .badge {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          background: #EB5757;
+          color: white;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: bold;
+          border: 2px solid white;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          transition: transform 0.3s ease;
+        }
 
-    .eye-group-left {
-      transform-origin: 35px 43px;
-      animation: blink 5s infinite;
-    }
+        .tooltip {
+          position: absolute;
+          right: 84px;
+          top: 50%;
+          transform: translateY(-50%) translateX(10px);
+          background: #1A2E22;
+          color: #FFFFFF;
+          padding: 8px 14px;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 600;
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: all 0.25s ease;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+          border-left: 4px solid #F2C94C;
+        }
 
-    .eye-group-right {
-      transform-origin: 58px 43px;
-      animation: blink 5s infinite;
-    }
+        .tooltip::after {
+          content: '';
+          position: absolute;
+          right: -6px;
+          top: 50%;
+          transform: translateY(-50%);
+          border-width: 6px 0 6px 6px;
+          border-style: solid;
+          border-color: transparent transparent transparent #1A2E22;
+        }
 
-    .ear-right {
-      transform-origin: 65px 25px;
-      animation: ear-wiggle 6s infinite;
-    }
+        @media (hover: hover) {
+          .mascot-container:hover .tooltip {
+            opacity: 1;
+            transform: translateY(-50%) translateX(0);
+          }
+        }
 
-    .ear-left {
-      transform-origin: 25px 22px;
-      animation: ear-wiggle 6s infinite 0.5s;
-    }
+        svg {
+          width: 52px;
+          height: 52px;
+          overflow: visible;
+        }
 
-    /* Estados ativos */
-    :host([state="speaking"]) .mouth-idle {
-      display: none;
-    }
-    :host([state="speaking"]) .mouth-talk {
-      display: block;
-      transform-origin: 48px 65px;
-      animation: talk 0.25s infinite alternate;
-    }
+        .head-group {
+          transform-origin: 50px 55px;
+          animation: breathe 4s ease-in-out infinite;
+        }
 
-    :host([state="reading"]) .glasses-frame,
-    :host([state="reading"]) .glasses-lens,
-    :host([state="reading"]) .glasses-accent,
-    :host([state="speaking"]) .glasses-frame,
-    :host([state="speaking"]) .glasses-lens,
-    :host([state="speaking"]) .glasses-accent {
-      opacity: 1;
-    }
+        .eye-lid {
+          transform-origin: 50px 42px;
+          animation: blink 4.5s infinite;
+        }
 
-    /* Alto Contraste */
-    :host(.high-contrast) .fur-body { fill: #000; stroke: #FFF; stroke-width: 2; }
-    :host(.high-contrast) .fur-snout { fill: #000; stroke: #FFF; stroke-width: 2; }
-    :host(.high-contrast) .fur-ear-inner { fill: #FFF; }
-    :host(.high-contrast) .eye { fill: #FFF; }
-    :host(.high-contrast) .glasses-frame { stroke: #FFFF00; stroke-width: 3; }
-    :host(.high-contrast) .glasses-lens { fill: rgba(255, 255, 0, 0.1); stroke: #FFFF00; }
+        .ear-left, .ear-right {
+          transform-origin: 30px 28px;
+          animation: ear-twitch 6s infinite;
+        }
+        .ear-right {
+          transform-origin: 70px 28px;
+          animation-delay: 0.2s;
+        }
 
-    /* Balão de Fala do Capi */
-    .speech-bubble {
-      position: absolute;
-      bottom: 25px;
-      right: 105px;
-      max-width: min(220px, 70vw);
-      width: max-content;
-      background: white;
-      border: 2px solid #1b4332;
-      border-radius: 12px;
-      padding: 8px 12px;
-      font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 1.35;
-      color: #1b4332;
-      white-space: normal;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      opacity: 0;
-      transform: translateX(10px) scale(0.9);
-      transition: opacity 0.3s, transform 0.3s;
-      pointer-events: none;
-    }
+        .mouth-speaking {
+          opacity: 0;
+          transform-origin: 50px 68px;
+        }
 
-    .speech-bubble::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: -8px;
-      margin-top: -6px;
-      border-width: 6px 0 6px 8px;
-      border-style: solid;
-      border-color: transparent transparent transparent white;
-      display: block;
-      width: 0;
-    }
+        .sound-waves {
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
 
-    .speech-bubble::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: -11px;
-      margin-top: -8px;
-      border-width: 8px 0 8px 10px;
-      border-style: solid;
-      border-color: transparent transparent transparent #1b4332;
-      display: block;
-      width: 0;
-      z-index: -1;
-    }
+        .state-speaking .mascot-container,
+        .mascot-container.state-speaking {
+          box-shadow: 0 6px 25px rgba(0, 128, 64, 0.6), 0 0 0 3px #FFFFFF, 0 0 0 6px #00E676;
+        }
 
-    :host(:hover) .speech-bubble {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
+        .state-speaking .head-group {
+          animation: talk-bob 0.6s ease-in-out infinite alternate;
+        }
 
-    .muted-indicator {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: #ef4444;
-      color: white;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      opacity: 0;
-      transform: scale(0.5);
-      transition: opacity 0.3s, transform 0.3s;
-    }
+        .state-speaking .mouth-idle {
+          opacity: 0;
+        }
 
-    .muted-indicator.visible {
-      opacity: 1;
-      transform: scale(1);
-    }
-    </style>
+        .state-speaking .mouth-speaking {
+          opacity: 1;
+          animation: mouth-talk 0.28s ease-in-out infinite alternate;
+        }
 
-    <div class="mascot-container animate-float">
-    <div class="speech-bubble">Olá! Sou o Capi. Clique em mim!</div>
+        .state-speaking .sound-waves {
+          opacity: 1;
+        }
 
-    <!-- Mascote SVG -->
-    <svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="furGradient" cx="40%" cy="30%" r="75%">
-        <stop offset="0%" stop-color="#A8723F" />
-        <stop offset="70%" stop-color="#8B5A2B" />
-        <stop offset="100%" stop-color="#6E4720" />
-      </radialGradient>
-      <radialGradient id="bellyGradient" cx="50%" cy="20%" r="80%">
-        <stop offset="0%" stop-color="#B98249" />
-        <stop offset="100%" stop-color="#8E5D33" />
-      </radialGradient>
-      <linearGradient id="lensGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="rgba(255,255,255,0.35)" />
-        <stop offset="55%" stop-color="rgba(135,206,250,0.12)" />
-        <stop offset="100%" stop-color="rgba(135,206,250,0.18)" />
-      </linearGradient>
-      <linearGradient id="sealGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="var(--ac-yellow)" />
-        <stop offset="100%" stop-color="var(--ac-green)" />
-      </linearGradient>
-    </defs>
+        .state-speaking .wave-1 {
+          animation: pulse-wave 1s infinite;
+        }
+        .state-speaking .wave-2 {
+          animation: pulse-wave 1s infinite 0.3s;
+        }
 
-    <!-- Selo institucional: anel sutil ao fundo, remete a brasão/carimbo oficial -->
-    <circle cx="50" cy="58" r="48" class="seal-ring" />
-    <circle cx="50" cy="58" r="44" class="seal-ring-inner" />
+        @keyframes breathe {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-2px) rotate(1deg); }
+        }
 
-    <!-- Anel de foco (visível apenas via :focus-visible) -->
-    <circle cx="50" cy="58" r="52" class="focus-ring" />
+        @keyframes blink {
+          0%, 94%, 98%, 100% { transform: scaleY(0); }
+          96% { transform: scaleY(1); }
+        }
 
-    <!-- Patas traseiras/Corpo de baixo -->
-    <ellipse cx="50" cy="98" rx="28" ry="12" class="fur-belly" />
+        @keyframes ear-twitch {
+          0%, 90%, 100% { transform: rotate(0deg); }
+          93% { transform: rotate(-8deg); }
+          96% { transform: rotate(5deg); }
+        }
 
-    <!-- Corpo principal -->
-    <path d="M 28 98 C 22 75, 25 50, 40 45 C 55 40, 72 45, 76 65 C 79 80, 76 95, 72 98 Z" class="fur-body" />
+        @keyframes talk-bob {
+          0% { transform: translateY(0) rotate(-1.5deg); }
+          100% { transform: translateY(-3px) rotate(1.5deg); }
+        }
 
-    <!-- Orelha Esquerda -->
-    <g class="ear-left">
-    <ellipse cx="28" cy="25" rx="7" ry="9" class="fur-body" transform="rotate(-15 28 25)" />
-    <ellipse cx="28" cy="26" rx="4" ry="6" class="fur-ear-inner" transform="rotate(-15 28 26)" />
-    </g>
+        @keyframes mouth-talk {
+          0% { transform: scaleY(0.4); }
+          100% { transform: scaleY(1.15); }
+        }
 
-    <!-- Orelha Direita -->
-    <g class="ear-right">
-    <ellipse cx="65" cy="27" rx="8" ry="10" class="fur-body" transform="rotate(15 65 27)" />
-    <ellipse cx="65" cy="28" rx="5" ry="7" class="fur-ear-inner" transform="rotate(15 65 28)" />
-    </g>
+        @keyframes pulse-wave {
+          0% { transform: scale(0.9); opacity: 0.9; }
+          100% { transform: scale(1.3); opacity: 0; }
+        }
 
-    <!-- Cabeça -->
-    <!-- O formato característico de 'bloco' da cabeça da capivara -->
-    <path d="M 28 50 C 28 30, 35 22, 52 24 C 69 26, 70 35, 68 55 C 66 68, 55 72, 45 72 C 34 71, 28 65, 28 50 Z" class="fur-body" />
+        @media (prefers-reduced-motion: reduce) {
+          .head-group, .eye-lid, .ear-left, .ear-right, .mouth-speaking, .wave-1, .wave-2 {
+            animation: none !important;
+          }
+        }
+      </style>
 
-    <!-- Focinho/Parte da Boca da capivara (mais escura) -->
-    <path d="M 40 50 C 40 45, 48 42, 60 44 C 68 46, 68 55, 65 62 C 60 69, 48 68, 42 66 C 39 64, 40 55, 40 50 Z" class="fur-snout" />
+      <div class="mascot-container state-${this.state}" role="button" tabindex="0" aria-label="Abrir assistente de acessibilidade e leitor de voz Acre-Acessível">
+        <div class="tooltip">Acessibilidade e Voz (Capi)</div>
+        <div class="badge" title="Estrela Solitária do Acre">★</div>
 
-    <!-- Bochecha corada -->
-    <ellipse cx="37" cy="60" rx="4" ry="3" class="cheek" />
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <g class="sound-waves" stroke="#F2C94C" stroke-width="3" fill="none" stroke-linecap="round">
+            <path class="wave-1" d="M 12 35 Q 4 50 12 65" />
+            <path class="wave-2" d="M 88 35 Q 96 50 88 65" />
+          </g>
 
-    <!-- Olho Esquerdo (visível de perfil de 3/4) -->
-    <g class="eye-group-left">
-    <ellipse cx="35" cy="43" rx="3.5" ry="4.5" class="eye" />
-    <circle cx="33.5" cy="41.5" r="1.2" class="eye-shine" />
-    </g>
+          <g class="head-group">
+            <g class="ear-left">
+              <ellipse cx="26" cy="26" rx="8" ry="10" fill="#7A4B2A" transform="rotate(-20 26 26)" />
+              <ellipse cx="26" cy="26" rx="4" ry="6" fill="#4E2F18" transform="rotate(-20 26 26)" />
+            </g>
+            <g class="ear-right">
+              <ellipse cx="74" cy="26" rx="8" ry="10" fill="#7A4B2A" transform="rotate(20 74 26)" />
+              <ellipse cx="74" cy="26" rx="4" ry="6" fill="#4E2F18" transform="rotate(20 74 26)" />
+            </g>
 
-    <!-- Olho Direito (faltava — a lente direita dos óculos ficava "flutuando" sem olho por baixo) -->
-    <g class="eye-group-right">
-    <ellipse cx="58" cy="43" rx="3.2" ry="4" class="eye" />
-    <circle cx="56.7" cy="41.5" r="1" class="eye-shine" />
-    </g>
+            <path d="M 28 18 C 35 8, 65 8, 72 18 C 76 22, 24 22, 28 18 Z" fill="#F2C94C" stroke="#D4AC0D" stroke-width="1.5"/>
+            <path d="M 22 18 Q 50 13 78 18 Q 82 21 75 22 Q 50 18 25 22 Q 18 21 22 18 Z" fill="#E6B800"/>
+            <polygon points="50,10 51.5,13 55,13.5 52.5,16 53,19.5 50,17.8 47,19.5 47.5,16 45,13.5 48.5,13" fill="#EB5757" />
 
-    <!-- Óculos (Aparecem quando o estado é 'reading') -->
-    <g class="glasses">
-    <!-- Lente e Armação da Esquerda -->
-    <circle cx="35" cy="43" r="8" class="glasses-lens" />
-    <circle cx="35" cy="43" r="8" class="glasses-frame" />
-    <!-- Ponte dos óculos -->
-    <path d="M 43 43 Q 47 41 51 43" class="glasses-frame" />
-    <!-- Micro-triângulo amarelo: eco da diagonal bandeira do Acre, discreto, só visível com a ponte -->
-    <polygon points="45.5,41.7 47,39.8 48.5,41.7" class="glasses-accent" />
-    <!-- Lente e Armação da Direita (raio levemente menor para não sobrepor a base da orelha direita) -->
-    <circle cx="58" cy="44" r="7.3" class="glasses-lens" />
-    <circle cx="58" cy="44" r="7.3" class="glasses-frame" />
-    </g>
+            <rect x="22" y="22" width="56" height="54" rx="26" fill="#9C643B" />
+            <path d="M 22 48 C 22 65, 34 76, 50 76 C 66 76, 78 65, 78 48 Z" fill="#8A5630" opacity="0.5" />
 
-    <!-- Nariz de Capivara -->
-    <path d="M 62 46 C 64 45, 66 45, 67 47 C 67 49, 65 52, 62 50 Z" fill="#2D1C0C" />
+            <ellipse cx="32" cy="52" rx="5" ry="3" fill="#E58C7E" opacity="0.5" />
+            <ellipse cx="68" cy="52" rx="5" ry="3" fill="#E58C7E" opacity="0.5" />
 
-    <!-- Boca / Linha de expressão -->
-    <!-- Boca Ociosa -->
-    <path d="M 52 61 Q 57 63 60 60" stroke="#3A2410" stroke-width="2" fill="none" class="mouth-idle" />
+            <g class="eyes">
+              <circle cx="35" cy="42" r="4.5" fill="#1E130C" />
+              <circle cx="33.5" cy="40.5" r="1.5" fill="#FFFFFF" />
+              <circle cx="65" cy="42" r="4.5" fill="#1E130C" />
+              <circle cx="63.5" cy="40.5" r="1.5" fill="#FFFFFF" />
+            </g>
 
-    <!-- Boca Falando -->
-    <ellipse cx="56" cy="62" rx="3" ry="4" class="mouth-talk" />
+            <g class="eye-lid">
+              <ellipse cx="35" cy="42" rx="5.5" ry="5" fill="#7A4B2A" />
+              <ellipse cx="65" cy="42" rx="5.5" ry="5" fill="#7A4B2A" />
+            </g>
 
-    <!-- Pequeno Dente de capivara aparecendo na boca falando -->
-    <rect x="54.5" y="58" width="3" height="2" fill="#FFF" class="mouth-talk" style="animation: none;" />
+            <g fill="none" stroke="#1A2E22" stroke-width="2.2">
+              <rect x="25" y="34" width="20" height="15" rx="5" fill="rgba(255,255,255,0.12)" />
+              <rect x="55" y="34" width="20" height="15" rx="5" fill="rgba(255,255,255,0.12)" />
+              <line x1="45" y1="41" x2="55" y2="41" />
+              <line x1="22" y1="40" x2="25" y2="40" />
+              <line x1="75" y1="40" x2="78" y2="40" />
+            </g>
 
-    <!-- Folha de Seringueira (Hevea brasiliensis): 3 folíolos em leque, símbolo do extrativismo acreano -->
-    <g class="seringueira-leaf">
-    <path d="M 18 108 Q 19 92 13 86 Q 11 100 16 110 Z" class="leaf-center" />
-    <path d="M 18 108 Q 13.5 95 13 86" class="leaf-vein" />
-    <path d="M 20 108 Q 15 100 8 102 Q 13 108 20 110 Z" class="leaf-main" />
-    <path d="M 20 108.5 Q 14.5 103 8 102" class="leaf-vein" />
-    <path d="M 23 108 Q 22 95 16 93 Q 20 105 23 110 Z" class="leaf-side" />
-    <path d="M 22.7 108.5 Q 19 100 16 93" class="leaf-vein" />
-    </g>
+            <rect x="34" y="47" width="32" height="24" rx="12" fill="#6E4223" />
+            <ellipse cx="44" cy="53" rx="2.5" ry="1.8" fill="#2D1A0E" transform="rotate(-15 44 53)" />
+            <ellipse cx="56" cy="53" rx="2.5" ry="1.8" fill="#2D1A0E" transform="rotate(15 56 53)" />
 
-    <!-- Broche estrela vermelha (estrela solitária da bandeira do Acre), sempre visível -->
-    <path class="ac-star" transform="translate(12, -15)" d="M 50 86 L 51.18 89.82 L 55.18 89.82 L 51.9 92.09 L 53.09 95.91 L 50 93.64 L 46.91 95.91 L 48.09 92.09 L 44.82 89.82 L 48.82 89.82 Z" />
-    </svg>
+            <g class="mouth-idle" stroke="#2D1A0E" stroke-width="2.2" fill="none" stroke-linecap="round">
+              <line x1="50" y1="56" x2="50" y2="62" />
+              <path d="M 43 63 Q 46.5 66 50 62 Q 53.5 66 57 63" />
+            </g>
 
-    <div class="muted-indicator" id="mutedIndicator" aria-label="Silenciado" title="Silenciado"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg></div>
-    </div>
+            <g class="mouth-speaking">
+              <path d="M 42 62 Q 50 73 58 62 Z" fill="#3B1518" stroke="#2D1A0E" stroke-width="1.8" />
+              <path d="M 46 67 Q 50 65 54 67 Q 50 70 46 67 Z" fill="#EB5757" />
+              <rect x="47" y="62" width="3" height="2.5" rx="0.5" fill="#FFF8E7" />
+              <rect x="50.5" y="62" width="3" height="2.5" rx="0.5" fill="#FFF8E7" />
+            </g>
+
+            <path d="M 32 73 L 50 82 L 68 73 L 64 84 L 50 88 L 36 84 Z" fill="#008040" />
+            <path d="M 50 82 L 68 73 L 64 84 L 50 88 Z" fill="#F2C94C" />
+            <circle cx="50" cy="83" r="3" fill="#EB5757" />
+          </g>
+        </svg>
+      </div>
     `;
-  }
 
-  private setupEvents() {
-    this.addEventListener('click', () => this.activate());
-  }
+      const container = this.shadow.querySelector('.mascot-container');
+      container?.addEventListener('click', () => {
+        this.dispatchEvent(new CustomEvent('toggle-panel', { bubbles: true, composed: true }));
+      });
 
-  private activate() {
-    this.isExpanded = !this.isExpanded;
-    this.setAttribute('aria-expanded', String(this.isExpanded));
-
-    // Feedback tátil/visual rápido ao acionar
-    this.classList.add('pressed');
-    if (this.pressTimeoutId !== null) window.clearTimeout(this.pressTimeoutId);
-    this.pressTimeoutId = window.setTimeout(() => this.classList.remove('pressed'), 150);
-
-    // Dispara um evento customizado que o painel principal irá escutar
-    this.dispatchEvent(new CustomEvent('toggle-panel', {
-      bubbles: true,
-      composed: true,
-      detail: { expanded: this.isExpanded }
-    }));
-  }
-
-  private currentLang: string = 'pt-BR';
-
-  public setLanguage(lang: string) {
-    this.currentLang = lang;
-    this.setMascotState('idle');
-  }
-
-  private setMascotState(state: string) {
-    const bubble = this.shadow.querySelector('.speech-bubble') as HTMLElement;
-    if (!bubble) return;
-
-    const isEn = this.currentLang.toLowerCase().startsWith('en');
-    const isHe = this.currentLang.toLowerCase().startsWith('he') || this.currentLang.toLowerCase().startsWith('iw');
-
-    if (state === 'speaking') {
-      bubble.innerText = isEn ? 'Reading for you...' : isHe ? 'מקריא עבורך...' : 'Estou lendo para você...';
-      bubble.style.opacity = '1';
-      bubble.style.transform = 'translateX(0) scale(1)';
-    } else if (state === 'reading') {
-      bubble.innerText = isEn ? 'Reading mode active!' : isHe ? 'מצב קריאה פעיל!' : 'Modo leitura ativo!';
-      bubble.style.opacity = '1';
-      bubble.style.transform = 'translateX(0) scale(1)';
-    } else {
-      // idle — volta ao estado padrão (hover mostra via CSS)
-      bubble.innerText = isEn ? 'Hi! I am Capi. Click on me!' : isHe ? 'היי! אני קאפי. לחץ עליי!' : 'Olá! Sou o Capi. Clique em mim!';
-      bubble.style.opacity = '';
-      bubble.style.transform = '';
+      container?.addEventListener('keydown', (e: Event) => {
+        const keyEvent = e as KeyboardEvent;
+        if (keyEvent.key === 'Enter' || keyEvent.key === ' ') {
+          keyEvent.preventDefault();
+          this.dispatchEvent(new CustomEvent('toggle-panel', { bubbles: true, composed: true }));
+        }
+      });
     }
   }
 
-  private updateMutedIcon() {
-    const indicator = this.shadow.getElementById('mutedIndicator');
-    if (indicator) {
-      if (this.isMuted) {
-        indicator.classList.add('visible');
-      } else {
-        indicator.classList.remove('visible');
-      }
-    }
-  }
-
-  public setHighContrast(active: boolean) {
-    const host = this.shadow.host;
-    if (active) {
-      host.classList.add('high-contrast');
-    } else {
-      host.classList.remove('high-contrast');
-    }
-  }
-
-  // Animação de boas-vindas — pode ser chamada externamente
-  public greet() {
-    this.classList.add('greeting');
-    setTimeout(() => this.classList.remove('greeting'), 1300);
-  }
-
+  customElements.define('capi-mascot', CapiMascot);
 }
-
-customElements.define('capi-mascot', CapiMascot);

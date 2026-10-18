@@ -35,6 +35,19 @@ export const categories: { id: ProjectCategory; label: string }[] = [
 export const projects: Project[] = [
   // ───────────── Principais (nesta ordem) ─────────────
   {
+    id: "ata-acre",
+    name: "ATA Acre",
+    href: "https://ataacre.netlify.app/",
+    category: "dados-osint",
+    categoryLabel: "Dados Públicos",
+    kind: "Jornalismo Investigativo · Transparência",
+    summary:
+      "Veículo documental sobre fiscalização orçamentária e dados abertos no Acre. Integra o leitor de tela neural Acre-Acessibilidade com o mascote Capi.",
+    stack: ["TypeScript", "TanStack Start", "WCAG", "Dados Abertos"],
+    featured: true,
+    highlight: "Jornalismo de Dados",
+  },
+  {
     id: "fala-comigo",
     name: "Fala Comigo",
     href: "https://github.com/walbarellos/FalaComigo",
@@ -234,6 +247,13 @@ export type TimelineItem = {
 };
 
 export const timeline: TimelineItem[] = [
+  {
+    date: "2026 — Presente",
+    title: "ATA Acre — Jornalismo de Dados & Transparência",
+    sub: "Editor & Desenvolvedor · ataacre.netlify.app",
+    desc: "Pesquisa documental, análise de dados orçamentários públicos e desenvolvimento da plataforma do jornal.",
+    active: true,
+  },
   {
     date: "2026 — Presente",
     title: "Sistemas para Internet — IFAC",
@@ -480,7 +500,7 @@ export const bioInfo = {
   name: "Willian Albarello",
   role: "Engenheiro de Software & Sistemas",
   summary:
-    "Engenheiro de software e criador de sistemas. Desenvolvo tecnologia assistiva e acessibilidade (com projetos aprovados pelo Programa Centelha/FINEP), engines de jogos com geração procedural (Fourier e Perlin em C++), ferramentas de engenharia reversa/redes (IRC, Linux ELF) e arquiteturas completas em Rust, Kotlin e TypeScript. Da matemática e baixo nível à interface que as pessoas usam.",
+    "Engenheiro de software e criador de sistemas. Desenvolvo tecnologia assistiva e acessibilidade (projetos aprovados pelo Programa Centelha/FINEP), sistemas para transparência pública e dados abertos, e o jornal investigativo ATA Acre (onde atuo na apuração documental e infraestrutura técnica). Crio também engines de jogos procedurais (Fourier e Perlin em C++), ferramentas de engenharia reversa (Linux ELF) e arquiteturas em Rust, Kotlin e TypeScript.",
   badges: ["Rio Branco, Acre", "IFAC · 2º Período"],
   availability: "Aberto para freelas e colaborações",
   responseTime: "Resposta em até 24h · UTC−5",

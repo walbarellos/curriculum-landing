@@ -1,1153 +1,934 @@
 /**
- * Acre Acessível - Leitor de Voz v6
- * Correções:
- * - isSequentialReading flag: bloqueia click/hover/selection durante leitura sequencial
- * - scrollIntoView removido da leitura automática (só rola ao next/prev manual)
- * - SpeechSynthesis como primário, servidor como fallback
- * - v4: TextNormalizer expande números/siglas/datas antes de falar; leitura por frases
- *   (chunking) com pausas reais entre elas; pitch/rate adaptativo por tipo de elemento
- *   (título x parágrafo x item de lista) para reduzir a monotonia da voz nativa.
- * - v5: buffering de 1 chunk adiante no modo servidor — o próximo chunk é pré-buscado
- *   assim que o atual começa a tocar, eliminando o gap de rede entre frases (edge-tts
- *   primário tem latência de rede que o Piper local não tinha). Earcon curto (Web
- *   Audio, sem arquivo extra) avisa esperas residuais >700ms sem competir com a fala.
- * - v6: Media Session API — botão físico de fone Bluetooth, tela de bloqueio e central
- *   de notificações passam a controlar play/pause/next/previous, sem precisar abrir o
- *   painel. Metadata mostra um trecho do texto atual + "Trecho X de Y" como progresso.
+ * VoiceReader v7 - Motor de Leitura de Voz Inteligente (Acre-Acessível)
+ * Adaptado para arquiteturas SPA e jornais editoriais (zero hardcode).
  */
 
-import { TextNormalizer, type SentenceChunk } from './text-normalizer';
+import { TextNormalizer } from './text-normalizer';
 
-export interface VoiceReaderConfig {
-  rate?: number;
-  volume?: number;
-  pitch?: number;
-  lang?: string;
-  onStateChange?: (state: 'idle' | 'speaking' | 'paused') => void;
-  onElementHighlight?: (element: HTMLElement | null) => void;
+export interface VoiceReaderCallbacks {
+  onStart?: () => void;
+  onStop?: () => void;
+  onPause?: () => void;
+  onResume?: () => void;
+  onSentenceChange?: (element: HTMLElement | null, text: string) => void;
 }
 
+export interface ReaderStructureConfig {
+  /** URL opcional de servidor TTS neural externo (se omitido, usa Web Speech API nativa) */
+  backendUrl?: string;
+  /** Seletores CSS de raízes de conteúdo principal para leitura sequencial */
+  contentRoots?: string[];
+  /** Seletores CSS de blocos legíveis dentro das raízes */
+  readableSelectors?: string[];
+  /** Seletores CSS de elementos ou contêineres que nunca devem ser lidos */
+  ignoreSelectors?: string[];
+  /** Seletores CSS de elementos interativos cujo clique normal não deve ser interceptado */
+  interactiveSelectors?: string[];
+  /** Atributo HTML opcional com texto descritivo estruturado para leitura (ex: tirinhas) */
+  readableTextAttr?: string;
+  /** Atributo HTML para botões que disparam leitura direta ao clicar */
+  directSpeakAttr?: string;
+  /** Dicionário adicional de siglas para pronúncia */
+  customAcronyms?: Record<string, string>;
+}
+
+const DEFAULT_STRUCTURE: Required<Omit<ReaderStructureConfig, 'backendUrl' | 'customAcronyms'>> = {
+  contentRoots: ['[role="dialog"]', 'main', 'article', '[role="main"]'],
+  readableSelectors: [
+    '[data-readable-text]',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'p',
+    'blockquote',
+    'figcaption',
+    'li',
+    'summary',
+  ],
+  ignoreSelectors: [
+    'capi-mascot',
+    'acre-accessibility-panel',
+    'nav',
+    'script',
+    'style',
+    'noscript',
+    '[aria-hidden="true"]',
+    '.sr-only',
+    '[data-paywall-locked="true"]',
+    '.select-none.pointer-events-none',
+  ],
+  interactiveSelectors: [
+    'a',
+    'button',
+    'input',
+    'select',
+    'textarea',
+    'summary',
+    '[role="button"]',
+    '[data-lightbox-trigger]',
+  ],
+  readableTextAttr: 'data-readable-text',
+  directSpeakAttr: 'data-acre-speak',
+};
+
 export class VoiceReader {
-  private synth: SpeechSynthesis;
+  private synth: SpeechSynthesis | null = null;
+  private voices: SpeechSynthesisVoice[] = [];
+  private selectedVoice: SpeechSynthesisVoice | null = null;
+  private normalizer: TextNormalizer;
+  private callbacks: VoiceReaderCallbacks;
+  private structure: Required<Omit<ReaderStructureConfig, 'backendUrl' | 'customAcronyms'>>;
+
+  private isReading = false;
+  private isPaused = false;
+  private rate = 1.05;
+  private pitch = 1.0;
+
+  private readableElements: HTMLElement[] = [];
+  private currentIndex = 0;
+  private currentHighlightedEl: HTMLElement | null = null;
+
+  private readOnHover = false;
+  private hoverTimeout: number | null = null;
+  private lastHoveredEl: HTMLElement | null = null;
+
+  private serverTtsUrl = '';
+  private currentAudio: HTMLAudioElement | null = null;
+  private useServerTts = false;
+
   private currentUtterance: SpeechSynthesisUtterance | null = null;
-  private config: Required<VoiceReaderConfig>;
-  private textElements: HTMLElement[] = [];
-  private currentIndex: number = -1;
-  private currentState: 'idle' | 'speaking' | 'paused' = 'idle';
-  private highlightClassName = 'acre-reading-highlight';
+  private watchdogTimer: number | null = null;
 
-  // Flag de modo sequencial — bloqueia triggers ad-hoc (click, hover, selection)
-  private _isSequentialReading: boolean = false;
+  private subChunks: string[] = [];
+  private currentSubChunkIndex = 0;
+  private activeSessionId = 0;
 
-  // Fallback do servidor (true = prioriza Azure Neural Francisca em produção e dev)
-  private useServerTts = true;
-  private audioPlayer: HTMLAudioElement | null = null;
-  private failedVoiceNames: Set<string> = new Set();
+  private isProgrammaticScroll = false;
+  private lastUserMouseMoveTime = 0;
+  private consecutiveErrors = 0;
+  private consecutiveInstantSkips = 0;
 
-  constructor(config: VoiceReaderConfig = {}) {
-    console.log('[Acre Acessivel] VoiceReader v6: Inicializando...');
-
-    this.synth = typeof window !== 'undefined' ? window.speechSynthesis : (null as any);
-
-    this.config = {
-      rate: config.rate ?? 1.0,
-      volume: config.volume ?? 1.0,
-      pitch: config.pitch ?? 1.0,
-      lang: config.lang ?? 'pt-BR',
-      onStateChange: config.onStateChange ?? (() => {}),
-      onElementHighlight: config.onElementHighlight ?? (() => {}),
+  constructor(callbacks: VoiceReaderCallbacks = {}, config: ReaderStructureConfig = {}) {
+    this.callbacks = callbacks;
+    this.structure = {
+      contentRoots: config.contentRoots?.length ? config.contentRoots : DEFAULT_STRUCTURE.contentRoots,
+      readableSelectors: config.readableSelectors?.length
+        ? config.readableSelectors
+        : DEFAULT_STRUCTURE.readableSelectors,
+      ignoreSelectors: config.ignoreSelectors?.length
+        ? config.ignoreSelectors
+        : DEFAULT_STRUCTURE.ignoreSelectors,
+      interactiveSelectors: config.interactiveSelectors?.length
+        ? config.interactiveSelectors
+        : DEFAULT_STRUCTURE.interactiveSelectors,
+      readableTextAttr: config.readableTextAttr || DEFAULT_STRUCTURE.readableTextAttr,
+      directSpeakAttr: config.directSpeakAttr || DEFAULT_STRUCTURE.directSpeakAttr,
     };
+    this.normalizer = new TextNormalizer({
+      customAcronyms: config.customAcronyms,
+    });
 
-    if (this.synth) {
-      try {
-        if (this.synth.speaking || this.synth.pending) {
-          this.synth.cancel();
-        }
-      } catch (e) {}
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      this.synth = window.speechSynthesis;
+      this.initVoices();
+      this.setupHoverReading();
+      this.setupClickToRead();
     }
 
-    this.injectHighlightStyles();
-    this.detectVoiceSupport();
-    this.setupMediaSession();
-
-    this.audioPlayer = typeof document !== 'undefined' ? document.createElement('audio') : null;
-    const unlock = () => {
-      if (this.synth) {
-        try {
-          if (this.synth.paused) {
-            this.synth.resume();
-          }
-          // Garante que o sintetizador está pronto sem falar utterance vazia com volume 0
-        } catch (e) {}
-      }
-      document.removeEventListener('click', unlock);
-      document.removeEventListener('touchstart', unlock);
-      document.removeEventListener('keydown', unlock);
-    };
-    if (typeof document !== 'undefined') {
-      document.addEventListener('click', unlock);
-      document.addEventListener('touchstart', unlock, { passive: true });
-      document.addEventListener('keydown', unlock);
-    }
-  }
-
-  /** Expõe se está em modo sequencial para o painel bloquear triggers externos */
-  public get isSequentialReading(): boolean {
-    return this._isSequentialReading;
-  }
-
-  /**
-   * URL do backend de TTS (fallback neural quando não há voz pt-BR local).
-   *
-   * Quando o widget roda no MESMO domínio do backend (ex: ambiente de dev), o palpite
-   * de porta 8001 no mesmo hostname funciona. Mas quando o widget é embutido em um
-   * domínio de TERCEIROS (script embed em qualquer site, ou extensão de navegador),
-   * o backend está em outro servidor — então a URL precisa ser configurada
-   * explicitamente via window.AcreAcessivelConfig.backendUrl (setado pelo loader
-   * a partir do atributo data-acre-backend da tag <script>, ou pela extensão).
-   * Em produção (Netlify), string vazia usa rota relativa /api/tts.
-   */
-  private getBackendUrl(): string {
-    if (typeof window !== 'undefined') {
-      const configured = (window as any).AcreAcessivelConfig?.backendUrl;
-      if (configured !== undefined && configured !== null && configured !== '') {
-        return configured.replace(/\/$/, '');
-      }
-      return '';
-    }
-    return '';
-  }
-
-  private injectHighlightStyles() {
-    if (document.getElementById('acre-highlight-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'acre-highlight-styles';
-    style.innerHTML = `
-    .${this.highlightClassName} {
-      background-color: rgba(27, 67, 50, 0.12) !important;
-      border-bottom: 2px solid #1b4332 !important;
-      border-radius: 2px !important;
-      transition: background-color 0.2s ease;
-    }
-    .acre-high-contrast-mode .${this.highlightClassName} {
-      background-color: #FFFF00 !important;
-      color: #000 !important;
-      border-bottom: 2px solid #000 !important;
-    }
-    `;
-    document.head.appendChild(style);
-  }
-
-  private detectVoiceSupport() {
-    const backendUrl = this.getBackendUrl();
-    const probeUrl = backendUrl ? `${backendUrl}/api/tts` : '/api/tts';
-
-    fetch(probeUrl, { method: 'GET' })
-      .then(res => {
-        if (res.ok) {
-          this.useServerTts = true;
-          console.log('[Acre Acessivel] Backend TTS Neural (Azure Francisca) ativo!');
-        } else if (backendUrl) {
-          fetch(backendUrl + '/', { method: 'GET' })
-            .then(r2 => {
-              if (r2.ok) {
-                this.useServerTts = true;
-                console.log('[Acre Acessivel] Backend TTS local ativo!');
-              }
-            })
-            .catch(() => this.checkBrowserFallback());
-        } else {
-          this.checkBrowserFallback();
-        }
-      })
-      .catch(() => {
-        if (backendUrl) {
-          fetch(backendUrl + '/', { method: 'GET' })
-            .then(r2 => {
-              if (r2.ok) {
-                this.useServerTts = true;
-                console.log('[Acre Acessivel] Backend TTS local ativo!');
-              }
-            })
-            .catch(() => this.checkBrowserFallback());
-        } else {
-          this.checkBrowserFallback();
-        }
-      });
-
-    if (!this.synth) {
+    if (config.backendUrl) {
+      this.serverTtsUrl = `${config.backendUrl.replace(/\/$/, '')}/api/tts`;
       this.useServerTts = true;
-      return;
     }
-    
-    const checkVoices = () => {
-      const ptVoice = this.getBestPtVoice();
-      if (ptVoice) {
-        console.log(`[Acre Acessivel] Voz nativa do navegador disponivel: ${ptVoice.name} (${ptVoice.lang})`);
+  }
+
+  private initVoices() {
+    if (!this.synth) return;
+
+    const loadVoices = () => {
+      if (!this.synth) return;
+      this.voices = this.synth.getVoices();
+      if (this.voices.length > 0 && !this.selectedVoice) {
+        this.selectedVoice = this.pickBestPortugueseVoice(this.voices);
       }
     };
 
-    if (typeof this.synth.addEventListener === 'function') {
-      this.synth.addEventListener('voiceschanged', checkVoices);
-    } else {
-      this.synth.onvoiceschanged = checkVoices;
+    loadVoices();
+    if (typeof window !== 'undefined' && this.synth.onvoiceschanged !== undefined) {
+      this.synth.onvoiceschanged = loadVoices;
     }
-    Promise.resolve().then(checkVoices);
-    checkVoices();
   }
 
-  private checkBrowserFallback() {
-    if (this.synth && this.getBestPtVoice()) {
-      console.log('[Acre Acessivel] Backend TTS nao alcancado, usando sintetizador nativo do navegador.');
+  private pickBestPortugueseVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+    const ptVoices = voices.filter(
+      (v) =>
+        v.lang.toLowerCase().includes('pt-br') ||
+        v.lang.toLowerCase().includes('pt_br') ||
+        v.lang.toLowerCase().startsWith('pt'),
+    );
+
+    if (ptVoices.length === 0) {
+      return voices[0] || null;
+    }
+
+    const priorityKeywords = [
+      'natural',
+      'francisca',
+      'antonio',
+      'thalita',
+      'neural',
+      'online',
+      'google português do brasil',
+      'google',
+      'luciana',
+      'daniel',
+      'microsoft',
+      'premium',
+      'enhanced',
+      'brasil',
+      'brazil',
+    ];
+
+    let bestVoice = ptVoices[0];
+    let bestScore = -1;
+
+    for (const v of ptVoices) {
+      let score = 0;
+      const nameLower = v.name.toLowerCase();
+      const langLower = v.lang.toLowerCase();
+
+      if (langLower.includes('br')) score += 20;
+
+      for (let i = 0; i < priorityKeywords.length; i++) {
+        if (nameLower.includes(priorityKeywords[i])) {
+          score += (priorityKeywords.length - i) * 5;
+        }
+      }
+
+      if (!v.localService) score += 10;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestVoice = v;
+      }
+    }
+
+    return bestVoice;
+  }
+
+  public getAvailablePortugueseVoices(): SpeechSynthesisVoice[] {
+    return this.voices.filter((v) => v.lang.toLowerCase().startsWith('pt'));
+  }
+
+  public setVoiceByName(name: string) {
+    const found = this.voices.find((v) => v.name === name);
+    if (found) {
+      this.selectedVoice = found;
       this.useServerTts = false;
-    } else {
-      console.log('[Acre Acessivel] Mantendo modo de audio remoto/servidor.');
     }
   }
 
   public setRate(rate: number) {
-    this.config.rate = rate;
-    if (this.currentState === 'speaking') {
-      if (this.useServerTts && this.audioPlayer) {
-        this.audioPlayer.playbackRate = rate;
-      } else {
-        const idx = this.currentIndex;
-        this.stop();
-        this._isSequentialReading = true;
-        this.readElementAtIndex(idx, false);
+    this.rate = Math.max(0.5, Math.min(2.2, rate));
+    if (this.currentAudio) {
+      this.currentAudio.playbackRate = this.rate;
+    }
+  }
+
+  public getRate(): number {
+    return this.rate;
+  }
+
+  public setReadOnHover(enabled: boolean) {
+    this.readOnHover = enabled;
+    if (!enabled) {
+      this.clearHighlight();
+    }
+  }
+
+  public isReadOnHoverEnabled(): boolean {
+    return this.readOnHover;
+  }
+
+  /** Chamado em mudanças de rota SPA para parar leitura anterior e reindexar o DOM */
+  public onRouteChange() {
+    if (this.isReading || this.isPaused) {
+      this.stop();
+    } else {
+      this.clearHighlight();
+    }
+    this.readableElements = [];
+    this.currentIndex = 0;
+  }
+
+  private isIgnoredElement(el: HTMLElement | null): boolean {
+    if (!el) return true;
+    const ignoreQuery = this.structure.ignoreSelectors.join(', ');
+    if (!ignoreQuery) return false;
+    try {
+      return Boolean(el.matches(ignoreQuery) || el.closest(ignoreQuery));
+    } catch {
+      return false;
+    }
+  }
+
+  private resolveRootContainers(): ParentNode[] {
+    if (typeof document === 'undefined') return [];
+    for (const rootSel of this.structure.contentRoots) {
+      try {
+        const matches = Array.from(document.querySelectorAll<HTMLElement>(rootSel)).filter((el) => {
+          const style = window.getComputedStyle(el);
+          return style.display !== 'none' && style.visibility !== 'hidden';
+        });
+        if (matches.length > 0) return matches;
+      } catch {
+        /* ignore invalid selector */
       }
     }
+    return [document.body];
   }
 
-  public setVolume(volume: number) {
-    this.config.volume = volume;
-    if (this.useServerTts && this.audioPlayer) {
-      this.audioPlayer.volume = volume;
-    } else if (this.currentUtterance) {
-      this.currentUtterance.volume = volume;
-    }
-  }
+  public scanReadableElements(): HTMLElement[] {
+    if (typeof document === 'undefined') return [];
+    const selector = this.structure.readableSelectors.join(', ');
+    const roots = this.resolveRootContainers();
+    const candidates: HTMLElement[] = [];
 
-  /** Tom base da voz (1.0 = neutro). Combinado com o perfil por tipo de elemento (ver TextNormalizer). */
-  public setPitch(pitch: number) {
-    this.config.pitch = pitch;
-  }
-
-  public setLanguage(lang: string) {
-    this.config.lang = lang;
-    this.useServerTts = true;
-    console.log(`[Acre Acessivel] Idioma alterado para: ${lang}`);
-  }
-
-  public get language(): string {
-    return this.config.lang;
-  }
-
-  private getReadableText(element: HTMLElement): string {
-    const tag = element.tagName.toLowerCase();
-
-    if (tag === 'img') {
-      return element.getAttribute('alt') || element.getAttribute('title') || '';
+    for (const root of roots) {
+      const nodeList = root.querySelectorAll<HTMLElement>(selector);
+      nodeList.forEach((el) => {
+        if (!candidates.includes(el)) {
+          candidates.push(el);
+        }
+      });
     }
 
-    const ariaLabel = element.getAttribute('aria-label');
-    if (ariaLabel) return ariaLabel.trim();
-
-    // Remove text from elements that shouldn't be read out loud (icons, aria-hidden)
-    const clone = element.cloneNode(true) as HTMLElement;
-    const hideSelectors = '[aria-hidden="true"], .material-symbols-outlined, .material-icons, i, svg';
-    clone.querySelectorAll(hideSelectors).forEach(el => el.remove());
-
-    const title = element.getAttribute('title');
-    if (title && !(clone.textContent || '').trim()) return title.trim();
-
-    // textContent colapsa whitespace melhor que innerText para leitura
-    const raw = (clone.textContent || '').replace(/\s+/g, ' ').trim();
-    return raw;
-  }
-
-  private scanReadableElements() {
-    this.textElements = [];
-    const selector =
-    'h1, h2, h3, h4, h5, h6, p, li, blockquote, figcaption, img[alt]';
-    // Separamos elementos interativos para não ler links/botões em sequência automática
-    // (eles são lidos ao clicar/focar individualmente)
-    const elements = Array.from(document.querySelectorAll<HTMLElement>(selector));
-
-    const filtered: HTMLElement[] = [];
-
-    for (const el of elements) {
-      if (
-        el.closest('acre-accessibility-panel') ||
-        el.closest('capi-mascot') ||
-        el.closest('#vlibras-div') ||
-        el.closest('.audio-player-wrapper') ||
-        el.closest('audio')
-      ) continue;
+    const filtered = candidates.filter((el) => {
+      if (this.isIgnoredElement(el)) return false;
 
       const style = window.getComputedStyle(el);
-      if (
-        style.display === 'none' ||
-        style.visibility === 'hidden' ||
-        style.opacity === '0'
-      ) continue;
-
-      const text = this.getReadableText(el).trim();
-      if (text.length < 2) continue;
-
-      // Descarta se já tem um ancestral na lista (evita duplicata pai/filho)
-      const hasAncestor = filtered.some(existing => existing.contains(el));
-      if (hasAncestor) continue;
-
-      // Remove descendentes já adicionados que são mais específicos que este (improvável mas seguro)
-      for (let i = filtered.length - 1; i >= 0; i--) {
-        if (el.contains(filtered[i])) filtered.splice(i, 1);
+      if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+        return false;
       }
 
-      filtered.push(el);
-    }
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return false;
 
-    this.textElements = filtered;
-    console.log(`[Acre Acessivel] Varredura: ${this.textElements.length} elementos legiveis.`);
-  }
+      const text = this.extractCleanText(el);
+      return text.length > 2;
+    });
 
-  private updateState(state: 'idle' | 'speaking' | 'paused') {
-    this.currentState = state;
-    this.config.onStateChange(state);
-    this.updateMediaSessionPlaybackState(state);
-    try {
-      document.dispatchEvent(new CustomEvent('acre:voice:state', { detail: { state } }));
-    } catch (e) {}
-  }
-
-  public play() {
-    if (this.currentState === 'paused') {
-      this.resume();
-      return;
-    }
-
-    this.scanReadableElements();
-    if (this.textElements.length === 0) {
-      console.warn('[Acre Acessivel] Nenhum elemento legivel encontrado.');
-      return;
-    }
-
-    this._isSequentialReading = true;
-    this.currentIndex = 0;
-    this.readElementAtIndex(this.currentIndex, false);
-  }
-
-  public pause() {
-    if (this.currentState !== 'speaking') return;
-    if (this.useServerTts && this.audioPlayer) {
-      this.audioPlayer.pause();
-    } else if (this.synth) {
-      this.synth.pause();
-    }
-    this.updateState('paused');
-  }
-
-  public resume() {
-    if (this.currentState !== 'paused') return;
-    if (this.useServerTts && this.audioPlayer) {
-      this.audioPlayer.play().catch(err => console.error('[Acre Acessivel] Erro ao retomar:', err));
-    } else if (this.synth) {
-      this.synth.resume();
-    }
-    this.updateState('speaking');
-  }
-
-  public stop() {
-    this._isSequentialReading = false;
-    this.clearWaitingFeedback();
-
-    // Aborta qualquer fetch de TTS em andamento (chunk atual + prefetch)
-    if (this._serverAbort) {
-      this._serverAbort.abort();
-      this._serverAbort = null;
-    }
-    this._prefetchedChunks.clear();
-
-    if (this.audioPlayer) {
-      this.audioPlayer.pause();
-      this.audioPlayer.removeAttribute('src');
-    }
-    if (this.synth) {
-      try {
-        this.synth.cancel();
-      } catch (e) {}
-    }
-    this.removeHighlight();
-    this.currentIndex = -1;
-    this.updateState('idle');
-  }
-
-  public next() {
-    if (this.textElements.length === 0) this.scanReadableElements();
-    if (this.currentIndex < this.textElements.length - 1) {
-      this.stopSpeechOnly();
-      this.currentIndex++;
-      // next/prev manual: scrolla para o elemento
-      this.readElementAtIndex(this.currentIndex, true);
-    } else {
-      console.log('[Acre Acessivel] Fim dos elementos da pagina.');
-      this.stop();
-    }
-  }
-
-  public previous() {
-    if (this.textElements.length === 0) this.scanReadableElements();
-    if (this.currentIndex > 0) {
-      this.stopSpeechOnly();
-      this.currentIndex--;
-      this.readElementAtIndex(this.currentIndex, true);
-    }
-  }
-
-  private stopSpeechOnly() {
-    this.clearWaitingFeedback();
-    if (this._serverAbort) {
-      this._serverAbort.abort();
-      this._serverAbort = null;
-    }
-    this._prefetchedChunks.clear();
-    if (this.audioPlayer) {
-      this.audioPlayer.pause();
-      this.audioPlayer.removeAttribute('src');
-    }
-    if (this.synth) {
-      try {
-        this.synth.cancel();
-      } catch (e) {}
-    }
-    this.removeHighlight();
-  }
-
-  private removeHighlight() {
-    this.textElements.forEach(el => el.classList.remove(this.highlightClassName));
-    this.config.onElementHighlight(null);
-  }
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // Media Session API — v6: controle remoto de hardware
-  // ──────────────────────────────────────────────────────────────────────────
-  //
-  // Conecta o leitor a botões físicos de fone Bluetooth, tela de bloqueio e
-  // central de notificações do sistema — sem precisar abrir o painel nem usar
-  // atalho de teclado. Os handlers só chamam os mesmos métodos públicos
-  // (play/pause/next/previous) que os botões do painel já usam.
-  //
-  // Limitação conhecida: no modo local (Web Speech API, sem <audio> real), o
-  // suporte do sistema pra mostrar os controles na tela de bloqueio varia por
-  // navegador — confiável no Chrome desktop/Android, inconsistente em
-  // Safari/Firefox. No modo servidor (useServerTts), como cada chunk é um
-  // <audio> de verdade tocando, a integração é mais sólida em qualquer
-  // navegador que implemente a API.
-
-  private setupMediaSession() {
-    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) {
-      console.warn(
-        '[Acre Acessivel] Media Session API indisponivel — controles de hardware (fone/tela de ' +
-        'bloqueio) nao vao funcionar. Atalhos de teclado e botoes do painel continuam normais.'
-      );
-      return;
-    }
-
-    const ms = navigator.mediaSession;
-    const safe = (action: MediaSessionAction, handler: MediaSessionActionHandler) => {
-      try {
-        ms.setActionHandler(action, handler);
-      } catch (e) {
-        // Ação específica não suportada nesse navegador — ignora só ela, não quebra o resto
+    // Evita ler o elemento pai E o elemento filho duplicadamente quando ambos batem no seletor
+    const deduplicated = filtered.filter((el) => {
+      const attrText = el.getAttribute(this.structure.readableTextAttr);
+      if (attrText) return true;
+      const parentWithAttr = el.parentElement?.closest(`[${this.structure.readableTextAttr}]`);
+      if (parentWithAttr && filtered.includes(parentWithAttr as HTMLElement)) {
+        return false;
       }
-    };
+      const hasFilteredChild = filtered.some((other) => other !== el && el.contains(other));
+      return !hasFilteredChild;
+    });
 
-    safe('play', () => this.play());
-    safe('pause', () => this.pause());
-    safe('stop', () => this.stop());
-    safe('previoustrack', () => this.previous());
-    safe('nexttrack', () => this.next());
-    // Alguns fones/firmwares mandam seek em vez de track — mapeia pro mesmo lugar,
-    // já que a granularidade de navegação aqui é por elemento, não por segundos.
-    safe('seekbackward', () => this.previous());
-    safe('seekforward', () => this.next());
+    this.readableElements = deduplicated;
+    return deduplicated;
   }
 
-  private updateMediaSessionPlaybackState(state: 'idle' | 'speaking' | 'paused') {
-    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
-    try {
-      navigator.mediaSession.playbackState =
-        state === 'speaking' ? 'playing' : state === 'paused' ? 'paused' : 'none';
-      if (state === 'idle') {
-        navigator.mediaSession.metadata = null;
-      }
-    } catch (e) {}
+  private extractCleanText(el: HTMLElement): string {
+    const customReadable = el.getAttribute(this.structure.readableTextAttr);
+    if (customReadable && customReadable.trim().length > 0) {
+      return customReadable.trim();
+    }
+
+    const clone = el.cloneNode(true) as HTMLElement;
+    clone
+      .querySelectorAll('[aria-hidden="true"], .sr-only, script, style, svg')
+      .forEach((n) => n.remove());
+
+    return (clone.innerText || clone.textContent || '').replace(/\s+/g, ' ').trim();
   }
 
-  /**
-   * Atualiza o que aparece na tela de bloqueio / central de notificações: um
-   * trecho do texto atual + "Trecho X de Y" como indicação de progresso.
-   * Não usa setPositionState (barra de progresso com tempo) porque não
-   * conhecemos a duração total do áudio adiantado — só a contagem de elementos.
-   */
-  private updateMediaSessionMetadata(rawText: string, index: number) {
-    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
-    if (typeof MediaMetadata === 'undefined') return;
-
-    const snippet = rawText.length > 70 ? `${rawText.slice(0, 70).trim()}…` : rawText.trim();
-    const total = this.textElements.length;
-    const progress =
-      total > 0 && index >= 0 && index < total
-        ? `Trecho ${index + 1} de ${total}`
-        : 'Acre Acessível';
-
-    try {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: snippet || 'Lendo conteúdo da página',
-        artist: progress,
-        album: document.title || 'Acre Acessível',
-      });
-    } catch (e) {
-      // MediaMetadata inválido ou indisponível — não é crítico, ignora
-    }
-  }
-
-  /**
-   * shouldScroll = true apenas quando o usuário clicou next/prev manualmente.
-   * Durante leitura automática sequencial: false (não move o mouse/viewport).
-   */
-  private readElementAtIndex(index: number, shouldScroll: boolean) {
-    if (index < 0 || index >= this.textElements.length) {
-      this.stop();
-      return;
+  private splitIntoSentences(text: string): string[] {
+    const normalized = this.normalizer.normalize(text);
+    if (normalized.length <= 180) {
+      return [normalized];
     }
 
-    const element = this.textElements[index];
-    this.removeHighlight();
-    element.classList.add(this.highlightClassName);
-    this.config.onElementHighlight(element);
+    const rawParts = normalized.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [normalized];
+    const chunks: string[] = [];
+    let current = '';
 
-    if (shouldScroll) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    for (const part of rawParts) {
+      const trimmed = part.trim();
+      if (!trimmed) continue;
 
-    const rawText = this.getReadableText(element);
-    if (!rawText.trim()) {
-      // Pula elemento vazio
-      if (this._isSequentialReading) {
-        this.currentIndex++;
-        this.readElementAtIndex(this.currentIndex, false);
-      }
-      return;
-    }
-
-    this.updateMediaSessionMetadata(rawText, index);
-
-    const tag = element.tagName.toLowerCase();
-    const chunks = TextNormalizer.normalizeToChunks(rawText, this.config.lang);
-    const profile = TextNormalizer.profileForTag(tag);
-
-    console.log(`[Acre Acessivel] [${index}] (${tag}) "${rawText.substring(0, 60)}${rawText.length > 60 ? '...' : ''}" — ${chunks.length} frase(s)`);
-
-    if (this.useServerTts) {
-      // No modo servidor, usa os mesmos chunks normalizados (com pausas entre frases)
-      // — cada chunk vira um POST separado, mantendo prosódia equivalente ao modo local.
-      this.readChunksViaServer(chunks, 0, index, () => {
-        if (this._isSequentialReading && this.currentState === 'speaking' && this.currentIndex === index) {
-          this.next();
-        }
-      });
-      return;
-    }
-
-    this.speakChunks(chunks, profile, 0, index, () => {
-      if (this._isSequentialReading && this.currentState === 'speaking' && this.currentIndex === index) {
-        this.next();
-      }
-    }, (event) => this.handleSpeechError(event, () => this.readElementAtIndex(index, shouldScroll)));
-  }
-
-  /**
-   * Fala uma lista de frases (chunks) em sequência, cada uma como utterance própria,
-   * respeitando a pausa sugerida entre elas. Isso é o que dá à voz nativa uma entonação
-   * de início/fim de frase real, em vez de uma leitura corrida e monotônica.
-   */
-  private speakChunks(
-    chunks: SentenceChunk[],
-    profile: { rateMultiplier: number; pitch: number },
-    chunkIdx: number,
-    elementIndex: number,
-    onAllDone: () => void,
-    onError?: (event: any) => void,
-    retryCount: number = 0
-  ) {
-    if (chunkIdx === 0 && retryCount === 0) {
-      this.updateState('speaking');
-    }
-
-    if (chunkIdx >= chunks.length) {
-      onAllDone();
-      return;
-    }
-
-    // Se o elemento mudou (ex: usuário pulou pra outro) ou parou de ler, aborta a cadeia
-    if (this._isSequentialReading && this.currentIndex !== elementIndex) return;
-
-    const chunk = chunks[chunkIdx];
-    const utterance = new SpeechSynthesisUtterance(chunk.text);
-    utterance.rate = Math.max(0.5, Math.min(2.0, this.config.rate * profile.rateMultiplier));
-    utterance.volume = Math.max(0.1, Math.min(1.0, this.config.volume));
-    utterance.pitch = this.clampPitch(this.config.pitch * profile.pitch);
-
-    const voice = this.getBestVoiceForLang(this.config.lang || 'pt-BR');
-    if (voice) {
-      utterance.voice = voice;
-      utterance.lang = voice.lang || this.config.lang || 'pt-BR';
-    } else {
-      utterance.lang = this.config.lang || 'pt-BR';
-    }
-
-    this.currentUtterance = utterance;
-    if (typeof window !== 'undefined') {
-      (window as any).__acre_active_utterance = utterance;
-    }
-
-    let finished = false;
-    let keepAliveTimer: any = null;
-
-    const cleanup = () => {
-      if (keepAliveTimer) {
-        clearInterval(keepAliveTimer);
-        keepAliveTimer = null;
-      }
-      if (typeof window !== 'undefined' && (window as any).__acre_active_utterance === utterance) {
-        (window as any).__acre_active_utterance = null;
-      }
-    };
-
-    const nextStep = () => {
-      if (finished) return;
-      finished = true;
-      cleanup();
-      if (chunk.pauseAfterMs > 0) {
-        setTimeout(() => {
-          this.speakChunks(chunks, profile, chunkIdx + 1, elementIndex, onAllDone, onError);
-        }, chunk.pauseAfterMs);
+      if ((current + ' ' + trimmed).trim().length <= 200) {
+        current = (current + ' ' + trimmed).trim();
       } else {
-        this.speakChunks(chunks, profile, chunkIdx + 1, elementIndex, onAllDone, onError);
-      }
-    };
-
-    utterance.onend = () => {
-      nextStep();
-    };
-
-    utterance.onerror = (event: any) => {
-      if (event?.error === 'interrupted' || event?.error === 'canceled') return;
-      console.warn('[Acre Acessivel] Utterance error:', event?.error);
-
-      // Tenta recuperar no maximo UMA unica vez trocando a voz para a padrao
-      if (
-        (event?.error === 'synthesis-failed' || event?.error === 'language-unavailable') &&
-        retryCount === 0
-      ) {
-        if (voice?.name) {
-          this.failedVoiceNames.add(voice.name);
-          console.warn(`[Acre Acessivel] Voz ${voice.name} falhou na sintese. Tentando novamente com voz padrao.`);
+        if (current) chunks.push(current);
+        if (trimmed.length > 220) {
+          const subParts = trimmed.split(/,\s*/);
+          let subCurrent = '';
+          for (const sp of subParts) {
+            if ((subCurrent + ', ' + sp).length <= 200) {
+              subCurrent = subCurrent ? `${subCurrent}, ${sp}` : sp;
+            } else {
+              if (subCurrent) chunks.push(subCurrent);
+              subCurrent = sp;
+            }
+          }
+          current = subCurrent;
+        } else {
+          current = trimmed;
         }
-        cleanup();
-        try {
-          this.synth.cancel();
-        } catch {}
-        setTimeout(() => {
-          this.speakChunks(chunks, profile, chunkIdx, elementIndex, onAllDone, onError, 1);
-        }, 100);
+      }
+    }
+    if (current) chunks.push(current);
+
+    return chunks.length > 0 ? chunks : [normalized];
+  }
+
+  public startPageReading(fromBeginning = true) {
+    if (!this.synth && !this.useServerTts) return;
+
+    this.cancelCurrentSpeechOnly();
+    this.consecutiveErrors = 0;
+
+    if (fromBeginning || this.readableElements.length === 0) {
+      this.scanReadableElements();
+      this.currentIndex = 0;
+    }
+
+    if (this.readableElements.length === 0) {
+      this.speakDirectText('Não encontramos textos legíveis nesta seção.');
+      return;
+    }
+
+    this.isReading = true;
+    this.isPaused = false;
+    this.activeSessionId++;
+    this.callbacks.onStart?.();
+    this.readCurrentElement(this.activeSessionId);
+  }
+
+  private readCurrentElement(sessionId: number) {
+    if (!this.isReading || sessionId !== this.activeSessionId) return;
+
+    if (this.currentIndex >= this.readableElements.length) {
+      this.stop();
+      return;
+    }
+
+    const el = this.readableElements[this.currentIndex];
+    const rawText = this.extractCleanText(el);
+
+    if (!rawText) {
+      this.currentIndex++;
+      this.readCurrentElement(sessionId);
+      return;
+    }
+
+    this.highlightElement(el, true);
+    this.callbacks.onSentenceChange?.(el, rawText);
+
+    this.subChunks = this.splitIntoSentences(rawText);
+    this.currentSubChunkIndex = 0;
+
+    this.speakNextSubChunk(sessionId);
+  }
+
+  private speakNextSubChunk(sessionId: number) {
+    if (!this.isReading || sessionId !== this.activeSessionId) return;
+
+    if (this.currentSubChunkIndex >= this.subChunks.length) {
+      this.currentIndex++;
+      window.setTimeout(() => {
+        if (this.isReading && !this.isPaused && sessionId === this.activeSessionId) {
+          this.readCurrentElement(sessionId);
+        }
+      }, 350);
+      return;
+    }
+
+    const chunkText = this.subChunks[this.currentSubChunkIndex];
+    this.speakRawChunk(chunkText, sessionId, () => {
+      if (this.isReading && !this.isPaused && sessionId === this.activeSessionId) {
+        this.currentSubChunkIndex++;
+        this.speakNextSubChunk(sessionId);
+      }
+    });
+  }
+
+  public readSingleElement(el: HTMLElement) {
+    const rawText = this.extractCleanText(el);
+    if (!rawText) return;
+
+    this.cancelCurrentSpeechOnly();
+    this.isReading = true;
+    this.isPaused = false;
+    this.activeSessionId++;
+    const sessionId = this.activeSessionId;
+
+    this.highlightElement(el, false);
+    this.callbacks.onStart?.();
+    this.callbacks.onSentenceChange?.(el, rawText);
+
+    this.subChunks = this.splitIntoSentences(rawText);
+    this.currentSubChunkIndex = 0;
+
+    const playSingleChunks = () => {
+      if (!this.isReading || sessionId !== this.activeSessionId) return;
+      if (this.currentSubChunkIndex >= this.subChunks.length) {
+        this.isReading = false;
+        this.clearHighlight();
+        this.callbacks.onStop?.();
         return;
       }
 
-      // Se falhou mesmo com retry (ou erro fatal): interrompe limpo sem reentrar em loop
-      cleanup();
-      console.warn('[Acre Acessivel] Sintese nativa cancelada para este elemento para evitar travamento.');
-      this.removeHighlight();
-      this.updateState('idle');
-      this._isSequentialReading = false;
-      try {
-        this.synth.cancel();
-      } catch {}
-      if (typeof onError === 'function') {
-        onError(event);
+      const chunk = this.subChunks[this.currentSubChunkIndex];
+      this.speakRawChunk(chunk, sessionId, () => {
+        if (this.isReading && !this.isPaused && sessionId === this.activeSessionId) {
+          this.currentSubChunkIndex++;
+          playSingleChunks();
+        }
+      });
+    };
+
+    playSingleChunks();
+  }
+
+  public speakDirectText(rawText: string) {
+    this.cancelCurrentSpeechOnly();
+    this.isReading = true;
+    this.isPaused = false;
+    this.activeSessionId++;
+    const sessionId = this.activeSessionId;
+
+    this.callbacks.onStart?.();
+    this.callbacks.onSentenceChange?.(null, rawText);
+
+    this.subChunks = this.splitIntoSentences(rawText);
+    this.currentSubChunkIndex = 0;
+
+    const playChunks = () => {
+      if (!this.isReading || sessionId !== this.activeSessionId) return;
+      if (this.currentSubChunkIndex >= this.subChunks.length) {
+        this.isReading = false;
+        this.callbacks.onStop?.();
+        return;
+      }
+
+      const chunk = this.subChunks[this.currentSubChunkIndex];
+      this.speakRawChunk(chunk, sessionId, () => {
+        if (this.isReading && !this.isPaused && sessionId === this.activeSessionId) {
+          this.currentSubChunkIndex++;
+          playChunks();
+        }
+      });
+    };
+
+    playChunks();
+  }
+
+  private speakRawChunk(normalizedChunk: string, sessionId: number, onComplete: () => void) {
+    this.clearWatchdog();
+
+    if (this.useServerTts && this.serverTtsUrl) {
+      this.fetchAndPlayServerAudio(normalizedChunk, sessionId, onComplete);
+      return;
+    }
+
+    if (!this.synth) {
+      onComplete();
+      return;
+    }
+
+    const cleanText = normalizedChunk.trim();
+    if (!cleanText || cleanText.length < 2) {
+      onComplete();
+      return;
+    }
+
+    if (this.voices.length === 0) {
+      this.voices = this.synth.getVoices();
+      if (this.voices.length > 0 && !this.selectedVoice) {
+        this.selectedVoice = this.pickBestPortugueseVoice(this.voices);
+      }
+    }
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = this.selectedVoice?.lang || 'pt-BR';
+    utterance.rate = this.rate;
+    utterance.pitch = this.pitch;
+
+    if (this.selectedVoice) {
+      utterance.voice = this.selectedVoice;
+    }
+
+    this.currentUtterance = utterance;
+    (window as unknown as Record<string, unknown>).__acreActiveUtterance = utterance;
+
+    let completed = false;
+    const speechStartTime = Date.now();
+
+    const finishOnce = () => {
+      if (completed) return;
+      completed = true;
+      this.clearWatchdog();
+      if (sessionId === this.activeSessionId) {
+        onComplete();
       }
     };
+
+    utterance.onstart = () => {
+      this.consecutiveErrors = 0;
+    };
+
+    utterance.onend = () => {
+      const elapsed = Date.now() - speechStartTime;
+      // Se um texto significativo (>= 12 caracteres) disparar onend em menos de 200ms,
+      // a síntese não produziu áudio real (falha silenciosa da API no navegador).
+      if (cleanText.length >= 12 && elapsed < 200) {
+        this.consecutiveInstantSkips++;
+        if (this.consecutiveInstantSkips >= 3) {
+          console.warn('[VoiceReader] Síntese de voz finalizou instantaneamente repetidas vezes. Encerrando leitura para evitar pulos.');
+          this.stop();
+          return;
+        }
+      } else {
+        this.consecutiveInstantSkips = 0;
+      }
+
+      this.consecutiveErrors = 0;
+      finishOnce();
+    };
+
+    utterance.onerror = (e) => {
+      if (e.error === 'interrupted' || e.error === 'canceled') {
+        this.clearWatchdog();
+        return;
+      }
+
+      console.warn(`[VoiceReader] Erro na síntese Web Speech (${e.error}).`);
+
+      const recoverableErrors = ['synthesis-failed', 'language-unavailable', 'network', 'audio-busy', 'voice-unavailable'];
+      const isRecoverable = !e.error || recoverableErrors.includes(e.error);
+
+      // Fallback automático para o backend TTS caso disponível
+      if (isRecoverable && this.serverTtsUrl) {
+        console.warn('🦫 Chaveando para servidor TTS neural após falha no Web Speech local.');
+        this.useServerTts = true;
+        this.clearWatchdog();
+        this.fetchAndPlayServerAudio(cleanText, sessionId, onComplete);
+        return;
+      }
+
+      this.consecutiveErrors++;
+      if (this.consecutiveErrors >= 2) {
+        console.warn('[VoiceReader] Síntese de voz bloqueada ou sem suporte no sistema operacional. Encerrando leitura.');
+        this.callbacks.onSentenceChange?.(null, 'Síntese de voz indisponível ou sem suporte neste navegador.');
+        this.stop();
+        return;
+      }
+      // Tenta resetar a voz para padrão do sistema caso a selecionada tenha falhado
+      this.selectedVoice = null;
+      window.setTimeout(() => finishOnce(), 400);
+    };
+
+    const estimatedMs = Math.max(5000, (cleanText.length * 110) / this.rate + 3000);
+    this.watchdogTimer = window.setTimeout(() => {
+      if (!completed && this.isReading && !this.isPaused && sessionId === this.activeSessionId) {
+        finishOnce();
+      }
+    }, estimatedMs);
 
     try {
       if (this.synth.paused) {
         this.synth.resume();
       }
       this.synth.speak(utterance);
-      keepAliveTimer = setInterval(() => {
-        if (!finished && this.synth && this.synth.speaking) {
-          if (this.synth.paused) {
-            this.synth.resume();
-          }
-        } else {
-          cleanup();
-        }
-      }, 5000);
-    } catch (err) {
-      console.error('[Acre Acessivel] Erro ao chamar synth.speak:', err);
-      if (typeof onError === 'function') {
-        onError(err);
-      }
-      nextStep();
-    }
-  }
-
-  private clampPitch(pitch: number): number {
-    return Math.min(2.0, Math.max(0.0, pitch));
-  }
-
-  /**
-   * Lê um elemento específico ad-hoc (click ou hover).
-   * Bloqueado se estiver em modo sequencial.
-   */
-  public readSpecificElement(element: HTMLElement, shouldScroll: boolean = false) {
-    if (this._isSequentialReading) return;
-
-    this.scanReadableElements();
-
-    let idx = this.textElements.indexOf(element);
-    if (idx === -1) {
-      const selector =
-      'h1, h2, h3, h4, h5, h6, p, li, blockquote, article span, label, figcaption, a, button, img[alt], [role="button"]';
-      const closest = element.closest(selector) as HTMLElement;
-      if (closest) {
-        idx = this.textElements.indexOf(closest);
-        element = closest;
+    } catch {
+      this.consecutiveErrors++;
+      if (this.consecutiveErrors >= 3) {
+        this.stop();
+      } else {
+        window.setTimeout(() => finishOnce(), 400);
       }
     }
+  }
 
-    if (idx !== -1) {
-      this.stopSpeechOnly();
-      this.currentIndex = idx;
-      this.readElementAtIndex(this.currentIndex, shouldScroll);
-    } else {
-      this.stopSpeechOnly();
-      this.readSingleElement(element);
+  private clearWatchdog() {
+    if (this.watchdogTimer !== null) {
+      clearTimeout(this.watchdogTimer);
+      this.watchdogTimer = null;
     }
   }
 
-  private readSingleElement(element: HTMLElement) {
-    this.removeHighlight();
-    element.classList.add(this.highlightClassName);
-    this.config.onElementHighlight(element);
-
-    const rawText = this.getReadableText(element);
-    if (!rawText.trim()) return;
-
-    this.updateMediaSessionMetadata(rawText, this.currentIndex);
-
-// Azure backend prioritizado quando disponível
-
-    if (this.useServerTts) {
-      const chunks = TextNormalizer.normalizeToChunks(rawText, this.config.lang);
-      this.readChunksViaServer(chunks, 0, this.currentIndex, () => {
-        this.removeHighlight();
-        this.updateState('idle');
+  private async fetchAndPlayServerAudio(text: string, sessionId: number, onComplete: () => void) {
+    try {
+      const response = await fetch(this.serverTtsUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
       });
-      return;
-    }
 
-    const tag = element.tagName.toLowerCase();
-    const chunks = TextNormalizer.normalizeToChunks(rawText, this.config.lang);
-    const profile = TextNormalizer.profileForTag(tag);
-
-    this.speakChunks(chunks, profile, 0, this.currentIndex, () => {
-      this.removeHighlight();
-      this.updateState('idle');
-    }, (event) => this.handleSpeechError(event, () => this.readSingleElement(element)));
-  }
-
-  public readTextDirectly(text: string) {
-    if (this._isSequentialReading) return;
-    this.stopSpeechOnly();
-    this.removeHighlight();
-    if (!text.trim()) return;
-
-    this.updateMediaSessionMetadata(text, this.currentIndex);
-
-// Azure backend prioritizado quando disponível
-
-    if (this.useServerTts) {
-      const chunks = TextNormalizer.normalizeToChunks(text, this.config.lang);
-      this.readChunksViaServer(chunks, 0, this.currentIndex, () => this.updateState('idle'));
-      return;
-    }
-
-    const chunks = TextNormalizer.normalizeToChunks(text, this.config.lang);
-    this.speakChunks(
-      chunks,
-      { rateMultiplier: 1.0, pitch: 1.0 },
-      0,
-      this.currentIndex,
-      () => this.updateState('idle'),
-      (event) => this.handleSpeechError(event, () => this.readTextDirectly(text))
-    );
-  }
-
-  /**
-   * Le uma lista estruturada de blocos de resumo (ex: cabeçalho, projetos, stack, certificados).
-   * Sincroniza com destaque visual do elemento correspondente na pagina.
-   */
-  public readBlocks(
-    blocks: { id?: string; elementId?: string; text: string }[],
-    startIndex: number = 0,
-    onBlockStart?: (idx: number, block: any) => void,
-    onComplete?: () => void
-  ) {
-    this.stop();
-    if (!blocks || blocks.length === 0) {
-      if (typeof onComplete === 'function') onComplete();
-      return;
-    }
-
-    this._isSequentialReading = true;
-    let currentIdx = Math.max(0, Math.min(startIndex, blocks.length - 1));
-
-    const playNextBlock = () => {
-      if (!this._isSequentialReading || currentIdx >= blocks.length) {
-        this.removeHighlight();
-        this.updateState('idle');
-        this._isSequentialReading = false;
-        if (typeof onComplete === 'function') onComplete();
-        return;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
 
-      this.currentIndex = currentIdx;
-      const blk = blocks[currentIdx];
-      this.removeHighlight();
+      if (sessionId !== this.activeSessionId || !this.isReading) return;
 
-      if (blk.elementId) {
-        const targetEl = document.getElementById(blk.elementId);
-        if (targetEl) {
-          targetEl.classList.add(this.highlightClassName);
-          this.config.onElementHighlight(targetEl);
-        }
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob);
+
+      if (this.currentAudio) {
+        this.currentAudio.pause();
+        this.currentAudio = null;
       }
 
-      if (typeof onBlockStart === 'function') {
-        onBlockStart(currentIdx, blk);
-      }
+      const audio = new Audio(audioUrl);
+      audio.playbackRate = this.rate;
+      this.currentAudio = audio;
 
-      const rawText = blk.text.trim();
-      if (!rawText) {
-        currentIdx++;
-        playNextBlock();
-        return;
-      }
-
-      const chunks = TextNormalizer.normalizeToChunks(rawText, this.config.lang);
-
-      const onDone = () => {
-        currentIdx++;
-        if (this._isSequentialReading) {
-          playNextBlock();
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        if (sessionId === this.activeSessionId) {
+          onComplete();
         }
       };
 
-      if (this.useServerTts) {
-        this.readChunksViaServer(chunks, 0, currentIdx, onDone);
-      } else {
-        this.speakChunks(chunks, { rateMultiplier: 1.0, pitch: 1.0 }, 0, currentIdx, onDone);
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+        console.warn('[VoiceReader] Erro ao reproduzir áudio do servidor TTS.');
+        this.callbacks.onSentenceChange?.(null, 'Erro ao reproduzir áudio do servidor de voz.');
+        this.stop();
+      };
+
+      await audio.play();
+    } catch (err) {
+      console.warn('[VoiceReader] Falha na requisição ao servidor TTS:', err);
+      this.callbacks.onSentenceChange?.(null, 'Servidor de voz offline ou indisponível.');
+      this.stop();
+    }
+  }
+
+  private cancelCurrentSpeechOnly() {
+    this.clearWatchdog();
+    this.currentUtterance = null;
+    delete (window as unknown as Record<string, unknown>).__acreActiveUtterance;
+
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+    }
+
+    if (this.synth) {
+      try {
+        this.synth.cancel();
+      } catch {
+        /* ignore */
       }
+    }
+  }
+
+  public pause() {
+    if (!this.isReading || this.isPaused) return;
+    this.isPaused = true;
+    this.clearWatchdog();
+
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+    } else if (this.synth) {
+      try {
+        this.synth.pause();
+      } catch {
+        /* ignore */
+      }
+    }
+    this.callbacks.onPause?.();
+  }
+
+  public resume() {
+    if (!this.isReading || !this.isPaused) return;
+    this.isPaused = false;
+
+    if (this.currentAudio) {
+      this.currentAudio.play();
+    } else if (this.synth) {
+      try {
+        this.synth.resume();
+      } catch {
+        /* ignore */
+      }
+    }
+    this.callbacks.onResume?.();
+  }
+
+  public stop() {
+    this.activeSessionId++;
+    this.isReading = false;
+    this.isPaused = false;
+    this.subChunks = [];
+    this.currentSubChunkIndex = 0;
+    this.currentIndex = 0;
+    this.consecutiveErrors = 0;
+    this.cancelCurrentSpeechOnly();
+    this.clearHighlight();
+    this.callbacks.onStop?.();
+  }
+
+  public nextElement() {
+    if (this.readableElements.length === 0) {
+      this.scanReadableElements();
+    }
+    if (this.currentIndex < this.readableElements.length - 1) {
+      this.cancelCurrentSpeechOnly();
+      this.currentIndex++;
+      this.isReading = true;
+      this.isPaused = false;
+      this.activeSessionId++;
+      this.callbacks.onStart?.();
+      this.readCurrentElement(this.activeSessionId);
+    }
+  }
+
+  public previousElement() {
+    if (this.readableElements.length === 0) {
+      this.scanReadableElements();
+    }
+    if (this.currentIndex > 0) {
+      this.cancelCurrentSpeechOnly();
+      this.currentIndex--;
+      this.isReading = true;
+      this.isPaused = false;
+      this.activeSessionId++;
+      this.callbacks.onStart?.();
+      this.readCurrentElement(this.activeSessionId);
+    }
+  }
+
+  public getStatus() {
+    return {
+      isReading: this.isReading,
+      isPaused: this.isPaused,
+      currentIndex: this.currentIndex,
+      totalElements: this.readableElements.length,
     };
-
-    playNextBlock();
   }
 
-  /**
-   * Lê chunks via servidor usando POST (sem limite de tamanho de URL).
-   * Cada chunk é uma sentença do TextNormalizer — o servidor sintetiza cada um
-   * individualmente, a fila respeita pauseAfterMs, e AbortController garante
-   * cancelamento limpo ao chamar stop().
-   *
-   * Fluxo: fetch POST → blob → URL.createObjectURL → Audio → onended → próximo chunk.
-   * Isso é equivalente ao speakChunks() para Web Speech API, mas para áudio HTTP.
-   *
-   * v5 — buffering: assim que o áudio do chunk atual COMEÇA a tocar (onplay), o
-   * fetch do PRÓXIMO chunk já é disparado em paralelo e fica em _prefetchedChunks.
-   * Quando o atual termina, o próximo já está pronto (ou quase) — elimina o gap de
-   * rede entre frases que o edge-tts (motor primário, com latência de rede) introduz
-   * e que o Piper local (~200ms) não tinha. Um único AbortController por cadeia de
-   * leitura (criado só em chunkIdx === 0) cobre o chunk atual E o prefetch — stop()
-   * cancela os dois com uma chamada.
-   */
-  private _serverAbort: AbortController | null = null;
-  private _prefetchedChunks: Map<number, Promise<Blob>> = new Map();
+  private highlightElement(el: HTMLElement, allowScroll = false) {
+    this.clearHighlight();
+    this.currentHighlightedEl = el;
+    el.classList.add('acre-acessivel-reading-highlight');
 
-  private fetchChunkAudio(text: string, signal: AbortSignal): Promise<Blob> {
-    const backendUrl = this.getBackendUrl();
-    const timeoutCtrl = new AbortController();
-    const timeoutTimer = setTimeout(() => timeoutCtrl.abort(), 5000);
+    if (!allowScroll) return;
 
-    const onParentAbort = () => {
-      clearTimeout(timeoutTimer);
-      timeoutCtrl.abort();
-    };
-    signal.addEventListener('abort', onParentAbort, { once: true });
+    const rect = el.getBoundingClientRect();
+    const vHeight = window.innerHeight || document.documentElement.clientHeight;
+    // Se o elemento já está razoavelmente visível na tela, NÃO mexe na rolagem da página
+    const isInViewport = rect.top >= 60 && rect.bottom <= vHeight - 60;
 
-    return fetch(`${backendUrl}/api/tts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, lang: this.config.lang }),
-      signal: timeoutCtrl.signal,
-    })
-      .then(res => {
-        clearTimeout(timeoutTimer);
-        if (!res.ok) throw new Error(`TTS HTTP ${res.status}`);
-        return res.blob();
-      })
-      .catch(err => {
-        clearTimeout(timeoutTimer);
-        throw err;
-      });
+    if (!isInViewport) {
+      this.isProgrammaticScroll = true;
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      window.setTimeout(() => {
+        this.isProgrammaticScroll = false;
+      }, 500);
+    }
   }
 
-  /** Garante que o fetch do chunk já esteja em andamento (ou concluído), sem duplicar. */
-  private ensurePrefetched(
-    chunks: SentenceChunk[],
-    chunkIdx: number,
-    signal: AbortSignal,
-  ): Promise<Blob> {
-    let promise = this._prefetchedChunks.get(chunkIdx);
-    if (!promise) {
-      promise = this.fetchChunkAudio(chunks[chunkIdx].text, signal);
-      this._prefetchedChunks.set(chunkIdx, promise);
+  private clearHighlight() {
+    if (this.currentHighlightedEl) {
+      this.currentHighlightedEl.classList.remove('acre-acessivel-reading-highlight');
+      this.currentHighlightedEl = null;
     }
-    return promise;
   }
 
-  private readChunksViaServer(
-    chunks: SentenceChunk[],
-    chunkIdx: number,
-    elementIndex: number,
-    onAllDone: () => void,
-  ) {
-    if (chunkIdx === 0) {
-      this.updateState('speaking');
-      this._prefetchedChunks.clear();
-      this._serverAbort = new AbortController();
-    }
+  private setupHoverReading() {
+    if (typeof document === 'undefined') return;
 
-    if (chunkIdx >= chunks.length) {
-      onAllDone();
-      return;
-    }
+    document.addEventListener(
+      'mousemove',
+      () => {
+        this.lastUserMouseMoveTime = Date.now();
+      },
+      { passive: true },
+    );
 
-    if (this._serverAbort?.signal.aborted) return;
-    if (this._isSequentialReading && this.currentIndex !== elementIndex) return;
+    const targetQuery = [
+      ...this.structure.readableSelectors,
+      'button',
+      'a',
+      'label',
+    ].join(', ');
 
-    const chunk = chunks[chunkIdx];
-    const signal = this._serverAbort!.signal;
+    document.addEventListener('mouseover', (e: MouseEvent) => {
+      if (!this.readOnHover) return;
+      if (this.isReading) return;
+      if (this.isProgrammaticScroll) return;
+      if (Date.now() - this.lastUserMouseMoveTime > 400) return;
 
-    // Som de espera (earcon) só dispara se a resposta REALMENTE demorar — ver baixo.
-    this.startWaitingFeedback();
+      const target = e.target as HTMLElement | null;
+      if (!target || this.isIgnoredElement(target)) return;
 
-    this.ensurePrefetched(chunks, chunkIdx, signal)
-      .then(blob => {
-        this.clearWaitingFeedback();
-        if (signal.aborted) return;
+      const readableEl = target.closest(targetQuery) as HTMLElement | null;
+      if (!readableEl || readableEl === this.lastHoveredEl || this.isIgnoredElement(readableEl)) {
+        return;
+      }
 
-        const url = URL.createObjectURL(blob);
-        const audio = this.audioPlayer || new Audio();
-        if (!this.audioPlayer) this.audioPlayer = audio;
-        
-        audio.src = url;
-        audio.preload = 'auto';
-        audio.playbackRate = this.config.rate;
-        audio.volume = this.config.volume;
+      if (this.hoverTimeout) {
+        window.clearTimeout(this.hoverTimeout);
+      }
 
-        // Buffering: ao começar a tocar o chunk atual, já adianta o fetch do próximo.
-        audio.onplay = () => {
-          if (signal.aborted || chunkIdx + 1 >= chunks.length) return;
-          this.ensurePrefetched(chunks, chunkIdx + 1, signal).catch(() => {
-            // Falha no prefetch não é fatal: vira um fetch normal (com earcon, se demorar)
-            // quando chegar a vez desse chunk.
-            this._prefetchedChunks.delete(chunkIdx + 1);
-          });
-        };
-
-        audio.onended = () => {
-          setTimeout(() => URL.revokeObjectURL(url), 100);
-          this._prefetchedChunks.delete(chunkIdx);
-          if (signal.aborted) return;
-          const next = () =>
-            this.readChunksViaServer(chunks, chunkIdx + 1, elementIndex, onAllDone);
-          chunk.pauseAfterMs > 0 ? setTimeout(next, chunk.pauseAfterMs) : next();
-        };
-
-        audio.onerror = () => {
-          setTimeout(() => URL.revokeObjectURL(url), 100);
-          if (signal.aborted) return;
-          console.warn('[Acre Acessivel] Erro ao reproduzir audio do servidor.');
-          if (this.synth) {
-            console.log('[Acre Acessivel] Alternando para voz nativa do navegador...');
-            this.useServerTts = false;
-            this.speakChunks(chunks, { rateMultiplier: 1.0, pitch: 1.0 }, chunkIdx, elementIndex, onAllDone);
-          } else {
-            this.stop();
-          }
-        };
-
-        audio.play().catch(err => {
-          setTimeout(() => URL.revokeObjectURL(url), 100);
-          if (err.name === 'AbortError') return;
-          console.error('[Acre Acessivel] Autoplay bloqueado:', err);
-          this.stop();
-        });
-      })
-      .catch(err => {
-        this.clearWaitingFeedback();
-        if (err.name === 'AbortError' || signal.aborted) return;
-        console.warn('[Acre Acessivel] Erro no fetch TTS do servidor:', err);
-        if (this.synth) {
-          console.log('[Acre Acessivel] Alternando para voz nativa do navegador...');
-          this.useServerTts = false;
-          this.speakChunks(chunks, { rateMultiplier: 1.0, pitch: 1.0 }, chunkIdx, elementIndex, onAllDone);
-        } else {
-          this.stop();
+      this.hoverTimeout = window.setTimeout(() => {
+        if (!this.readOnHover || this.isReading || this.isProgrammaticScroll) return;
+        const text = this.extractCleanText(readableEl);
+        if (text && text.length > 1) {
+          this.lastHoveredEl = readableEl;
+          this.readSingleElement(readableEl);
         }
-      });
+      }, 350);
+    });
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // Feedback de espera (earcon) — v5
-  // ──────────────────────────────────────────────────────────────────────────
-  //
-  // Pra quem não vê tela de carregamento, silêncio sem contexto é ambíguo:
-  // travou? acabou? tá processando? Em vez de avisar por voz a cada frase (o que
-  // seria irritante e competiria com a própria leitura), um som curto e neutro
-  // soa SÓ se a espera passar de um limiar — a maioria dos chunks, com o buffer
-  // de prefetch ativo, nunca chega a disparar isso.
+  private setupClickToRead() {
+    if (typeof document === 'undefined') return;
+    const directAttr = this.structure.directSpeakAttr;
+    const interactiveQuery = this.structure.interactiveSelectors.join(', ');
+    const readableQuery = this.structure.readableSelectors.join(', ');
 
-  private _earconTimer: ReturnType<typeof setTimeout> | null = null;
-  private _earconInterval: ReturnType<typeof setInterval> | null = null;
-  private _earconCtx: AudioContext | null = null;
+    document.addEventListener('click', (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
 
-  /** Agenda o earcon pra disparar só se a espera passar de 700ms; repete a cada 1.6s enquanto durar. */
-  private startWaitingFeedback() {
-    this.clearWaitingFeedback();
-    this._earconTimer = setTimeout(() => {
-      this.playEarcon();
-      this._earconInterval = setInterval(() => this.playEarcon(), 1600);
-    }, 700);
-  }
-
-  private clearWaitingFeedback() {
-    if (this._earconTimer) {
-      clearTimeout(this._earconTimer);
-      this._earconTimer = null;
-    }
-    if (this._earconInterval) {
-      clearInterval(this._earconInterval);
-      this._earconInterval = null;
-    }
-  }
-
-  /**
-   * Som curto e neutro (não falado) gerado via Web Audio API — sem precisar de
-   * nenhum arquivo de áudio extra no projeto. Tom suave, baixo volume relativo
-   * ao volume configurado pelo usuário, fade-in/fade-out pra não estalar.
-   */
-  private playEarcon() {
-    try {
-      if (!this._earconCtx) {
-        const AudioCtxCls: typeof AudioContext =
-          window.AudioContext || (window as any).webkitAudioContext;
-        this._earconCtx = new AudioCtxCls();
+      // 1. Botão explícito [data-acre-speak="..."] sempre dispara a fala solicitada
+      const directTrigger = target.closest(`[${directAttr}]`) as HTMLElement | null;
+      if (directTrigger) {
+        const textToSpeak = directTrigger.getAttribute(directAttr);
+        if (textToSpeak && textToSpeak.trim()) {
+          e.stopPropagation();
+          this.speakDirectText(textToSpeak.trim());
+          return;
+        }
       }
-      const ctx = this._earconCtx;
-      if (ctx.state === 'suspended') ctx.resume();
 
-      const now = ctx.currentTime;
-      const peakGain = 0.05 * this.config.volume;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(peakGain, now + 0.03);
-      gain.gain.linearRampToValueAtTime(0, now + 0.2);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.22);
-    } catch (e) {
-      // Web Audio indisponível (raro) — não é crítico, ignora silenciosamente.
-    }
-  }
+      // 2. Quando "Apontar/Tocar para Ouvir" está ativo, tocar num bloco de texto lê o bloco
+      if (!this.readOnHover) return;
+      if (this.isIgnoredElement(target)) return;
 
-  private handleSpeechError(event: any, _retry?: () => void) {
-    const errorType = event?.error;
-    if (errorType === 'interrupted' || errorType === 'canceled') return;
+      // Não bloqueia navegação se o usuário clicou num link ou botão interativo
+      if (interactiveQuery && target.closest(interactiveQuery)) return;
 
-    console.warn(`[Acre Acessivel] SpeechSynthesis error: ${errorType}`);
-    if (errorType === 'language-unavailable' || errorType === 'synthesis-failed') {
-      if (this.currentUtterance?.voice?.name) {
-        this.failedVoiceNames.add(this.currentUtterance.voice.name);
+      const selection = window.getSelection();
+      if (selection && selection.toString().trim().length > 0) return;
+
+      const bestTarget = target.closest(readableQuery) as HTMLElement | null;
+      if (bestTarget && !this.isIgnoredElement(bestTarget)) {
+        const text = this.extractCleanText(bestTarget);
+        if (text && text.length > 2) {
+          this.readSingleElement(bestTarget);
+        }
       }
-      if (this.currentUtterance) {
-        this.currentUtterance.voice = null;
-        this.currentUtterance.lang = '';
-      }
-    }
-    // Finaliza leitura deste elemento sem reentrar em loop recursivo
-    this.removeHighlight();
-    this.updateState('idle');
-    this._isSequentialReading = false;
-    try {
-      this.synth.cancel();
-    } catch {}
-  }
-
-  private getBestPtVoice(): SpeechSynthesisVoice | null {
-    return this.getBestVoiceForLang(this.config.lang || 'pt-BR');
-  }
-
-  private getBestVoiceForLang(targetLang: string = 'pt-BR'): SpeechSynthesisVoice | null {
-    if (!this.synth) return null;
-    const allVoices = this.synth.getVoices();
-    if (allVoices.length === 0) return null;
-
-    const voices = allVoices.filter(v => !this.failedVoiceNames.has(v.name));
-    if (voices.length === 0) return null;
-
-    const currentLang = targetLang.toLowerCase().replace('_', '-');
-    const langPrefix = currentLang.split('-')[0];
-
-    const matchLang = (v: SpeechSynthesisVoice) => {
-      const vLang = v.lang.toLowerCase().replace('_', '-');
-      if (langPrefix === 'he' || langPrefix === 'iw') {
-        return vLang.startsWith('he') || vLang.startsWith('iw');
-      }
-      return vLang.startsWith(currentLang) || vLang.startsWith(langPrefix);
-    };
-
-    const priorities = [
-      (v: SpeechSynthesisVoice) => matchLang(v) && v.name.toLowerCase().includes('natural'),
-      (v: SpeechSynthesisVoice) => matchLang(v) && v.name.toLowerCase().includes('online'),
-      (v: SpeechSynthesisVoice) => matchLang(v) && v.name.includes('Google'),
-      (v: SpeechSynthesisVoice) => matchLang(v) && v.name.includes('Microsoft'),
-      (v: SpeechSynthesisVoice) => matchLang(v),
-      (v: SpeechSynthesisVoice) => v.default,
-    ];
-    for (const fn of priorities) {
-      const found = voices.find(fn);
-      if (found) return found;
-    }
-    return voices[0] || null;
-  }
-
-  public get state() {
-    return this.currentState;
+    });
   }
 }
