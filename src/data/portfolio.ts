@@ -55,10 +55,10 @@ export const projects: Project[] = [
     categoryLabel: "Acessibilidade & CAA",
     kind: "Android · CAA · GPL-3.0",
     summary:
-      "App de comunicação para pessoas não verbais, autistas e educadores. Funciona 100% offline, é gratuito e open source. Um parceiro no RJ fez fork para uso educacional, e o sistema foi aprovado no Programa Centelha (FAPEAC/FINEP).",
+      "App de comunicação para pessoas não verbais, autistas e educadores. Funciona 100% offline, é gratuito e open source. Um parceiro no RJ fez fork para uso educacional, e a proposta foi selecionada na 1ª fase do Programa Centelha (FAPEAC/FINEP).",
     stack: ["Kotlin", "Jetpack Compose", "Room", "Offline-first"],
     featured: true,
-    highlight: "v0.3.0 · Centelha fase 2",
+    highlight: "v0.3.0 · Centelha fase 1",
   },
   {
     id: "sentinela",
@@ -271,7 +271,7 @@ export const timeline: TimelineItem[] = [
     date: "2026",
     title: "Fala Comigo v0.3.0 — Produção",
     sub: "App Android de CAA · GPL-3.0 · VirusTotal 0/72",
-    desc: "App de comunicação para pessoas não verbais. Fork educacional feito por parceiro no RJ. Aprovado no Programa Centelha (FAPEAC/FINEP).",
+    desc: "App de comunicação para pessoas não verbais. Fork educacional feito por parceiro no RJ. Proposta classificada na 1ª fase do Programa Centelha (FAPEAC/FINEP).",
     active: true,
   },
   {
@@ -500,7 +500,7 @@ export const bioInfo = {
   name: "Willian Albarello",
   role: "Engenheiro de Software & Sistemas",
   summary:
-    "Engenheiro de software e criador de sistemas. Desenvolvo tecnologia assistiva e acessibilidade (projetos aprovados pelo Programa Centelha/FINEP), sistemas para transparência pública e dados abertos, e o jornal investigativo ATA Acre (onde atuo na apuração documental e infraestrutura técnica). Crio também engines de jogos procedurais (Fourier e Perlin em C++), ferramentas de engenharia reversa (Linux ELF) e arquiteturas em Rust, Kotlin e TypeScript.",
+    "Engenheiro de software e criador de sistemas. Desenvolvo tecnologia assistiva e acessibilidade (proposta selecionada na 1ª fase do Programa Centelha/FINEP), sistemas para transparência pública e dados abertos, e o jornal investigativo ATA Acre (onde atuo na apuração documental e infraestrutura técnica). Crio também engines de jogos procedurais (Fourier e Perlin em C++), ferramentas de engenharia reversa (Linux ELF) e arquiteturas em Rust, Kotlin e TypeScript.",
   badges: ["Rio Branco, Acre", "IFAC · 2º Período"],
   availability: "Aberto para freelas e colaborações",
   responseTime: "Resposta em até 24h · UTC−5",
