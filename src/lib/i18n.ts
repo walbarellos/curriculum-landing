@@ -465,10 +465,10 @@ const content: Record<"en" | "he", Overlay> = {
     },
     projects: {
       "ata-acre": {
-        kind: "Investigative Journalism · Transparency",
+        kind: "Documentary Platform · Transparency",
         summary:
-          "Documentary newsroom investigating public budgets and open data in Acre. Integrates the Acre-Acessibilidade neural screen reader with the Capi mascot.",
-        highlight: "Data Journalism",
+          "Documentary platform analyzing public budgets and open data in Acre. Integrates the Acre-Acessibilidade neural screen reader with the Capi mascot.",
+        highlight: "Public Data & Budget",
       },
       "fala-comigo": {
         kind: "Android · AAC · GPL-3.0",
@@ -553,9 +553,9 @@ const content: Record<"en" | "he", Overlay> = {
     timeline: [
       {
         date: "2026 — Present",
-        title: "ATA Acre — Data Journalism & Transparency",
+        title: "ATA Acre — Documentary Platform & Transparency",
         sub: "Founder & Maintainer · ataacre.netlify.app",
-        desc: "Creation of the outlet, research and analysis of public budget data, documentary reporting and infrastructure development.",
+        desc: "Creation of the platform, research and analysis of public budget data, and infrastructure development.",
       },
       {
         date: "2026 — Present",
@@ -723,10 +723,10 @@ const content: Record<"en" | "he", Overlay> = {
     },
     projects: {
       "ata-acre": {
-        kind: "עיתונות חוקרת · שקיפות ציבורית",
+        kind: "פלטפורמה תיעודית · שקיפות ציבורית",
         summary:
-          "כלי תקשורת תיעודי על ביקורת תקציבית ונתונים פתוחים באקרי. משלב את קורא המסך העצבי של Acre-Acessibilidade עם הקמע קפי.",
-        highlight: "עיתונות נתונים",
+          "פלטפורמה תיעודית על ביקורת תקציבית ונתונים פתוחים באקרי. משלבת את קורא המסך העצבי של Acre-Acessibilidade עם הקמע קפי.",
+        highlight: "נתונים ציבוריים ותקציב",
       },
       "fala-comigo": {
         kind: "אנדרואיד · AAC · GPL-3.0",
@@ -809,9 +809,9 @@ const content: Record<"en" | "he", Overlay> = {
     timeline: [
       {
         date: "2026 — הווה",
-        title: "ATA Acre — עיתונות נתונים ושקיפות",
+        title: "ATA Acre — פלטפורמה תיעודית ושקיפות",
         sub: "מייסד ומתחזק · ataacre.netlify.app",
-        desc: "הקמת כלי התקשורת, תחקיר וניתוח של נתוני תקציב ציבוריים, כתיבה תיעודית ופיתוח כלל התשתית.",
+        desc: "הקמת הפלטפורמה, תחקיר וניתוח של נתוני תקציב ציבוריים ופיתוח התשתית.",
       },
       {
         date: "2026 — הווה",
