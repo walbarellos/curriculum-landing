@@ -1,120 +1,134 @@
-import './capi-mascot';
-import './accessibility-panel';
+/**
+ * Acre-Acessível - Ponto de Entrada Principal do Plugin
+ * Orquestra o Mascote Capi, o Painel de Acessibilidade e o Motor de Voz PT-BR.
+ */
 
-export interface AcreAcessivelConfig {
-  leitura?: boolean;
-  contraste?: boolean;
-  fonte?: boolean;
-  audio?: boolean;
-  libras?: boolean; // Preparação para integração com VLibras ou outros
+import { registerCapiMascot } from './capi-mascot';
+import {
+  registerAccessibilityPanel,
+  type AccessibilityPanelElement,
+} from './accessibility-panel';
+import { VoiceReader, type ReaderStructureConfig } from './voice-reader';
+
+export interface WidgetConfig {
+  position?: 'bottom-right' | 'bottom-left';
+  greetingText?: string;
+  autoGreet?: boolean;
+  lang?: string;
+  backendUrl?: string;
+  reader?: ReaderStructureConfig;
 }
 
-class AcreAcessivelInitializer {
-  private panelInstance: HTMLElement | null = null;
+class AcreAcessivelPlugin {
+  private mascot: HTMLElement | null = null;
+  private panel: AccessibilityPanelElement | null = null;
+  private voiceReader: VoiceReader | null = null;
+  private initialized = false;
 
-  /** Referência pública ao painel para integração com scripts externos (BarraAcessibilidade, etc.) */
-  public get panel(): any {
-    return this.panelInstance;
-  }
+  public init(config: WidgetConfig = {}) {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    if (this.initialized) return;
+    this.initialized = true;
 
-  public get reader(): any {
-    return (this.panelInstance as any)?.reader || null;
-  }
+    registerCapiMascot();
+    registerAccessibilityPanel();
 
-  public setLanguage(lang: string) {
-    if (this.panelInstance && typeof (this.panelInstance as any).setLanguage === 'function') {
-      (this.panelInstance as any).setLanguage(lang);
-    } else if (this.reader && typeof this.reader.setLanguage === 'function') {
-      this.reader.setLanguage(lang);
+    const mount = () => {
+      this.mountComponents(config);
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', mount, { once: true });
+    } else {
+      mount();
     }
   }
 
-  public readBlocks(
-    blocks: { id?: string; elementId?: string; text: string }[],
-    startIndex: number = 0,
-    onBlockStart?: (idx: number, block: any) => void,
-    onComplete?: () => void
-  ) {
-    if (this.reader && typeof this.reader.readBlocks === 'function') {
-      return this.reader.readBlocks(blocks, startIndex, onBlockStart, onComplete);
+  private mountComponents(config: WidgetConfig) {
+    if (document.querySelector('capi-mascot')) return;
+
+    const mascotEl = document.createElement('capi-mascot');
+    const panelEl = document.createElement(
+      'acre-accessibility-panel',
+    ) as AccessibilityPanelElement;
+
+    if (config.position === 'bottom-left') {
+      mascotEl.style.right = 'auto';
+      mascotEl.style.left = '24px';
+      panelEl.style.right = 'auto';
+      panelEl.style.left = '24px';
     }
+
+    const setMascotState = (state: 'idle' | 'speaking' | 'listening') => {
+      mascotEl.setAttribute('state', state);
+    };
+
+    this.voiceReader = new VoiceReader(
+      {
+        onStart: () => {
+          setMascotState('speaking');
+          panelEl.updateReadingStatus(true, false);
+        },
+        onStop: () => {
+          setMascotState('idle');
+          panelEl.updateReadingStatus(false, false);
+        },
+        onPause: () => {
+          setMascotState('idle');
+          panelEl.updateReadingStatus(true, true);
+        },
+        onResume: () => {
+          setMascotState('speaking');
+          panelEl.updateReadingStatus(true, false);
+        },
+        onSentenceChange: (_el, text) => {
+          panelEl.updateReadingStatus(true, false, text);
+        },
+      },
+      {
+        ...config.reader,
+        backendUrl: config.backendUrl ?? config.reader?.backendUrl,
+      },
+    );
+
+    panelEl.setVoiceReader(this.voiceReader);
+
+    mascotEl.addEventListener('toggle-panel', () => {
+      panelEl.toggle();
+    });
+
+    document.body.appendChild(panelEl);
+    document.body.appendChild(mascotEl);
+
+    this.mascot = mascotEl;
+    this.panel = panelEl;
+  }
+
+  public speak(text: string) {
+    this.voiceReader?.speakDirectText(text);
   }
 
   public stop() {
-    if (this.reader && typeof this.reader.stop === 'function') {
-      this.reader.stop();
-    }
+    this.voiceReader?.stop();
   }
 
-  public pause() {
-    if (this.reader && typeof this.reader.pause === 'function') {
-      this.reader.pause();
-    }
+  public openPanel() {
+    this.panel?.toggle(true);
   }
 
-  public resume() {
-    if (this.reader && typeof this.reader.resume === 'function') {
-      this.reader.resume();
-    }
+  public closePanel() {
+    this.panel?.toggle(false);
   }
 
-  public init(config: AcreAcessivelConfig = {}) {
-    // Garante que o inicializador rode no navegador
-    if (typeof window === 'undefined') return;
-
-    // Evita duplicidade
-    if (document.querySelector('acre-accessibility-panel')) {
-      console.warn('Acre Acessível já inicializado nesta página.');
-      return;
-    }
-
-    // Cria a instância do Web Component do painel
-    this.panelInstance = document.createElement('acre-accessibility-panel');
-    
-    // Passa configurações para atributos se necessário
-    if (config.libras) {
-      this.injectVLibras();
-    }
-
-    // Anexa o componente ao body
-    document.body.appendChild(this.panelInstance);
-
-    console.log('[Acre Acessivel] Inicializado com sucesso. Mascote Capi pronto para ajudar.');
-  }
-
-  /**
-   * Integração opcional com o VLibras do Governo Federal
-   */
-  private injectVLibras() {
-    if (document.getElementById('vlibras-div')) return;
-
-    // Cria a div necessária para o VLibras
-    const vlibrasDiv = document.createElement('div');
-    vlibrasDiv.id = 'vlibras-div';
-    vlibrasDiv.setAttribute('vw', '');
-    vlibrasDiv.classList.add('enabled');
-    vlibrasDiv.innerHTML = `
-      <div vw-access-button class="active"></div>
-      <div vw-plugin-wrapper>
-        <div class="vw-plugin-top-wrapper"></div>
-      </div>
-    `;
-    document.body.appendChild(vlibrasDiv);
-
-    // Carrega o script do VLibras
-    const script = document.createElement('script');
-    script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
-    script.onload = () => {
-      // @ts-ignore
-      new window.VLibras.Widget('https://vlibras.gov.br/app');
-    };
-    document.head.appendChild(script);
+  public onRouteChange() {
+    this.voiceReader?.onRouteChange();
   }
 }
 
-// Expõe globalmente
-const AcreAcessivel = new AcreAcessivelInitializer();
-// @ts-ignore
-window.AcreAcessivel = AcreAcessivel;
+export const AcreAcessivel = new AcreAcessivelPlugin();
+
+if (typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>).AcreAcessivel = AcreAcessivel;
+}
 
 export default AcreAcessivel;

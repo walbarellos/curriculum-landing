@@ -1,290 +1,578 @@
 /**
- * Acre Acessível - Normalizador de Texto para Fala (TTS)
- *
- * Resolve os 3 problemas clássicos de leitura "burra" via Web Speech API / TTS genérico:
- *  1. Pronúncia errada de números, moeda, datas, ordinais e siglas.
- *  2. Falta de entonação/tônica: o motor não sabe separar frases nem dar peso a títulos.
- *  3. Falta de pausas naturais: tudo é lido como um bloco só, sem respiro.
- *
- * Estratégia:
- *  - Expande tudo que o motor de fala pronuncia mal para sua forma escrita por extenso
- *    (R$ 1.200,00 -> "1.200 reais e 0 centavos" / "Art. 5º" -> "Artigo quinto").
- *  - Quebra o texto em frases curtas (sentence splitting) para que cada SpeechSynthesisUtterance
- *    seja independente — isso por si só já melhora MUITO a entonação, porque o motor nativo
- *    aplica curva de prosódia por utterance, e utterances longas "atropelam" a entonação.
- *  - Define um perfil de voz (rate/pitch) por tipo de elemento semântico (título lido mais
- *    grave e pausado, texto corrido no tom normal, listas com pausa extra entre itens).
+ * TextNormalizer - Normalização de texto para TTS em Português Brasileiro (PT-BR)
+ * Converte números, datas, siglas, moeda, temperaturas e abreviações para forma extensiva falada.
+ * Zero hardcode de domínio: aceita dicionário de siglas e substituições via configuração.
  */
 
-export interface SentenceChunk {
-  text: string;
-  /** Pausa sugerida (ms) depois deste chunk, antes do próximo */
-  pauseAfterMs: number;
+const UNIDADES = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+const DEZ_A_DEZENOVE = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+const DEZENAS = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+const CENTENAS = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+
+const MESES: Record<string, string> = {
+  '01': 'janeiro', '1': 'janeiro',
+  '02': 'fevereiro', '2': 'fevereiro',
+  '03': 'março', '3': 'março',
+  '04': 'abril', '4': 'abril',
+  '05': 'maio', '5': 'maio',
+  '06': 'junho', '6': 'junho',
+  '07': 'julho', '7': 'julho',
+  '08': 'agosto', '8': 'agosto',
+  '09': 'setembro', '9': 'setembro',
+  '10': 'outubro',
+  '11': 'novembro',
+  '12': 'dezembro',
+};
+
+const DEFAULT_SIGLAS: Record<string, string> = {
+  'AC': 'Acre',
+  'UFAC': 'Ufac',
+  'SEFAZ': 'Sefaz',
+  'DETRAN': 'Detran',
+  'SESACRE': 'Sesacre',
+  'SEE': 'Secretaria de Educação',
+  'SEJUSP': 'Sejusp',
+  'MPAC': 'Ministério Público do Acre',
+  'TJAC': 'Tribunal de Justiça do Acre',
+  'ALEAC': 'Assembleia Legislativa do Acre',
+  'GOV': 'Governo',
+  'CPF': 'Cê Pê Éfe',
+  'RG': 'Erre Gê',
+  'CNPJ': 'Cê Ene Pê Jota',
+  'CEP': 'Cê É Pê',
+  'SUS': 'Sús',
+  'INSS': 'I Ene Ésse Ésse',
+  'IBGE': 'I Bê Gê É',
+  'ONU': 'Ônu',
+  'MEC': 'Méc',
+  'ENEM': 'Enem',
+  'PIX': 'Píx',
+  'PDF': 'Pê Dê Éfe',
+  'URL': 'U Erre Éle',
+  'HTML': 'Agá Tê Eme Éle',
+  'CSS': 'Cê Ésse Ésse',
+  'API': 'A Pê I',
+  'TTS': 'Texto para Fala',
+  'WCAG': 'Dáblio Cê A Gê',
+  'EMAG': 'ê-Mág',
+  'COVID': 'Covíd',
+  'UTI': 'U Tê I',
+  'UBS': 'U Bê Ésse',
+  'UPA': 'Úpa',
+  'SAMU': 'Samú',
+  'PM': 'Polícia Militar',
+  'PC': 'Polícia Civil',
+  'BM': 'Bombeiros Militares',
+  'BO': 'Boletim de Ocorrência',
+  'CNH': 'Cê Ene Agá',
+  'IPVA': 'I Pê Vê A',
+  'ICMS': 'I Cê Eme Ésse',
+  'IPTU': 'I Pê Tê U',
+  'FGTS': 'Éfe Gê Tê Ésse',
+  'CLT': 'Cê Éle Tê',
+  'MEI': 'Mêi',
+  'PME': 'Pê Eme É',
+  'SEBRAE': 'Sebráe',
+  'SENAC': 'Senác',
+  'SENAI': 'Senái',
+  'SESC': 'Sésc',
+  'SESI': 'Sési',
+  'OAB': 'Ó A Bê',
+  'CRM': 'Cê Erre Eme',
+  'CREA': 'Crêa',
+  'CAU': 'Cáu',
+  'CRP': 'Cê Erre Pê',
+  'COREN': 'Corén',
+  'CRO': 'Cê Erre Ó',
+  'CRF': 'Cê Erre Éfe',
+  'CREF': 'Créfe',
+  'CRESS': 'Créss',
+  'CONFEA': 'Confêa',
+  'IBAMA': 'Ibama',
+  'ICMBIO': 'I Cê Eme Bio',
+  'FUNAI': 'Funái',
+  'INCRA': 'Íncra',
+  'DNIT': 'Dênit',
+  'ANATEL': 'Anatél',
+  'ANEEL': 'Anéel',
+  'ANP': 'A Ene Pê',
+  'ANVISA': 'Anvísa',
+  'ANS': 'A Ene Ésse',
+  'ANA': 'Âna',
+  'ANTAQ': 'Antáq',
+  'ANTT': 'A Ene Tê Tê',
+  'ANAC': 'Anác',
+  'INFRAERO': 'Infraéro',
+  'CORREIOS': 'Corrêios',
+  'CAIXA': 'Cáixa',
+  'BB': 'Banco do Brasil',
+  'BASA': 'Bása',
+  'BNDES': 'Bê Ene Dê Ésse',
+  'BACEN': 'Bacén',
+  'CVM': 'Cê Vê Eme',
+  'STF': 'Ésse Tê Éfe',
+  'STJ': 'Ésse Tê Jota',
+  'TST': 'Tê Ésse Tê',
+  'TSE': 'Tê Ésse É',
+  'STM': 'Ésse Tê Eme',
+  'CNJ': 'Cê Ene Jota',
+  'CNMP': 'Cê Ene Eme Pê',
+  'AGU': 'A Gê U',
+  'PF': 'Polícia Federal',
+  'PRF': 'Polícia Rodoviária Federal',
+  'ABIN': 'Abín',
+  'GSI': 'Gê Ésse I',
+  'MD': 'Ministério da Defesa',
+  'MRE': 'Itamaraty',
+  'MF': 'Ministério da Fazenda',
+  'MP': 'Ministério Público',
+  'MJ': 'Ministério da Justiça',
+  'MS': 'Ministério da Saúde',
+  'MT': 'Ministério do Trabalho',
+  'MMA': 'Ministério do Meio Ambiente',
+  'MCTI': 'Eme Cê Tê I',
+  'MINC': 'Mínc',
+  'ME': 'Ministério da Economia',
+  'MAPA': 'Mápa',
+  'MDR': 'Eme Dê Erre',
+  'MMFDH': 'Direitos Humanos',
+  'CGU': 'Cê Gê U',
+  'TCU': 'Tê Cê U',
+  'TCE': 'Tê Cê É',
+  'MPC': 'Eme Pê Cê',
+  'PGE': 'Pê Gê É',
+  'PGM': 'Pê Gê Eme',
+  'DPE': 'Defensoria Pública',
+  'DPU': 'Defensoria Pública da União',
+  'PROCON': 'Procón',
+  'IDAC': 'Idác',
+  'IMAC': 'Imác',
+  'ITERACRE': 'Iterácre',
+  'DEPASA': 'Depása',
+  'SANEACRE': 'Saneácre',
+  'DERACRE': 'Derácre',
+  'RBTRANS': 'Erre Bê Trâns',
+  'FEM': 'Fém',
+  'FGB': 'Fundação Garibaldi Brasil',
+  'FUNDHACRE': 'Fundácre',
+  'HEMOACRE': 'Emoácre',
+  'INTO': 'Ínto',
+  'HUERB': 'Uérb',
+  'MATER': 'Máter',
+  'SAS': 'Sás',
+  'CRAS': 'Crás',
+  'CREAS': 'Crêas',
+  'CAPS': 'Cáps',
+  'RIO BRANCO': 'Rio Branco',
+  'CRUZEIRO DO SUL': 'Cruzeiro do Sul',
+  'SENA MADUREIRA': 'Sena Madureira',
+  'TARAUACÁ': 'Tarauacá',
+  'FEIJÓ': 'Feijó',
+  'BRASILÉIA': 'Brasiléia',
+  'EPITACIOLÂNDIA': 'Epitaciolândia',
+  'XAPURI': 'Xapurí',
+  'PLÁCIDO DE CASTRO': 'Plácido de Castro',
+  'SENADOR GUIOMARD': 'Senador Guiomard',
+  'MANOEL URBANO': 'Manoel Urbano',
+  'ASSIS BRASIL': 'Assis Brasil',
+  'CAPIXABA': 'Capixaba',
+  'BUJARI': 'Bujarí',
+  'PORTO ACRE': 'Porto Acre',
+  'ACRELÂNDIA': 'Acrelândia',
+  'RODRIGUES ALVES': 'Rodrigues Alves',
+  'MÂNCIO LIMA': 'Mâncio Lima',
+  'PORTO WALTER': 'Porto Válter',
+  'MARECHAL THAUMATURGO': 'Marechal Taumaturgo',
+  'JORDAO': 'Jordão',
+  'JORDÃO': 'Jordão',
+  'SANTA ROSA DO PURUS': 'Santa Rosa do Purús',
+  'QUINARI': 'Quinarí',
+};
+
+const ABREVIACOES: Record<string, string> = {
+  'dr.': 'doutor',
+  'dra.': 'doutora',
+  'sr.': 'senhor',
+  'sra.': 'senhora',
+  'srta.': 'senhorita',
+  'prof.': 'professor',
+  'profa.': 'professora',
+  'eng.': 'engenheiro',
+  'enga.': 'engenheira',
+  'arq.': 'arquiteto',
+  'adv.': 'advogado',
+  'gov.': 'governador',
+  'pref.': 'prefeito',
+  'dep.': 'deputado',
+  'sen.': 'senador',
+  'ver.': 'vereador',
+  'sec.': 'secretário',
+  'pres.': 'presidente',
+  'dir.': 'diretor',
+  'coord.': 'coordenador',
+  'av.': 'avenida',
+  'r.': 'rua',
+  'al.': 'alameda',
+  'tv.': 'travessa',
+  'pç.': 'praça',
+  'pca.': 'praça',
+  'rod.': 'rodovia',
+  'br-': 'Bê Erre ',
+  'ac-': 'A Cê ',
+  'km': 'quilômetros',
+  'm': 'metros',
+  'cm': 'centímetros',
+  'mm': 'milímetros',
+  'kg': 'quilos',
+  'g': 'gramas',
+  'mg': 'miligramas',
+  'l': 'litros',
+  'ml': 'mililitros',
+  'h': 'horas',
+  'min': 'minutos',
+  'seg': 'segundos',
+  'tel.': 'telefone',
+  'cel.': 'celular',
+  'nº': 'número',
+  'n.': 'número',
+  'no.': 'número',
+  'art.': 'artigo',
+  'inc.': 'inciso',
+  'par.': 'parágrafo',
+  'cap.': 'capítulo',
+  'pág.': 'página',
+  'p.': 'página',
+  'pp.': 'páginas',
+  'vol.': 'volume',
+  'ed.': 'edição',
+  'obs.': 'observação',
+  'ex.': 'exemplo',
+  'etc.': 'etcétera',
+  'cia.': 'companhia',
+  'ltda.': 'limitada',
+  's/a': 'sociedade anônima',
+  's.a.': 'sociedade anônima',
+  'cpf:': 'Cê Pê Éfe:',
+  'rg:': 'Erre Gê:',
+  'cep:': 'Cê É Pê:',
+  'cnpj:': 'Cê Ene Pê Jota:',
+};
+
+export interface TextNormalizerOptions {
+  customAcronyms?: Record<string, string>;
+  customAbbreviations?: Record<string, string>;
 }
-
-export interface VoiceProfile {
-  rateMultiplier: number;
-  pitch: number;
-}
-
-// Siglas comuns em portais públicos/educacionais brasileiros — pronúncia letra a letra
-// quando o motor tentaria ler como palavra (ex: "OCA" virando "óca")
-const KNOWN_ACRONYMS: Record<string, string> = {
-  'OCA': 'Ó C A',
-  'CPF': 'C P F',
-  'CNPJ': 'C N P J',
-  'CEP': 'C E P',
-  'PDF': 'P D F',
-  'URL': 'U R L',
-  'HTML': 'H T M L',
-  'CSS': 'C S S',
-  'API': 'A P I',
-  'TI': 'T I',
-  'RH': 'R H',
-  'EAD': 'E A D',
-  'ENEM': 'É-NÉM',
-  'SUS': 'SÚS',
-  'INSS': 'I N S S',
-  'IBGE': 'I B G E',
-  'MEC': 'MÉQUI',
-  'ONG': 'ÓNGUI',
-};
-
-const ORDINAL_MASC: Record<string, string> = {
-  '1': 'primeiro', '2': 'segundo', '3': 'terceiro', '4': 'quarto', '5': 'quinto',
-  '6': 'sexto', '7': 'sétimo', '8': 'oitavo', '9': 'nono', '10': 'décimo',
-};
-
-const ORDINAL_FEM: Record<string, string> = {
-  '1': 'primeira', '2': 'segunda', '3': 'terceira', '4': 'quarta', '5': 'quinta',
-  '6': 'sexta', '7': 'sétima', '8': 'oitava', '9': 'nona', '10': 'décima',
-};
-
-// Substantivos femininos comuns em editais públicos que seguem um ordinal
-const FEMININE_NOUNS_PATTERN =
-  /\b(turma|vez|edição|etapa|fase|questão|rodada|vaga|semana|instância|chamada|convocação|via|cópia|série|versão)\b/i;
-
-const MONTHS = [
-  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
-];
 
 export class TextNormalizer {
-  /**
-   * Ponto de entrada principal: recebe texto bruto de um elemento e retorna
-   * uma lista de "chunks" (frases) já normalizados, prontos para serem
-   * enfileirados em utterances separadas.
-   */
-  public static normalizeToChunks(rawText: string, lang: string = 'pt-BR'): SentenceChunk[] {
-    const expanded = this.expandAll(rawText, lang);
-    return this.splitIntoSentences(expanded);
+  private siglas: Record<string, string>;
+  private abreviacoes: Record<string, string>;
+
+  constructor(options?: TextNormalizerOptions) {
+    this.siglas = { ...DEFAULT_SIGLAS, ...(options?.customAcronyms || {}) };
+    this.abreviacoes = { ...ABREVIACOES, ...(options?.customAbbreviations || {}) };
   }
 
-  /** Normaliza sem quebrar em frases (usado por quem só precisa do texto plano, ex: backend) */
-  public static normalize(rawText: string, lang: string = 'pt-BR'): string {
-    return this.expandAll(rawText, lang);
+  public normalize(text: string): string {
+    if (!text) return '';
+
+    let normalized = text;
+
+    // 0. Limpar símbolos gráficos editoriais para leitura fluida
+    normalized = normalized
+      .replace(/[★■●○▪▸▹]/g, ' ')
+      .replace(/\s*[·•|]\s*/g, ', ')
+      .replace(/[←→↑↓]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // 1. Escalas de trabalho como 6x1, 0x7, 12x36
+    normalized = normalized.replace(/\b(\d{1,2})[xX](\d{1,2})\b/g, (_, a, b) => {
+      return `${this.numberToWords(parseInt(a, 10))} por ${this.numberToWords(parseInt(b, 10))}`;
+    });
+
+    // 2. Temperaturas (ex: 38°C, 38 °C)
+    normalized = normalized.replace(/(\d+)\s*°\s*C\b/gi, (_, num) => {
+      return `${this.numberToWords(parseInt(num, 10))} graus Celsius`;
+    });
+
+    // 3. Datas (DD/MM/YYYY ou DD/MM/YY)
+    normalized = this.normalizeDates(normalized);
+
+    // 4. Valores monetários (R$ 1.234,56)
+    normalized = this.normalizeCurrency(normalized);
+
+    // 5. Porcentagens (50%, 12,5%)
+    normalized = this.normalizePercentages(normalized);
+
+    // 6. Telefones e CEP
+    normalized = this.normalizePhonesAndCep(normalized);
+
+    // 7. Abreviações comuns
+    normalized = this.normalizeAbbreviations(normalized);
+
+    // 8. Siglas e Acrônimos
+    normalized = this.normalizeAcronyms(normalized);
+
+    // 9. Números ordinais (1º, 2ª)
+    normalized = this.normalizeOrdinals(normalized);
+
+    // 10. Algarismos Romanos em contextos comuns
+    normalized = this.normalizeRomanNumerals(normalized);
+
+    // 11. Números cardinais restantes
+    normalized = this.normalizeNumbers(normalized);
+
+    // 12. Limpeza de espaços extras e caracteres especiais soltos
+    normalized = this.cleanUp(normalized);
+
+    return normalized;
   }
 
-  /** Perfil de voz (rate/pitch relativos) sugerido para uma tag semântica */
-  public static profileForTag(tag: string): VoiceProfile {
-    switch (tag) {
-      case 'h1':
-        return { rateMultiplier: 0.92, pitch: 1.08 };
-      case 'h2':
-        return { rateMultiplier: 0.94, pitch: 1.05 };
-      case 'h3':
-      case 'h4':
-      case 'h5':
-      case 'h6':
-        return { rateMultiplier: 0.96, pitch: 1.03 };
-      case 'li':
-        return { rateMultiplier: 1.0, pitch: 1.0 };
-      case 'blockquote':
-        return { rateMultiplier: 0.95, pitch: 0.97 };
-      case 'figcaption':
-        return { rateMultiplier: 0.95, pitch: 0.98 };
-      default:
-        return { rateMultiplier: 1.0, pitch: 1.0 };
+  private normalizeDates(text: string): string {
+    return text.replace(/\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/g, (match, dia, mes, ano) => {
+      const d = parseInt(dia, 10);
+      const m = MESES[mes];
+      let a = parseInt(ano, 10);
+      if (a < 100) {
+        a += a > 50 ? 1900 : 2000;
+      }
+
+      if (d >= 1 && d <= 31 && m) {
+        const diaStr = d === 1 ? 'primeiro' : this.numberToWords(d);
+        const anoStr = this.numberToWords(a);
+        return `${diaStr} de ${m} de ${anoStr}`;
+      }
+      return match;
+    });
+  }
+
+  private normalizeCurrency(text: string): string {
+    return text.replace(/R\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?|\d+(?:,\d{1,2})?)/g, (match, valor) => {
+      const parts = valor.replace(/\./g, '').split(',');
+      const reais = parseInt(parts[0], 10);
+      const centavos = parts[1] ? parseInt(parts[1].padEnd(2, '0'), 10) : 0;
+
+      let result = '';
+      if (reais > 0) {
+        result += `${this.numberToWords(reais)} ${reais === 1 ? 'real' : 'reais'}`;
+      }
+      if (centavos > 0) {
+        if (result) result += ' e ';
+        result += `${this.numberToWords(centavos)} ${centavos === 1 ? 'centavo' : 'centavos'}`;
+      }
+      if (reais === 0 && centavos === 0) {
+        result = 'zero reais';
+      }
+      return result || match;
+    });
+  }
+
+  private normalizePercentages(text: string): string {
+    return text.replace(/(\d+(?:,\d+)?)\s*%/g, (_, num) => {
+      if (num.includes(',')) {
+        const [intPart, decPart] = num.split(',');
+        return `${this.numberToWords(parseInt(intPart, 10))} vírgula ${this.numberToWords(parseInt(decPart, 10))} por cento`;
+      }
+      return `${this.numberToWords(parseInt(num, 10))} por cento`;
+    });
+  }
+
+  private normalizePhonesAndCep(text: string): string {
+    text = text.replace(/\b(\d{5})-(\d{3})\b/g, (_, p1, p2) => {
+      return `${this.digitsToWords(p1)} traço ${this.digitsToWords(p2)}`;
+    });
+
+    text = text.replace(/(?:\((\d{2})\)\s*)?(\d{4,5})-(\d{4})\b/g, (_, ddd, p1, p2) => {
+      let res = '';
+      if (ddd) {
+        res += `Dê Dê Dê ${this.digitsToWords(ddd)}, `;
+      }
+      res += `${this.digitsToWords(p1)} ${this.digitsToWords(p2)}`;
+      return res;
+    });
+
+    return text;
+  }
+
+  private normalizeAbbreviations(text: string): string {
+    let result = text;
+    for (const [abrev, full] of Object.entries(this.abreviacoes)) {
+      const escaped = abrev.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(?<=^|\\s|\\()${escaped}(?=\\s|$|[.,;:])`, 'gi');
+      result = result.replace(regex, full);
     }
+    return result;
   }
 
-  // ---------------------------------------------------------------------------------
-  // Expansão (números, moeda, datas, siglas, pontuação problemática)
-  // ---------------------------------------------------------------------------------
+  private normalizeAcronyms(text: string): string {
+    let result = text;
+    const sortedKeys = Object.keys(this.siglas).sort((a, b) => b.length - a.length);
 
-  private static expandAll(text: string, lang: string = 'pt-BR'): string {
-    let t = text;
-
-    if (lang.toLowerCase().startsWith('pt')) {
-      t = this.expandCurrency(t);
-      t = this.expandDates(t);
-      t = this.expandPercentages(t);
-      t = this.expandOrdinals(t);
-      t = this.expandAbbreviations(t);
-      t = this.expandAcronyms(t);
-      t = this.expandDecimalNumbers(t);
+    for (const sigla of sortedKeys) {
+      const pronunciation = this.siglas[sigla];
+      const escaped = sigla.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escaped}\\b`, 'g');
+      result = result.replace(regex, pronunciation);
     }
-    t = this.normalizePunctuationForProsody(t);
 
-    return t.replace(/\s+/g, ' ').trim();
+    return result;
   }
 
-  /** R$ 1.200,50 -> "1.200 reais e 50 centavos" / R$ 1.200 -> "1.200 reais" */
-  private static expandCurrency(text: string): string {
-    return text.replace(
-      /R\$\s?(\d{1,3}(?:\.\d{3})*)(?:,(\d{2}))?/g,
-      (_match, intPart: string, centPart?: string) => {
-        const reais = intPart;
-        if (centPart && centPart !== '00') {
-          return `${reais} reais e ${centPart} centavos`;
+  private normalizeOrdinals(text: string): string {
+    const ordinaisMasc: Record<number, string> = {
+      1: 'primeiro', 2: 'segundo', 3: 'terceiro', 4: 'quarto', 5: 'quinto',
+      6: 'sexto', 7: 'sétimo', 8: 'oitavo', 9: 'nono', 10: 'décimo',
+    };
+    const ordinaisFem: Record<number, string> = {
+      1: 'primeira', 2: 'segunda', 3: 'terceira', 4: 'quarta', 5: 'quinta',
+      6: 'sexta', 7: 'sétima', 8: 'oitava', 9: 'nona', 10: 'décima',
+    };
+
+    text = text.replace(/\b(\d+)[º°]\b/g, (match, num) => {
+      const n = parseInt(num, 10);
+      return ordinaisMasc[n] || match;
+    });
+
+    text = text.replace(/\b(\d+)ª\b/g, (match, num) => {
+      const n = parseInt(num, 10);
+      return ordinaisFem[n] || match;
+    });
+
+    return text;
+  }
+
+  private normalizeRomanNumerals(text: string): string {
+    const romanos: Record<string, number> = {
+      'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5,
+      'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10,
+      'XI': 11, 'XII': 12, 'XIII': 13, 'XIV': 14, 'XV': 15,
+      'XVI': 16, 'XVII': 17, 'XVIII': 18, 'XIX': 19, 'XX': 20,
+      'XXI': 21,
+    };
+
+    return text.replace(/\b(Século|Capítulo|Artigo|Inciso|Volume|Tomo|Papa|Dom|Rei|João| Bento|Pio|Paulo)\s+(I|II|III|IV|V|VI|VII|VIII|IX|X|XI|XII|XIII|XIV|XV|XVI|XVII|XVIII|XIX|XX|XXI)\b/gi, (match, prefix, roman) => {
+      const val = romanos[roman.toUpperCase()];
+      if (!val) return match;
+
+      const pLower = prefix.toLowerCase();
+      if (['artigo', 'inciso', 'capítulo'].includes(pLower) && val <= 10) {
+        const ordinais = ['', 'primeiro', 'segundo', 'terceiro', 'quarto', 'quinto', 'sexto', 'sétimo', 'oitavo', 'nono', 'décimo'];
+        return `${prefix} ${ordinais[val]}`;
+      }
+
+      return `${prefix} ${this.numberToWords(val)}`;
+    });
+  }
+
+  private normalizeNumbers(text: string): string {
+    text = text.replace(/\b\d{1,3}(?:\.\d{3})+\b/g, (match) => {
+      const cleanNum = parseInt(match.replace(/\./g, ''), 10);
+      if (!isNaN(cleanNum) && cleanNum <= 999999999) {
+        return this.numberToWords(cleanNum);
+      }
+      return match;
+    });
+
+    text = text.replace(/\b(\d+),(\d+)\b/g, (_, intPart, decPart) => {
+      const i = parseInt(intPart, 10);
+      const d = parseInt(decPart, 10);
+      return `${this.numberToWords(i)} vírgula ${this.numberToWords(d)}`;
+    });
+
+    text = text.replace(/\b\d+\b/g, (match) => {
+      if (match.length > 1 && match.startsWith('0')) {
+        const stripped = parseInt(match, 10);
+        if (match.length <= 3 && !isNaN(stripped)) {
+          return this.numberToWords(stripped);
         }
-        return `${reais} reais`;
+        return this.digitsToWords(match);
       }
-    );
-  }
-
-  /** 12% -> "12 por cento" */
-  private static expandPercentages(text: string): string {
-    return text.replace(/(\d+(?:[.,]\d+)?)\s?%/g, (_m, num: string) => `${num} por cento`);
-  }
-
-  /** 05/06/2026 ou 5 de junho de 2026 (normaliza separador) -> fala natural */
-  private static expandDates(text: string): string {
-    return text.replace(
-      /\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/g,
-      (_m, d: string, mo: string, y: string) => {
-        const day = parseInt(d, 10);
-        const monthIdx = parseInt(mo, 10) - 1;
-        const monthName = MONTHS[monthIdx] ?? mo;
-        const year = y.length === 2 ? `20${y}` : y;
-        return `${day} de ${monthName} de ${year}`;
+      const n = parseInt(match, 10);
+      if (!isNaN(n) && n <= 999999999) {
+        return this.numberToWords(n);
       }
-    );
-  }
-
-  /** 1º, 2ª, Art. 5º -> "primeiro", "segunda", "Artigo quinto" (até 10; acima disso lê o numeral cardinal) */
-  private static expandOrdinals(text: string): string {
-    // Caso especial: "Art. Nº" / "Artigo Nº" — sempre masculino (artigo é masc)
-    text = text.replace(
-      /\b(Art\.?|Artigo)\s*(\d{1,3})\s*[ºª]?/gi,
-      (_m, _prefix: string, num: string) => {
-        const word = ORDINAL_MASC[num];
-        return `Artigo ${word ?? num}`;
-      }
-    );
-
-    // Caso genérico: º = masculino, ª = feminino — sufixo é a marca morfológica.
-    text = text.replace(/\b(\d{1,3})(º|ª)/g, (_m, num: string, suffix: string) => {
-      if (suffix === 'ª') {
-        const word = ORDINAL_FEM[num];
-        return word ?? `${num}ª`;
-      }
-      const word = ORDINAL_MASC[num];
-      return word ?? `${num}º`;
+      return match;
     });
 
     return text;
   }
 
-  /** Verifica se um texto contém substantivo feminino comum (utilitário público para testes) */
-  public static hasFeminineNoun(text: string): boolean {
-    return FEMININE_NOUNS_PATTERN.test(text);
+  private digitsToWords(digits: string): string {
+    const map: Record<string, string> = {
+      '0': 'zero', '1': 'um', '2': 'dois', '3': 'três', '4': 'quatro',
+      '5': 'cinco', '6': 'seis', '7': 'sete', '8': 'oito', '9': 'nove',
+    };
+    return digits.split('').map((d) => map[d] || d).join(' ');
   }
 
-  /** Abreviações comuns que o motor lê errado ou de forma cortada */
-  private static expandAbbreviations(text: string): string {
-    const map: Array<[RegExp, string]> = [
-      [/\bSr\.\s/g, 'Senhor '],
-      [/\bSra\.\s/g, 'Senhora '],
-      [/\bDr\.\s/g, 'Doutor '],
-      [/\bDra\.\s/g, 'Doutora '],
-      [/\bProf\.\s/g, 'Professor '],
-      [/\bProfa\.\s/g, 'Professora '],
-      [/\bEx\.\s/g, 'Excelência '],
-      [/\bpág\.\s?/gi, 'página '],
-      [/\bpp\.\s?/gi, 'páginas '],
-      [/\bnº\s?/gi, 'número '],
-      [/\bn\.\s?/gi, 'número '],
-      [/\betc\.\b/gi, 'etcétera'],
-    ];
-    for (const [regex, replacement] of map) {
-      text = text.replace(regex, replacement);
-    }
-    return text;
-  }
+  public numberToWords(n: number): string {
+    if (n === 0) return 'zero';
+    if (n < 0) return `menos ${this.numberToWords(Math.abs(n))}`;
 
-  /** Siglas conhecidas -> soletradas, para não virarem palavras estranhas */
-  private static expandAcronyms(text: string): string {
-    for (const [acronym, spoken] of Object.entries(KNOWN_ACRONYMS)) {
-      const regex = new RegExp(`\\b${acronym}\\b`, 'g');
-      text = text.replace(regex, spoken);
-    }
-    return text;
-  }
+    let words = '';
 
-  /** 1.234.567 (separador de milhar) lido corretamente, sem confundir com decimal */
-  private static expandDecimalNumbers(text: string): string {
-    // Números com ponto de milhar e vírgula decimal (padrão BR): 1.234,56 -> "1234 vírgula 56"
-    return text.replace(
-      /\b(\d{1,3}(?:\.\d{3})+),(\d+)\b/g,
-      (_m, intPart: string, decPart: string) => {
-        const cleanInt = intPart.replace(/\./g, '');
-        return `${cleanInt} vírgula ${decPart}`;
+    if (n >= 1000000) {
+      const milhoes = Math.floor(n / 1000000);
+      words += `${this.convertHundreds(milhoes)} ${milhoes === 1 ? 'milhão' : 'milhões'}`;
+      n %= 1000000;
+      if (n > 0) {
+        words += n < 100 || n % 100 === 0 ? ' e ' : ', ';
       }
-    );
-  }
-
-  /**
-   * Normaliza pontuação que confunde o sintetizador:
-   * - Múltiplos sinais (??!, ...) colapsados
-   * - Travessões e parênteses convertidos em vírgula (geram pausa, sem o motor "engolir" a fala)
-   * - Adiciona ponto final se a frase não tiver pontuação de encerramento (ajuda o motor a aplicar
-   *   curva de entonação de fim de frase em vez de tom neutro/cortado)
-   */
-  private static normalizePunctuationForProsody(text: string): string {
-    let t = text;
-    t = t.replace(/\.{3,}/g, '…');
-    t = t.replace(/!{2,}/g, '!');
-    t = t.replace(/\?{2,}/g, '?');
-    t = t.replace(/[–—]/g, ',');
-    t = t.replace(/\(([^)]+)\)/g, ', $1,');
-    t = t.replace(/\s*,\s*,\s*/g, ', ');
-    return t;
-  }
-
-  // ---------------------------------------------------------------------------------
-  // Sentence splitting
-  // ---------------------------------------------------------------------------------
-
-  /**
-   * Quebra o texto em frases curtas. Cada frase se torna uma utterance separada
-   * no voice-reader, o que dá ao motor de síntese um "reset" de prosódia por frase
-   * (entonação de início/fim de frase aplicada corretamente) em vez de uma leitura
-   * corrida que tende a ficar monotônica em textos longos.
-   */
-  private static splitIntoSentences(text: string): SentenceChunk[] {
-    if (!text.trim()) return [];
-
-    // Protege abreviações comuns de serem quebradas como fim de frase
-    const protectedText = text.replace(/\b(\w)\.(\w)\./g, '$1_DOT_$2_DOT_');
-
-    const rawSentences = protectedText
-      .split(/(?<=[.!?…])\s+(?=[A-ZÀ-Ú0-9])/)
-      .map(s => s.replace(/_DOT_/g, '.').trim())
-      .filter(s => s.length > 0);
-
-    if (rawSentences.length === 0) {
-      return [{ text, pauseAfterMs: 0 }];
     }
 
-    return rawSentences.map((sentence, idx) => {
-      const isLast = idx === rawSentences.length - 1;
-      const endsStrong = /[.!?…]$/.test(sentence);
-      return {
-        text: sentence,
-        // Pausa maior entre frases reais; nenhuma pausa extra na última (o stop natural já cobre)
-        pauseAfterMs: isLast ? 0 : endsStrong ? 260 : 120,
-      };
-    });
+    if (n >= 1000) {
+      const milhares = Math.floor(n / 1000);
+      if (milhares === 1) {
+        words += 'mil';
+      } else {
+        words += `${this.convertHundreds(milhares)} mil`;
+      }
+      n %= 1000;
+      if (n > 0) {
+        words += n < 100 || n % 100 === 0 ? ' e ' : ', ';
+      }
+    }
+
+    if (n > 0) {
+      words += this.convertHundreds(n);
+    }
+
+    return words.trim();
+  }
+
+  private convertHundreds(n: number): string {
+    if (n === 100) return 'cem';
+
+    let str = '';
+    const c = Math.floor(n / 100);
+    const d = Math.floor((n % 100) / 10);
+    const u = n % 10;
+
+    if (c > 0) {
+      str += CENTENAS[c];
+    }
+
+    if (d === 1) {
+      if (str) str += ' e ';
+      str += DEZ_A_DEZENOVE[u];
+    } else {
+      if (d > 1) {
+        if (str) str += ' e ';
+        str += DEZENAS[d];
+      }
+      if (u > 0) {
+        if (str) str += ' e ';
+        str += UNIDADES[u];
+      }
+    }
+
+    return str;
+  }
+
+  private cleanUp(text: string): string {
+    return text
+      .replace(/\s+/g, ' ')
+      .replace(/\s+([.,;:!?])/g, '$1')
+      .trim();
   }
 }

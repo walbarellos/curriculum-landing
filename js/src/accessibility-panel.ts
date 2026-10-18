@@ -1,1139 +1,944 @@
-import { VoiceReader } from './voice-reader';
-import './capi-mascot';
-
-export class AcreAccessibilityPanel extends HTMLElement {
-  private shadow: ShadowRoot;
-  public reader: VoiceReader;
-  private isOpen: boolean = false;
-
-  private fontScale: number = 1.0;
-  private isHighContrast: boolean = false;
-  private isGrayscale: boolean = false;
-  private lineSpacing: 'normal' | 'medium' | 'large' = 'normal';
-  private letterSpacing: 'normal' | 'medium' | 'large' = 'normal';
-  private isDyslexicFriendly: boolean = false;
-  private showMascot: boolean = true;
-  private readOnHover: boolean = false;
-  private isLibrasActive: boolean = false;
-  private hoverTimeout: any = null;
-  private lastHoveredElement: HTMLElement | null = null;
-
-  constructor() {
-    super();
-    this.shadow = this.attachShadow({ mode: 'open', delegatesFocus: true });
-    this.reader = new VoiceReader({
-      onStateChange: state => this.handleVoiceStateChange(state),
-                                  onElementHighlight: element => this.handleElementHighlight(element),
-    });
-    this.injectGlobalStyles();
-  }
-
-  connectedCallback() {
-    this.render();
-    this.setupEvents();
-    this.setupKeyboardShortcuts();
-    this.loadSettings();
-    this.applySettingsToPage();
-
-    // Detectar se é a primeira interação da sessão ou uma navegação subsequente
-    const hasInteracted = sessionStorage.getItem('acre_user_interacted');
-
-    if (!hasInteracted) {
-      // Primeira visita na sessão: mostra boas-vindas no primeiro input do usuário
-      const welcomeHandler = () => {
-        document.removeEventListener('click', welcomeHandler, true);
-        document.removeEventListener('keydown', welcomeHandler, true);
-        sessionStorage.setItem('acre_user_interacted', '1');
-        setTimeout(() => {
-          this.reader.readTextDirectly(
-            'Acre Acessível pronto. Pressione Alt P para ouvir a página, ou Alt A para abrir o menu.'
-          );
-        }, 400);
-      };
-      document.addEventListener('click', welcomeHandler, true);
-      document.addEventListener('keydown', welcomeHandler, true);
-    } else {
-      // Navegação subsequente: foco inteligente direto no conteúdo
-      this.smartPageFocus();
-    }
-  }
-
-  /**
-   * Foco inteligente ao carregar uma página subsequente.
-   * Move o foco direto para o <main> e anuncia o título da página,
-   * para que o cego não precise percorrer o header inteiro de novo.
-   */
-  private smartPageFocus() {
-    // Pequeno delay para garantir que o DOM está renderizado
-    setTimeout(() => {
-      const main = document.getElementById('main-content');
-      if (!main) return;
-
-      // Move o foco para o conteúdo principal
-      main.focus();
-
-      // Monta o anúncio contextual
-      const pageTitle = document.querySelector('h1')?.textContent?.trim()
-        || document.title.split('|')[0]?.trim()
-        || 'página';
-
-      this.reader.readTextDirectly(
-        `Página ${pageTitle}. Use J para navegar o conteúdo, F para voltar, Alt G para o menu.`
-      );
-    }, 300);
-  }
-
-  /** Seta o estado do mascote com segurança, aguardando o custom element estar pronto */
-  private setMascotState(state: string) {
-    const mascot = this.shadow.getElementById('capiMascot');
-    if (!mascot) return;
-    // Se o custom element ainda não definiu observedAttributes (não está pronto), tenta de novo
-    if (!customElements.get('capi-mascot')) {
-      setTimeout(() => this.setMascotState(state), 100);
-      return;
-    }
-    mascot.setAttribute('state', state);
-  }
-
-  private injectGlobalStyles() {
-    if (document.getElementById('acre-global-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'acre-global-styles';
-    style.innerHTML = `
-    :root {
-      --acre-font-multiplier: 1.0;
-      --acre-line-spacing: normal;
-      --acre-letter-spacing: normal;
-    }
-    html, body {
-      font-size: calc(16px * var(--acre-font-multiplier)) !important;
-    }
-    body {
-      line-height: var(--acre-line-spacing) !important;
-      letter-spacing: var(--acre-letter-spacing) !important;
-      transition: line-height 0.2s ease, letter-spacing 0.2s ease;
-    }
-    .acre-dyslexic-mode, .acre-dyslexic-mode *:not(.material-symbols-outlined) {
-      font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif !important;
-    }
-    .acre-grayscale-mode {
-      filter: grayscale(100%) !important;
-    }
-    .acre-high-contrast-mode {
-      background-color: #000000 !important;
-      color: #FFFFFF !important;
-      filter: none !important;
-    }
-    .acre-high-contrast-mode body { background-color: #000000 !important; color: #FFFFFF !important; }
-    .acre-high-contrast-mode p,
-    .acre-high-contrast-mode h1,.acre-high-contrast-mode h2,.acre-high-contrast-mode h3,
-    .acre-high-contrast-mode h4,.acre-high-contrast-mode h5,.acre-high-contrast-mode h6,
-    .acre-high-contrast-mode li,.acre-high-contrast-mode a,.acre-high-contrast-mode span,
-    .acre-high-contrast-mode div:not([class*="acre"]) {
-      background-color: #000000 !important;
-      color: #FFFFFF !important;
-      border-color: #FFFFFF !important;
-    }
-    .acre-high-contrast-mode a { color: #FFFF00 !important; text-decoration: underline !important; }
-    .acre-high-contrast-mode button:not([class*="acre"]) {
-      background-color: #000000 !important; color: #FFFFFF !important; border: 2px solid #FFFFFF !important;
-    }
-    `;
-    document.head.appendChild(style);
-  }
-
-  private render() {
-    this.shadow.innerHTML = `
-    <style>
-    :host {
-      --primary: #1b4332;
-      --primary-hover: #2d6a4f;
-      --primary-light: #e8f0ec;
-      --accent: #A06D3B;
-      --bg: #ffffff;
-      --bg-subtle: #f8f9fa;
-      --text: #111827;
-      --text-muted: #6b7280;
-      --border: #e5e7eb;
-      --border-strong: #d1d5db;
-      --shadow-lg: -4px 0 24px rgba(0,0,0,0.10);
-      --radius: 6px;
-      --font: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 999999;
-      font-family: var(--font);
-    }
-    @media (max-width: 700px) {
-      :host {
-        bottom: 72px;
-      }
-    }
-
-    /* ── Mascote / Trigger ── */
-    .mascot-trigger {
-      position: absolute; bottom: 0; right: 0; z-index: 10;
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
-    }
-    .mascot-trigger.hidden { opacity: 0; pointer-events: none; transform: scale(0.5) translateY(50px); }
-
-    .alt-trigger {
-      background: var(--primary); color: white; border: none; border-radius: 50%;
-      width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      transition: background-color 0.2s, transform 0.2s;
-    }
-    .alt-trigger:hover { background-color: var(--primary-hover); transform: scale(1.05); }
-    .alt-trigger svg { width: 22px; height: 22px; }
-
-    /* ── Drawer ── */
-    .panel-drawer {
-      position: fixed; top: 0; right: -390px; width: 360px; height: 100vh;
-      background: var(--bg); border-left: 1px solid var(--border);
-      box-shadow: var(--shadow-lg);
-      transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex; flex-direction: column; z-index: 5; color: var(--text);
-    }
-    .panel-drawer.open { right: 0; }
-
-    /* ── Header ── */
-    .panel-header {
-      padding: 16px 20px; background: var(--primary); color: white;
-      display: flex; justify-content: space-between; align-items: center;
-      flex-shrink: 0; border-bottom: 2px solid var(--accent);
-    }
-    .panel-title {
-      margin: 0; font-size: 15px; font-weight: 600; letter-spacing: 0.01em;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .panel-title svg { width: 18px; height: 18px; opacity: 0.9; }
-    .close-btn {
-      background: transparent; border: none; color: rgba(255,255,255,0.75);
-      cursor: pointer; border-radius: var(--radius);
-      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-      transition: background-color 0.15s, color 0.15s; padding: 0;
-    }
-    .close-btn:hover { background: rgba(255,255,255,0.12); color: white; }
-    .close-btn svg { width: 16px; height: 16px; }
-
-    /* ── Conteúdo ── */
-    .panel-content {
-      flex: 1; overflow-y: auto; padding: 18px 20px;
-      scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent;
-    }
-
-    /* ── Seções ── */
-    .section-title {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--text-muted);
-      margin: 22px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
-    }
-    .section-title:first-of-type { margin-top: 0; }
-
-    /* ── Controles de Voz ── */
-    .voice-controls {
-      background: var(--bg-subtle); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px;
-    }
-
-    /* Transport — ícones SVG, sem emoji */
-    .voice-transport {
-      display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 14px;
-    }
-    .transport-btn {
-      background: var(--bg); border: 1px solid var(--border-strong);
-      border-radius: var(--radius); width: 36px; height: 36px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--text);
-      transition: background 0.15s, border-color 0.15s; padding: 0;
-    }
-    .transport-btn svg { width: 14px; height: 14px; }
-    .transport-btn:hover { background: var(--border); }
-    .transport-btn.primary {
-      background: var(--primary); border-color: var(--primary); color: white;
-      width: 42px; height: 42px;
-    }
-    .transport-btn.primary svg { width: 16px; height: 16px; }
-    .transport-btn.primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
-
-    /* ── Sliders ── */
-    .slider-group { margin-top: 10px; }
-    .slider-label {
-      font-size: 11px; font-weight: 600;
-      display: flex; justify-content: space-between; margin-bottom: 5px; color: var(--text-muted);
-    }
-    .panel-slider { width: 100%; accent-color: var(--primary); cursor: pointer; height: 4px; }
-
-    /* Toggle row — hover speak */
-    .toggle-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 9px 12px; border: 1px solid var(--border-strong);
-      border-radius: var(--radius); background: var(--bg);
-      cursor: pointer; margin-top: 10px;
-      font-size: 12px; font-weight: 500; color: var(--text);
-      transition: background 0.15s; gap: 8px; font-family: var(--font);
-    }
-    .toggle-row:hover { background: var(--bg-subtle); }
-    .toggle-row-label { display: flex; align-items: center; gap: 7px; }
-    .toggle-row-label svg { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
-    .toggle-badge {
-      font-size: 10px; font-weight: 700; padding: 2px 8px;
-      border-radius: 10px; background: var(--border); color: var(--text-muted);
-      white-space: nowrap; transition: background 0.15s, color 0.15s;
-    }
-    .toggle-badge.on { background: var(--primary); color: white; }
-
-    /* ── Grid de Botões ── */
-    .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .panel-btn {
-      background: var(--bg); border: 1px solid var(--border-strong);
-      border-radius: var(--radius); padding: 9px 12px;
-      font-size: 12px; font-weight: 500; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 7px;
-      color: var(--text); transition: background 0.15s, border-color 0.15s, color 0.15s;
-      line-height: 1.3; text-align: center; font-family: var(--font);
-    }
-    .panel-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-    .panel-btn:hover { background: var(--bg-subtle); }
-    .panel-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .panel-btn.active svg { opacity: 0.9; }
-    .panel-btn.full-width { grid-column: span 2; }
-
-    /* ── Rodapé / Atalhos ── */
-    .panel-footer {
-      padding: 14px 20px; background: var(--bg-subtle);
-      border-top: 1px solid var(--border); flex-shrink: 0;
-    }
-    .shortcuts-title {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px;
-    }
-    .shortcut-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 3px 0; font-size: 11px; color: var(--text-muted);
-    }
-    .shortcut-key {
-      background: var(--bg); border: 1px solid var(--border-strong);
-      padding: 1px 6px; border-radius: 4px; font-weight: 600; font-size: 10px;
-      color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; white-space: nowrap;
-    }
-
-    /* ── Bolinha Capi ── */
-    .capi-bubble {
-      position: absolute; bottom: 115px; right: 0;
-      background: var(--primary); color: white;
-      border-radius: 10px 10px 0 10px; padding: 9px 13px;
-      font-size: 12px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      opacity: 0; transform: translateY(8px) scale(0.95);
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      pointer-events: none; max-width: 200px; white-space: normal;
-      line-height: 1.5; z-index: 20;
-    }
-    .capi-bubble.visible { opacity: 1; transform: translateY(0) scale(1); }
-    .capi-bubble::after {
-      content: ''; position: absolute; bottom: -7px; right: 12px;
-      width: 0; height: 0;
-      border-left: 7px solid transparent; border-top: 7px solid var(--primary);
-    }
-
-    /* ── Alto Contraste ── */
-    :host(.high-contrast) {
-      --primary: #000000; --primary-hover: #222222; --primary-light: #333;
-      --accent: #FFFF00; --bg: #000000; --bg-subtle: #111111;
-      --text: #ffffff; --text-muted: #cccccc; --border: #555555; --border-strong: #ffffff;
-    }
-    :host(.high-contrast) .capi-bubble { background: #FFFF00; color: #000; }
-    :host(.high-contrast) .capi-bubble::after { border-top-color: #FFFF00; }
-    :host(.high-contrast) .panel-btn.active { background: #FFFF00; color: #000; border-color: #FFFF00; }
-    :host(.high-contrast) .transport-btn.primary { background: #FFFF00; color: #000; border-color: #FFFF00; }
-    :host(.high-contrast) .toggle-badge.on { background: #FFFF00; color: #000; }
-    :host(.high-contrast) .shortcut-key { background: #fff; color: #000; border-color: #fff; }
-    </style>
-
-    <!-- Balão de boas-vindas -->
-    <div class="capi-bubble" id="capiBubble" aria-hidden="true">
-    Pressione <strong>Alt + A</strong> para abrir o menu ou <strong>Alt + P</strong> para ouvir a página.
-    </div>
-
-    <!-- Mascote -->
-    <div class="mascot-trigger" id="mascotTrigger">
-    <capi-mascot id="capiMascot"></capi-mascot>
-    </div>
-
-    <!-- Botão alternativo (quando mascote oculto) -->
-    <div class="mascot-trigger hidden" id="altTriggerContainer">
-    <button class="alt-trigger" title="Abrir menu de acessibilidade" aria-label="Abrir menu de acessibilidade Acre Acessível" aria-expanded="false" id="altTriggerBtn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <circle cx="12" cy="5" r="2"/><path d="M12 9v4M8 21l4-8 4 8M6 13h12"/>
-    </svg>
-    </button>
-    </div>
-
-    <!-- Drawer -->
-    <div class="panel-drawer" id="panelDrawer" role="dialog" aria-modal="true"
-    aria-label="Painel de Acessibilidade Acre Acessível" aria-describedby="panelDesc">
-
-    <div class="panel-header">
-    <h2 class="panel-title">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <circle cx="12" cy="5" r="2"/><path d="M12 9v4M8 21l4-8 4 8M6 13h12"/>
-    </svg>
-    Acre Acessível
-    </h2>
-    <button class="close-btn" id="closeBtn" aria-label="Fechar painel">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-    </button>
-    </div>
-
-    <p id="panelDesc" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
-    Painel de configurações de acessibilidade. Use Tab para navegar. Pressione Escape para fechar.
-    </p>
-
-    <div class="panel-content">
-
-    <!-- Leitor de Voz -->
-    <div class="section-title">Leitor de Voz</div>
-    <div class="voice-controls">
-    <div class="voice-transport">
-    <button class="transport-btn" id="prevBtn" title="Elemento anterior (Alt+B)" aria-label="Elemento anterior">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <polygon points="19 20 9 12 19 4 19 20" fill="currentColor" stroke="none"/>
-    <line x1="5" y1="4" x2="5" y2="20"/>
-    </svg>
-    </button>
-
-    <button class="transport-btn primary" id="playPauseBtn" title="Ler página (Alt+P)" aria-label="Iniciar leitura">
-    <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <polygon points="5 3 19 12 5 21 5 3"/>
-    </svg>
-    </button>
-
-    <button class="transport-btn" id="stopBtn" title="Parar leitura (Alt+S)" aria-label="Parar leitura">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <rect x="4" y="4" width="16" height="16" rx="2"/>
-    </svg>
-    </button>
-
-    <button class="transport-btn" id="nextBtn" title="Próximo elemento (Alt+N)" aria-label="Próximo elemento">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <polygon points="5 4 15 12 5 20 5 4" fill="currentColor" stroke="none"/>
-    <line x1="19" y1="4" x2="19" y2="20"/>
-    </svg>
-    </button>
-    </div>
-
-    <div class="slider-group">
-    <div class="slider-label">
-    <span>Velocidade</span>
-    <span id="rateVal">1.00x</span>
-    </div>
-    <input type="range" class="panel-slider" id="rateSlider"
-    min="0.5" max="2.0" step="0.25" value="1.0" aria-label="Velocidade da voz">
-    </div>
-
-    <div class="slider-group">
-    <div class="slider-label">
-    <span>Tom</span>
-    <span id="pitchVal">1.00</span>
-    </div>
-    <input type="range" class="panel-slider" id="pitchSlider"
-    min="0.5" max="1.5" step="0.1" value="1.0" aria-label="Tom da voz">
-    </div>
-
-    <div class="slider-group">
-    <div class="slider-label">
-    <span>Volume</span>
-    <span id="volumeVal">100%</span>
-    </div>
-    <input type="range" class="panel-slider" id="volumeSlider"
-    min="0" max="1" step="0.1" value="1" aria-label="Volume da voz">
-    </div>
-
-    <div class="toggle-row" id="btnHoverSpeak" role="button" tabindex="0"
-    aria-pressed="false" title="Ler texto ao apontar com o mouse">
-    <span class="toggle-row-label">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-    </svg>
-    Apontar para Ouvir
-    </span>
-    <span class="toggle-badge" id="hoverSpeakLabel">Off</span>
-    </div>
-    </div>
-
-    <!-- Acessibilidade Visual -->
-    <div class="section-title">Acessibilidade Visual</div>
-    <div class="button-grid">
-    <button class="panel-btn" id="btnFontInc" aria-label="Aumentar tamanho da fonte">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
-    </svg>
-    Aumentar
-    </button>
-    <button class="panel-btn" id="btnFontDec" aria-label="Diminuir tamanho da fonte">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    <line x1="8" y1="11" x2="14" y2="11"/>
-    </svg>
-    Diminuir
-    </button>
-    <button class="panel-btn" id="btnContrast" aria-pressed="false" aria-label="Alternar alto contraste">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor" stroke="none"/>
-    </svg>
-    Contraste
-    </button>
-    <button class="panel-btn" id="btnGrayscale" aria-pressed="false" aria-label="Alternar preto e branco">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M12 2v20M2 12h20" stroke-dasharray="3 2"/>
-    </svg>
-    P&amp;B
-    </button>
-    </div>
-
-    <!-- Layout -->
-    <div class="section-title">Layout &amp; Espaçamento</div>
-    <div class="button-grid">
-    <button class="panel-btn" id="btnLineSpacing" aria-label="Espaçamento entre linhas">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-    <line x1="8" y1="18" x2="21" y2="18"/>
-    <polyline points="3 8 3 3 3 3"/><line x1="3" y1="3" x2="3" y2="21"/>
-    </svg>
-    Linhas: <b id="lineSpacingLabel">Normal</b>
-    </button>
-    <button class="panel-btn" id="btnLetterSpacing" aria-label="Espaçamento entre letras">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <path d="M4 7l4 10M12 7l-4 10M8 14h8M20 7l-4 10"/>
-    </svg>
-    Letras: <b id="letterSpacingLabel">Normal</b>
-    </button>
-    <button class="panel-btn full-width" id="btnDyslexic" aria-pressed="false" aria-label="Ativar fonte para dislexia">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <path d="M2 6h20M2 12h14M2 18h20"/>
-    </svg>
-    Fonte para Dislexia
-    </button>
-    </div>
-
-    <!-- Auditiva -->
-    <div class="section-title">Acessibilidade Auditiva</div>
-    <div class="button-grid">
-    <button class="panel-btn full-width" id="btnLibras" aria-pressed="false" aria-label="Ativar Tradutor de Libras">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
-    <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/>
-    <line x1="14" y1="1" x2="14" y2="4"/>
-    </svg>
-    Tradutor de Libras: <b id="librasLabel">Off</b>
-    </button>
-    </div>
-
-    <!-- Mascote -->
-    <div class="section-title">Visual do Mascote</div>
-    <div class="button-grid">
-    <button class="panel-btn full-width" id="btnToggleMascot" aria-label="Mostrar ou ocultar mascote">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-    </svg>
-    <span id="mascotBtnLabel">Ocultar Mascote</span>
-    </button>
-    </div>
-
-    </div><!-- /panel-content -->
-
-    <!-- Rodapé atalhos -->
-    <div class="panel-footer">
-    <div class="shortcut-item"><span>Ativar / Desativar Painel</span><span class="shortcut-key">Alt + A</span></div>
-    <div class="shortcut-item"><span>Play / Pause na Leitura</span><span class="shortcut-key">Alt + P</span></div>
-    <div class="shortcut-item"><span>Parar Leitura</span><span class="shortcut-key">Alt + S</span></div>
-    <div class="shortcut-item"><span>Próximo elemento</span><span class="shortcut-key">Alt + N</span></div>
-    <div class="shortcut-item"><span>Elemento anterior</span><span class="shortcut-key">Alt + B</span></div>
-    <div class="shortcut-item"><span>Alto contraste</span><span class="shortcut-key">Alt + C</span></div>
-    <div class="shortcut-item"><span>Navegar abas</span><span class="shortcut-key">← →</span></div>
-    <div class="shortcut-item"><span>Fechar painel</span><span class="shortcut-key">Esc</span></div>
-    </div>
-    </div><!-- /panel-drawer -->
-    `;
-  }
-
-  private setupEvents() {
-    const shadow = this.shadow;
-    const drawer = shadow.getElementById('panelDrawer')!;
-    const capiBubble = shadow.getElementById('capiBubble')!;
-    const altTrigger = shadow.querySelector('.alt-trigger')!;
-    const closeBtn = shadow.getElementById('closeBtn')!;
-
-    const togglePanel = () => {
-      this.isOpen = !this.isOpen;
-      if (this.isOpen) {
-        drawer.classList.add('open');
-        drawer.setAttribute('aria-hidden', 'false');
-        this.reader.stop();
-        capiBubble.classList.remove('visible');
-        const altBtn = shadow.getElementById('altTriggerBtn');
-        if (altBtn) altBtn.setAttribute('aria-expanded', 'true');
-        setTimeout(() => {
-          const first = drawer.querySelector<HTMLElement>(
-            'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
-          );
-          first?.focus();
-        }, 410);
-      } else {
-        drawer.classList.remove('open');
-        drawer.setAttribute('aria-hidden', 'true');
-        const altBtn = shadow.getElementById('altTriggerBtn');
-        if (altBtn) altBtn.setAttribute('aria-expanded', 'false');
-      }
-    };
-
-    // Escape fecha
-    (shadow as any).addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && this.isOpen) togglePanel();
-    });
-
-      this.addEventListener('close-panel', () => { if (this.isOpen) togglePanel(); });
-
-      // Trap de foco
-      drawer.addEventListener('keydown', (e: KeyboardEvent) => {
-        if (!this.isOpen || e.key !== 'Tab') return;
-        const sel = 'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
-        const els = Array.from(drawer.querySelectorAll<HTMLElement>(sel));
-        if (!els.length) return;
-        if (e.shiftKey && document.activeElement === els[0]) {
-          e.preventDefault(); els[els.length - 1].focus();
-        } else if (!e.shiftKey && document.activeElement === els[els.length - 1]) {
-          e.preventDefault(); els[0].focus();
-        }
-      });
-
-      // Boas-vindas visual — balão + animação do mascote
-      // Só exibe se o painel estiver fechado E o leitor não estiver falando
-      setTimeout(() => {
-        if (!this.isOpen && this.reader.state === 'idle') {
-          capiBubble.classList.add('visible');
-          setTimeout(() => capiBubble.classList.remove('visible'), 6000);
-          // Acena o mascote via referência direta ao custom element
-          const mascotEl = this.shadow.getElementById('capiMascot') as any;
-          if (mascotEl && typeof mascotEl.greet === 'function') {
-            mascotEl.greet();
-          }
-        }
-      }, 2000);
-
-      this.addEventListener('toggle-panel', togglePanel);
-      altTrigger.addEventListener('click', togglePanel);
-      closeBtn.addEventListener('click', togglePanel);
-
-      // Controles de voz
-      const playPauseBtn = shadow.getElementById('playPauseBtn')!;
-      const stopBtn = shadow.getElementById('stopBtn')!;
-      const prevBtn = shadow.getElementById('prevBtn')!;
-      const nextBtn = shadow.getElementById('nextBtn')!;
-      const rateSlider = shadow.getElementById('rateSlider') as HTMLInputElement;
-      const pitchSlider = shadow.getElementById('pitchSlider') as HTMLInputElement;
-      const volumeSlider = shadow.getElementById('volumeSlider') as HTMLInputElement;
-
-      playPauseBtn.addEventListener('click', () => {
-        if (this.reader.state === 'speaking') this.reader.pause();
-        else if (this.reader.state === 'paused') this.reader.resume();
-        else this.reader.play();
-      });
-
-        stopBtn.addEventListener('click', () => this.reader.stop());
-        prevBtn.addEventListener('click', () => this.reader.previous());
-        nextBtn.addEventListener('click', () => this.reader.next());
-
-        rateSlider.addEventListener('input', e => {
-          const val = parseFloat((e.target as HTMLInputElement).value);
-          const label = shadow.getElementById('rateVal');
-          if (label) label.innerText = `${val.toFixed(2)}x`;
-          this.reader.setRate(val);
-          this.saveSettings();
-        });
-
-        pitchSlider.addEventListener('input', e => {
-          const val = parseFloat((e.target as HTMLInputElement).value);
-          const label = shadow.getElementById('pitchVal');
-          if (label) label.innerText = val.toFixed(2);
-          this.reader.setPitch(val);
-          this.saveSettings();
-        });
-
-        volumeSlider.addEventListener('input', e => {
-          const val = parseFloat((e.target as HTMLInputElement).value);
-          const label = shadow.getElementById('volumeVal');
-          if (label) label.innerText = `${Math.round(val * 100)}%`;
-          this.reader.setVolume(val);
-          this.saveSettings();
-        });
-
-        // Visuais
-        shadow.getElementById('btnFontInc')?.addEventListener('click', () => {
-          this.fontScale = Math.min(this.fontScale + 0.1, 2.0);
-          this.applySettingsToPage(); this.saveSettings();
-        });
-        shadow.getElementById('btnFontDec')?.addEventListener('click', () => {
-          this.fontScale = Math.max(this.fontScale - 0.1, 0.8);
-          this.applySettingsToPage(); this.saveSettings();
-        });
-        shadow.getElementById('btnContrast')?.addEventListener('click', () => {
-          this.isHighContrast = !this.isHighContrast;
-          this.applySettingsToPage(); this.saveSettings();
-        });
-        shadow.getElementById('btnGrayscale')?.addEventListener('click', () => {
-          this.isGrayscale = !this.isGrayscale;
-          this.applySettingsToPage(); this.saveSettings();
-        });
-        shadow.getElementById('btnLineSpacing')?.addEventListener('click', () => {
-          this.lineSpacing = this.lineSpacing === 'normal' ? 'medium' : this.lineSpacing === 'medium' ? 'large' : 'normal';
-          this.applySettingsToPage(); this.saveSettings();
-        });
-        shadow.getElementById('btnLetterSpacing')?.addEventListener('click', () => {
-          this.letterSpacing = this.letterSpacing === 'normal' ? 'medium' : this.letterSpacing === 'medium' ? 'large' : 'normal';
-          this.applySettingsToPage(); this.saveSettings();
-        });
-        shadow.getElementById('btnDyslexic')?.addEventListener('click', () => {
-          this.isDyslexicFriendly = !this.isDyslexicFriendly;
-          this.applySettingsToPage(); this.saveSettings();
-        });
-        shadow.getElementById('btnToggleMascot')?.addEventListener('click', () => {
-          this.showMascot = !this.showMascot;
-          this.applySettingsToPage(); this.saveSettings();
-        });
-
-        // Toggle hover speak — suporta click e Enter/Space
-        const hoverBtn = shadow.getElementById('btnHoverSpeak')!;
-        const toggleHover = () => {
-          this.readOnHover = !this.readOnHover;
-          this.applySettingsToPage(); this.saveSettings();
-        };
-        hoverBtn.addEventListener('click', toggleHover);
-        hoverBtn.addEventListener('keydown', (e: KeyboardEvent) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleHover(); }
-        });
-
-        // Libras
-        shadow.getElementById('btnLibras')?.addEventListener('click', () => {
-          this.isLibrasActive = !this.isLibrasActive;
-          this.reader.readTextDirectly(
-            this.isLibrasActive ? 'Tradução em Libras ativada' : 'Tradução em Libras desativada'
-          );
-          document.dispatchEvent(new CustomEvent('acre:libras:state', { detail: { active: this.isLibrasActive } }));
-          this.applySettingsToPage(); this.saveSettings();
-        });
-
-        // Click direto em elemento da página — bloqueado durante leitura sequencial
-        document.addEventListener('click', e => {
-          if (this.reader.isSequentialReading) return;
-          const target = e.target as HTMLElement;
-          if (
-            target.closest('acre-accessibility-panel') ||
-            target.closest('capi-mascot') ||
-            target.closest('.accessibility-bar') ||
-            target.closest('.audio-player-wrapper') ||
-            target.closest('audio') ||
-            target.closest('[vw]') ||
-            target.closest('#vlibras-div') ||
-            target.closest('[data-acre-ignore]') ||
-            target.closest('.acre-ignore') ||
-            target.closest('header') ||
-            target.closest('nav') ||
-            target.closest('button') ||
-            target.closest('a')
-          ) return;
-
-          const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,img[alt]';
-          const readable = target.closest(selector) as HTMLElement;
-          if (readable) {
-            this.reader.readSpecificElement(readable, false);
-          }
-        });
-
-          // Seleção de texto — bloqueada durante leitura sequencial
-          let selectionTimeout: number | null = null;
-          const handleTextSelection = () => {
-            if (selectionTimeout) window.clearTimeout(selectionTimeout);
-            selectionTimeout = window.setTimeout(() => {
-              if (this.reader.isSequentialReading) return;
-              const text = window.getSelection()?.toString().trim();
-              if (!text || text.length <= 2) return;
-              const sel = window.getSelection();
-              if (sel?.anchorNode) {
-                const parent = sel.anchorNode.parentElement;
-                if (
-                  parent?.closest('acre-accessibility-panel') ||
-                  parent?.closest('capi-mascot') ||
-                  parent?.closest('.accessibility-bar') ||
-                  parent?.closest('.vpw-plugin-wrapper') ||
-                  parent?.closest('#vlibras-div')
-                ) return;
-              }
-              this.reader.readTextDirectly(text);
-            }, 800); // 800ms debounce para dar tempo de arrastar a seleção no celular
-          };
-          document.addEventListener('selectionchange', handleTextSelection);
-
-          // Tap/Click para mobile (Ler ao apontar)
-          document.addEventListener('click', e => {
-            if (!this.readOnHover || this.reader.isSequentialReading) return;
-            const target = e.target as HTMLElement;
-            if (
-              target.closest('acre-accessibility-panel') ||
-              target.closest('capi-mascot') ||
-              target.closest('.accessibility-bar') ||
-              target.closest('.audio-player-wrapper') ||
-              target.closest('audio') ||
-              target.closest('[vw]') ||
-              target.closest('#vlibras-div') ||
-              target.closest('[data-acre-ignore]') ||
-              target.closest('.acre-ignore') ||
-              target.closest('header') ||
-              target.closest('nav') ||
-              target.closest('button') ||
-              target.closest('a')
-            ) return;
-            const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,img[alt]';
-            const readable = target.closest(selector) as HTMLElement;
-            if (readable) {
-              if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
-              this.reader.readSpecificElement(readable, false);
-            }
-          });
-
-          // Hover — bloqueado durante leitura sequencial
-          document.addEventListener('mouseover', e => {
-            if (!this.readOnHover || this.reader.isSequentialReading) return;
-            const target = e.target as HTMLElement;
-            if (
-              target.closest('acre-accessibility-panel') ||
-              target.closest('capi-mascot') ||
-              target.closest('.accessibility-bar') ||
-              target.closest('.audio-player-wrapper') ||
-              target.closest('audio') ||
-              target.closest('[vw]') ||
-              target.closest('#vlibras-div') ||
-              target.closest('[data-acre-ignore]') ||
-              target.closest('.acre-ignore')
-            ) return;
-            const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,a,button,img[alt],[role="button"]';
-            const readable = target.closest(selector) as HTMLElement;
-            if (readable && readable !== this.lastHoveredElement) {
-              this.lastHoveredElement = readable;
-              if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
-              this.hoverTimeout = setTimeout(() => {
-                if (!this.reader.isSequentialReading) {
-                  this.reader.readSpecificElement(readable, false);
-                }
-              }, 300);
-            }
-          });
-
-          document.addEventListener('mouseout', e => {
-            if (!this.readOnHover) return;
-            const target = e.target as HTMLElement;
-            const related = e.relatedTarget as HTMLElement;
-            const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,a,button,img[alt],[role="button"]';
-            const readable = target.closest(selector) as HTMLElement;
-            const relatedReadable = related ? related.closest(selector) : null;
-            if (readable && readable === this.lastHoveredElement && !relatedReadable) {
-              if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
-              this.lastHoveredElement = null;
-            }
-          });
-
-          // Foco por teclado — bloqueado durante leitura sequencial
-          document.addEventListener('focusin', e => {
-            if (!this.readOnHover || this.reader.isSequentialReading) return;
-            const target = e.target as HTMLElement;
-            if (
-              target.closest('acre-accessibility-panel') ||
-              target.closest('capi-mascot') ||
-              target.closest('.accessibility-bar') ||
-              target.closest('[data-acre-ignore]') ||
-              target.closest('.acre-ignore')
-            ) return;
-            const selector = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,article span,label,figcaption,a,button,img[alt],[role="button"]';
-            const readable = target.closest(selector) as HTMLElement;
-            if (readable) {
-              if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
-              this.reader.readSpecificElement(readable, false);
-            }
-          });
-  }
-
-  private setupKeyboardShortcuts() {
-    window.addEventListener('keydown', e => {
-      if (!e.altKey) return;
-      switch (e.key.toLowerCase()) {
-        case 'a':
-          e.preventDefault();
-          this.dispatchEvent(new CustomEvent('toggle-panel', { bubbles: true, composed: true }));
-          break;
-        case 'p':
-          e.preventDefault();
-          if (this.reader.state === 'speaking') this.reader.pause();
-          else if (this.reader.state === 'paused') this.reader.resume();
-          else this.reader.play();
-          break;
-        case 's':
-          e.preventDefault();
-          this.reader.stop();
-          break;
-        case 'n':
-          e.preventDefault();
-          this.reader.next();
-          break;
-        case 'b':
-          e.preventDefault();
-          this.reader.previous();
-          break;
-        case 'c':
-          e.preventDefault();
-          this.isHighContrast = !this.isHighContrast;
-          this.applySettingsToPage(); this.saveSettings();
-          break;
-      }
-    });
-  }
-
-  private handleVoiceStateChange(state: 'idle' | 'speaking' | 'paused') {
-    const shadow = this.shadow;
-    const playPauseBtn = shadow.getElementById('playPauseBtn');
-    const iconPlay = shadow.getElementById('iconPlay');
-
-    if (!playPauseBtn || !iconPlay) return;
-
-    if (state === 'speaking') {
-      iconPlay.setAttribute('viewBox', '0 0 24 24');
-      iconPlay.setAttribute('fill', 'currentColor');
-      iconPlay.innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
-      playPauseBtn.setAttribute('aria-label', 'Pausar leitura');
-      playPauseBtn.setAttribute('title', 'Pausar leitura (Alt+P)');
-      this.setMascotState('speaking');
-      // Esconde o balão de boas-vindas para não sobrepor o balão de fala do Capi
-      shadow.getElementById('capiBubble')?.classList.remove('visible');
-    } else if (state === 'paused') {
-      iconPlay.setAttribute('viewBox', '0 0 24 24');
-      iconPlay.setAttribute('fill', 'currentColor');
-      iconPlay.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
-      playPauseBtn.setAttribute('aria-label', 'Retomar leitura');
-      playPauseBtn.setAttribute('title', 'Retomar leitura (Alt+P)');
-      this.setMascotState('idle');
-    } else {
-      iconPlay.setAttribute('viewBox', '0 0 24 24');
-      iconPlay.setAttribute('fill', 'currentColor');
-      iconPlay.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
-      playPauseBtn.setAttribute('aria-label', 'Iniciar leitura');
-      playPauseBtn.setAttribute('title', 'Ler página (Alt+P)');
-      this.setMascotState('idle');
-    }
-  }
-
-  private handleElementHighlight(element: HTMLElement | null) {
-    if (element) {
-      this.setMascotState(this.reader.state === 'speaking' ? 'speaking' : 'reading');
-    } else {
-      this.setMascotState('idle');
-    }
-  }
-
-  private applySettingsToPage() {
-    const shadow = this.shadow;
-    const body = document.body;
-    const docEl = document.documentElement;
-
-    // Fonte
-    docEl.style.setProperty('--acre-font-multiplier', this.fontScale.toString());
-
-    // Alto contraste
-    const btnContrast = shadow.getElementById('btnContrast');
-    if (this.isHighContrast) {
-      docEl.classList.add('acre-high-contrast-mode');
-      this.classList.add('high-contrast');
-      btnContrast?.classList.add('active');
-      btnContrast?.setAttribute('aria-pressed', 'true');
-      const mascot = shadow.getElementById('capiMascot') as any;
-      if (mascot?.setHighContrast) mascot.setHighContrast(true);
-    } else {
-      docEl.classList.remove('acre-high-contrast-mode');
-      this.classList.remove('high-contrast');
-      btnContrast?.classList.remove('active');
-      btnContrast?.setAttribute('aria-pressed', 'false');
-      const mascot = shadow.getElementById('capiMascot') as any;
-      if (mascot?.setHighContrast) mascot.setHighContrast(false);
-    }
-
-    // Grayscale
-    const btnGray = shadow.getElementById('btnGrayscale');
-    if (this.isGrayscale) {
-      body.classList.add('acre-grayscale-mode');
-      btnGray?.classList.add('active');
-      btnGray?.setAttribute('aria-pressed', 'true');
-    } else {
-      body.classList.remove('acre-grayscale-mode');
-      btnGray?.classList.remove('active');
-      btnGray?.setAttribute('aria-pressed', 'false');
-    }
-
-    // Line spacing
-    const lineLabel = shadow.getElementById('lineSpacingLabel');
-    const btnLine = shadow.getElementById('btnLineSpacing');
-    const lineMap = { normal: ['normal', 'Normal', false], medium: ['1.8', 'Médio', true], large: ['2.3', 'Largo', true] } as const;
-    const [lVal, lText, lActive] = lineMap[this.lineSpacing];
-    docEl.style.setProperty('--acre-line-spacing', lVal);
-    if (lineLabel) lineLabel.innerText = lText;
-    btnLine?.classList.toggle('active', lActive);
-
-    // Letter spacing
-    const letterLabel = shadow.getElementById('letterSpacingLabel');
-    const btnLetter = shadow.getElementById('btnLetterSpacing');
-    const letterMap = { normal: ['normal', 'Normal', false], medium: ['0.12em', 'Médio', true], large: ['0.2em', 'Largo', true] } as const;
-    const [ltVal, ltText, ltActive] = letterMap[this.letterSpacing];
-    docEl.style.setProperty('--acre-letter-spacing', ltVal);
-    if (letterLabel) letterLabel.innerText = ltText;
-    btnLetter?.classList.toggle('active', ltActive);
-
-    // Dislexia
-    const btnDyslexic = shadow.getElementById('btnDyslexic');
-    body.classList.toggle('acre-dyslexic-mode', this.isDyslexicFriendly);
-    btnDyslexic?.classList.toggle('active', this.isDyslexicFriendly);
-    btnDyslexic?.setAttribute('aria-pressed', String(this.isDyslexicFriendly));
-
-    // Mascote
-    const mascotTrigger = shadow.getElementById('mascotTrigger');
-    const altContainer = shadow.getElementById('altTriggerContainer');
-    const mascotLabel = shadow.getElementById('mascotBtnLabel');
-    if (this.showMascot) {
-      mascotTrigger?.classList.remove('hidden');
-      altContainer?.classList.add('hidden');
-      if (mascotLabel) mascotLabel.innerText = 'Ocultar Mascote';
-      shadow.getElementById('btnToggleMascot')?.classList.remove('active');
-    } else {
-      mascotTrigger?.classList.add('hidden');
-      altContainer?.classList.remove('hidden');
-      if (mascotLabel) mascotLabel.innerText = 'Mostrar Mascote';
-      shadow.getElementById('btnToggleMascot')?.classList.add('active');
-    }
-
-    // Hover speak
-    const hoverLabel = shadow.getElementById('hoverSpeakLabel');
-    const hoverBtn = shadow.getElementById('btnHoverSpeak');
-    if (hoverLabel) hoverLabel.innerText = this.readOnHover ? 'On' : 'Off';
-    hoverLabel?.classList.toggle('on', this.readOnHover);
-    hoverBtn?.setAttribute('aria-pressed', String(this.readOnHover));
-
-    // Libras
-    const librasLabel = shadow.getElementById('librasLabel');
-    const btnLibras = shadow.getElementById('btnLibras');
-    if (librasLabel) librasLabel.innerText = this.isLibrasActive ? 'On' : 'Off';
-    btnLibras?.classList.toggle('active', this.isLibrasActive);
-    btnLibras?.setAttribute('aria-pressed', String(this.isLibrasActive));
-
-    if (this.isLibrasActive) {
-      const vd = document.querySelector('[vw]') as HTMLElement;
-      if (!vd) this.injectVLibras();
-      else vd.style.display = 'block';
-    } else {
-      const vd = document.querySelector('[vw]') as HTMLElement;
-      if (vd) vd.style.display = 'none';
-    }
-  }
-
-  private saveSettings() {
-    const rateSlider = this.shadow.getElementById('rateSlider') as HTMLInputElement;
-    const pitchSlider = this.shadow.getElementById('pitchSlider') as HTMLInputElement;
-    const volumeSlider = this.shadow.getElementById('volumeSlider') as HTMLInputElement;
-    localStorage.setItem('acre_acessivel_settings', JSON.stringify({
-      fontScale: this.fontScale,
-      isHighContrast: this.isHighContrast,
-      isGrayscale: this.isGrayscale,
-      lineSpacing: this.lineSpacing,
-      letterSpacing: this.letterSpacing,
-      isDyslexicFriendly: this.isDyslexicFriendly,
-      showMascot: this.showMascot,
-      readOnHover: this.readOnHover,
-      isLibrasActive: this.isLibrasActive,
-      rate: parseFloat(rateSlider?.value || '1.0'),
-      pitch: parseFloat(pitchSlider?.value || '1.0'),
-      volume: parseFloat(volumeSlider?.value || '1.0'),
-    }));
-  }
-
-  private loadSettings() {
-    const data = localStorage.getItem('acre_acessivel_settings');
-    if (!data) return;
-    try {
-      const s = JSON.parse(data);
-      this.fontScale = s.fontScale ?? 1.0;
-      this.isHighContrast = s.isHighContrast ?? false;
-      this.isGrayscale = s.isGrayscale ?? false;
-      this.lineSpacing = s.lineSpacing ?? 'normal';
-      this.letterSpacing = s.letterSpacing ?? 'normal';
-      this.isDyslexicFriendly = s.isDyslexicFriendly ?? false;
-      this.showMascot = s.showMascot ?? true;
-      this.readOnHover = s.readOnHover ?? false;
-      this.isLibrasActive = s.isLibrasActive ?? false;
-
-      const rateSlider = this.shadow.getElementById('rateSlider') as HTMLInputElement;
-      const rateVal = this.shadow.getElementById('rateVal');
-      if (rateSlider && s.rate !== undefined) {
-        rateSlider.value = s.rate.toString();
-        if (rateVal) rateVal.innerText = `${s.rate.toFixed(2)}x`;
-        this.reader.setRate(s.rate);
-      }
-      const pitchSlider = this.shadow.getElementById('pitchSlider') as HTMLInputElement;
-      const pitchVal = this.shadow.getElementById('pitchVal');
-      if (pitchSlider && s.pitch !== undefined) {
-        pitchSlider.value = s.pitch.toString();
-        if (pitchVal) pitchVal.innerText = s.pitch.toFixed(2);
-        this.reader.setPitch(s.pitch);
-      }
-      const volumeSlider = this.shadow.getElementById('volumeSlider') as HTMLInputElement;
-      const volumeVal = this.shadow.getElementById('volumeVal');
-      if (volumeSlider && s.volume !== undefined) {
-        volumeSlider.value = s.volume.toString();
-        if (volumeVal) volumeVal.innerText = `${Math.round(s.volume * 100)}%`;
-        this.reader.setVolume(s.volume);
-      }
-    } catch (e) {
-      console.error('Erro ao ler configurações:', e);
-    }
-  }
-
-  public setLanguage(lang: string) {
-    if (this.reader) {
-      this.reader.setLanguage(lang);
-    }
-    const mascot = this.shadow?.getElementById('capiMascot') as any;
-    if (mascot && typeof mascot.setLanguage === 'function') {
-      mascot.setLanguage(lang);
-    }
-  }
-
-  private injectVLibras() {
-    if (document.querySelector('[vw]')) return;
-    const div = document.createElement('div');
-    div.id = 'vlibras-div';
-    div.setAttribute('vw', '');
-    div.classList.add('enabled');
-    div.innerHTML = `<div vw-access-button class="active"></div><div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>`;
-    document.body.appendChild(div);
-    const script = document.createElement('script');
-    script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
-    script.onload = () => {
-      // @ts-ignore
-      if (window.VLibras?.Widget) new window.VLibras.Widget('https://vlibras.gov.br/app');
-    };
-      document.head.appendChild(script);
-  }
+/**
+ * AcreAccessibilityPanel - Painel Completo de Acessibilidade e Controle de Voz (Acre-Acessível)
+ * Seguro para SSR: registra o Custom Element somente no navegador.
+ */
+
+import type { VoiceReader } from './voice-reader';
+
+export interface AccessibilitySettings {
+  fontScale: number;
+  highContrast: boolean;
+  darkMode: boolean;
+  dyslexicFont: boolean;
+  lineSpacing: boolean;
+  highlightLinks: boolean;
+  readingGuide: boolean;
+  stopAnimations: boolean;
+  speechRate: number;
+  readOnHover: boolean;
 }
 
-customElements.define('acre-accessibility-panel', AcreAccessibilityPanel);
+const DEFAULT_SETTINGS: AccessibilitySettings = {
+  fontScale: 1.0,
+  highContrast: false,
+  darkMode: false,
+  dyslexicFont: false,
+  lineSpacing: false,
+  highlightLinks: false,
+  readingGuide: false,
+  stopAnimations: false,
+  speechRate: 1.05,
+  readOnHover: false,
+};
+
+const ICONS = {
+  play: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>`,
+  pause: `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`,
+  prev: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>`,
+  next: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>`,
+  stop: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>`,
+  speaker: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`,
+  close: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  type: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>`,
+  eye: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  touch: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>`,
+  contrast: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 18a6 6 0 0 0 0-12v12z" fill="currentColor"/></svg>`,
+  moon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`,
+  dyslexic: `<span style="font-family:serif;font-weight:700;font-size:15px;letter-spacing:-0.5px;">Abc</span>`,
+  spacing: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 8 22 12 18 16"/><polyline points="6 8 2 12 6 16"/><line x1="2" y1="12" x2="22" y2="12"/></svg>`,
+  links: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  ruler: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
+  pauseMotion: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>`,
+};
+
+export interface AccessibilityPanelElement extends HTMLElement {
+  setVoiceReader(reader: VoiceReader): void;
+  toggle(force?: boolean): void;
+  updateReadingStatus(isReading: boolean, isPaused: boolean, currentText?: string): void;
+}
+
+export function registerAccessibilityPanel(): void {
+  if (typeof window === 'undefined' || typeof customElements === 'undefined') return;
+  if (customElements.get('acre-accessibility-panel')) return;
+
+  class AcreAccessibilityPanel extends HTMLElement implements AccessibilityPanelElement {
+    private shadow: ShadowRoot;
+    private isOpen = false;
+    private settings: AccessibilitySettings = { ...DEFAULT_SETTINGS };
+    private voiceReader: VoiceReader | null = null;
+    private readingGuideEl: HTMLElement | null = null;
+
+    constructor() {
+      super();
+      this.shadow = this.attachShadow({ mode: 'open' });
+      this.loadSettings();
+    }
+
+    public setVoiceReader(reader: VoiceReader) {
+      this.voiceReader = reader;
+      this.voiceReader.setRate(this.settings.speechRate);
+      this.voiceReader.setReadOnHover(this.settings.readOnHover);
+      this.populateVoices();
+    }
+
+    connectedCallback() {
+      this.injectGlobalStyles();
+      this.render();
+      this.applySettingsToPage();
+      this.setupGlobalListeners();
+    }
+
+    public toggle(force?: boolean) {
+      this.isOpen = force !== undefined ? force : !this.isOpen;
+      const panel = this.shadow.querySelector('.panel-wrapper');
+      if (panel) {
+        panel.classList.toggle('open', this.isOpen);
+        if (this.isOpen) {
+          this.populateVoices();
+        }
+      }
+    }
+
+    public updateReadingStatus(isReading: boolean, isPaused: boolean, currentText?: string) {
+      const playBtn = this.shadow.querySelector('#btn-play-pause') as HTMLButtonElement | null;
+      const statusText = this.shadow.querySelector('#reader-status-text') as HTMLElement | null;
+      const previewBox = this.shadow.querySelector('#reader-preview') as HTMLElement | null;
+
+      if (playBtn) {
+        if (!isReading) {
+          playBtn.innerHTML = `${ICONS.play}<span>Ouvir Página</span>`;
+          playBtn.classList.remove('active-reading');
+        } else if (isPaused) {
+          playBtn.innerHTML = `${ICONS.play}<span>Continuar</span>`;
+          playBtn.classList.remove('active-reading');
+        } else {
+          playBtn.innerHTML = `${ICONS.pause}<span>Pausar</span>`;
+          playBtn.classList.add('active-reading');
+        }
+      }
+
+      if (statusText) {
+        if (!isReading) {
+          statusText.textContent = 'Pronto para ler';
+        } else if (isPaused) {
+          statusText.textContent = 'Leitura pausada';
+        } else {
+          statusText.textContent = 'Capi está lendo...';
+        }
+      }
+
+      if (previewBox && currentText) {
+        previewBox.textContent =
+          currentText.length > 90 ? currentText.substring(0, 90) + '...' : currentText;
+        previewBox.style.display = isReading ? 'block' : 'none';
+      } else if (previewBox && !isReading) {
+        previewBox.style.display = 'none';
+      }
+    }
+
+    private loadSettings() {
+      try {
+        const saved = localStorage.getItem('acre_acessivel_settings');
+        if (saved) {
+          this.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+          // Segurança: nunca inicia com leitura por hover ativada para evitar disparos acidentais
+          this.settings.readOnHover = false;
+        }
+      } catch {
+        this.settings = { ...DEFAULT_SETTINGS };
+      }
+    }
+
+    private saveSettings() {
+      try {
+        localStorage.setItem('acre_acessivel_settings', JSON.stringify(this.settings));
+      } catch {
+        /* ignore */
+      }
+    }
+
+    private injectGlobalStyles() {
+      if (document.getElementById('acre-acessivel-global-styles')) return;
+
+      const style = document.createElement('style');
+      style.id = 'acre-acessivel-global-styles';
+      style.textContent = `
+        @import url('https://fonts.cdnfonts.com/css/opendyslexic');
+
+        :root {
+          --acre-font-multiplier: 1;
+        }
+
+        html.acre-custom-font,
+        html.acre-custom-font body {
+          font-size: calc(16px * var(--acre-font-multiplier)) !important;
+        }
+
+        .acre-acessivel-reading-highlight {
+          outline: 3px solid #C8102E !important;
+          background-color: rgba(242, 201, 76, 0.28) !important;
+          border-radius: 4px !important;
+          transition: background-color 0.2s ease, outline 0.2s ease !important;
+        }
+
+        html.acre-high-contrast {
+          --bg-paper: #000000 !important;
+          --bg-surface: #0a0a0a !important;
+          --bg-elevated: #000000 !important;
+          --ink-primary: #FFFFFF !important;
+          --ink-secondary: #FFFF00 !important;
+          --ink-muted: #00FF99 !important;
+          --rule-strong: #FFFF00 !important;
+          --rule-light: #FFFFFF !important;
+        }
+
+        html.acre-high-contrast,
+        html.acre-high-contrast body,
+        html.acre-high-contrast header,
+        html.acre-high-contrast footer,
+        html.acre-high-contrast main,
+        html.acre-high-contrast section,
+        html.acre-high-contrast article,
+        html.acre-high-contrast .newspaper-shell,
+        html.acre-high-contrast .editorial-nav,
+        html.acre-high-contrast .doc-list,
+        html.acre-high-contrast .doc-row {
+          background-color: #000000 !important;
+          color: #FFFFFF !important;
+          border-color: #FFFF00 !important;
+        }
+
+        html.acre-high-contrast h1,
+        html.acre-high-contrast h2,
+        html.acre-high-contrast h3,
+        html.acre-high-contrast h4,
+        html.acre-high-contrast p,
+        html.acre-high-contrast span,
+        html.acre-high-contrast li {
+          color: #FFFFFF !important;
+        }
+
+        html.acre-high-contrast a,
+        html.acre-high-contrast button {
+          color: #FFFF00 !important;
+        }
+
+        html.acre-dark-mode {
+          --bg-paper: #121614 !important;
+          --bg-surface: #1A201D !important;
+          --bg-elevated: #1F2622 !important;
+          --ink-primary: #EAE6DF !important;
+          --ink-secondary: #C8C3B9 !important;
+          --ink-muted: #9E988E !important;
+          --rule-strong: #4A524D !important;
+          --rule-light: #2C342F !important;
+        }
+
+        html.acre-dark-mode,
+        html.acre-dark-mode body,
+        html.acre-dark-mode header,
+        html.acre-dark-mode footer,
+        html.acre-dark-mode main,
+        html.acre-dark-mode .editorial-nav,
+        html.acre-dark-mode .doc-list {
+          background-color: #121614 !important;
+          color: #EAE6DF !important;
+        }
+
+        html.acre-dark-mode h1,
+        html.acre-dark-mode h2,
+        html.acre-dark-mode h3,
+        html.acre-dark-mode p,
+        html.acre-dark-mode span,
+        html.acre-dark-mode li,
+        html.acre-dark-mode a {
+          color: #EAE6DF !important;
+        }
+
+        html.acre-dyslexic-font,
+        html.acre-dyslexic-font body,
+        html.acre-dyslexic-font p,
+        html.acre-dyslexic-font h1,
+        html.acre-dyslexic-font h2,
+        html.acre-dyslexic-font h3,
+        html.acre-dyslexic-font h4,
+        html.acre-dyslexic-font span,
+        html.acre-dyslexic-font a,
+        html.acre-dyslexic-font li {
+          font-family: 'OpenDyslexic', 'Comic Sans MS', Verdana, sans-serif !important;
+        }
+
+        html.acre-line-spacing p,
+        html.acre-line-spacing li,
+        html.acre-line-spacing span,
+        html.acre-line-spacing div {
+          line-height: 2.0 !important;
+          letter-spacing: 0.06em !important;
+          word-spacing: 0.14em !important;
+        }
+
+        html.acre-highlight-links a {
+          background-color: #F2C94C !important;
+          color: #000000 !important;
+          text-decoration: underline !important;
+          font-weight: bold !important;
+          padding: 1px 4px !important;
+          border-radius: 3px !important;
+        }
+
+        html.acre-stop-animations *,
+        html.acre-stop-animations *::before,
+        html.acre-stop-animations *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+
+        #acre-reading-guide-bar {
+          position: fixed;
+          left: 0;
+          width: 100vw;
+          height: 36px;
+          background: rgba(242, 201, 76, 0.25);
+          border-top: 2px solid #008040;
+          border-bottom: 2px solid #C8102E;
+          pointer-events: none;
+          z-index: 999990;
+          display: none;
+          transform: translateY(-50%);
+        }
+      `;
+      document.head.appendChild(style);
+
+      if (!document.getElementById('acre-reading-guide-bar')) {
+        const guide = document.createElement('div');
+        guide.id = 'acre-reading-guide-bar';
+        document.body.appendChild(guide);
+        this.readingGuideEl = guide;
+      }
+    }
+
+    private applySettingsToPage() {
+      const html = document.documentElement;
+      const hasCustomFont = Math.abs(this.settings.fontScale - 1.0) > 0.01;
+      html.classList.toggle('acre-custom-font', hasCustomFont);
+      html.style.setProperty('--acre-font-multiplier', this.settings.fontScale.toString());
+
+      html.classList.toggle('acre-high-contrast', this.settings.highContrast);
+      html.classList.toggle('acre-dark-mode', this.settings.darkMode);
+      html.classList.toggle('acre-dyslexic-font', this.settings.dyslexicFont);
+      html.classList.toggle('acre-line-spacing', this.settings.lineSpacing);
+      html.classList.toggle('acre-highlight-links', this.settings.highlightLinks);
+      html.classList.toggle('acre-stop-animations', this.settings.stopAnimations);
+
+      if (this.readingGuideEl) {
+        this.readingGuideEl.style.display = this.settings.readingGuide ? 'block' : 'none';
+      }
+
+      if (this.voiceReader) {
+        this.voiceReader.setRate(this.settings.speechRate);
+        this.voiceReader.setReadOnHover(this.settings.readOnHover);
+      }
+
+      this.updateUIButtonsState();
+      this.saveSettings();
+    }
+
+    private updateUIButtonsState() {
+      const setBtnActive = (id: string, active: boolean) => {
+        const btn = this.shadow.querySelector(`#${id}`);
+        if (btn) {
+          btn.classList.toggle('active', active);
+          btn.setAttribute('aria-pressed', active.toString());
+        }
+      };
+
+      setBtnActive('btn-contrast', this.settings.highContrast);
+      setBtnActive('btn-dark', this.settings.darkMode);
+      setBtnActive('btn-dyslexic', this.settings.dyslexicFont);
+      setBtnActive('btn-spacing', this.settings.lineSpacing);
+      setBtnActive('btn-links', this.settings.highlightLinks);
+      setBtnActive('btn-guide', this.settings.readingGuide);
+      setBtnActive('btn-animations', this.settings.stopAnimations);
+      setBtnActive('btn-hover-read', this.settings.readOnHover);
+
+      const fontLabel = this.shadow.querySelector('#font-scale-label');
+      if (fontLabel) {
+        fontLabel.textContent = `${Math.round(this.settings.fontScale * 100)}%`;
+      }
+
+      const rateLabel = this.shadow.querySelector('#speech-rate-label');
+      if (rateLabel) {
+        rateLabel.textContent = `${this.settings.speechRate.toFixed(1)}x`;
+      }
+    }
+
+    private populateVoices() {
+      if (!this.voiceReader) return;
+      const select = this.shadow.querySelector('#voice-select') as HTMLSelectElement | null;
+      if (!select) return;
+
+      const voices = this.voiceReader.getAvailablePortugueseVoices();
+      if (voices.length === 0) return;
+
+      const currentVal = select.value;
+      select.innerHTML = '';
+
+      voices.forEach((v) => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = `${v.name.replace(/Microsoft |Google /g, '')} (${v.lang})`;
+        select.appendChild(opt);
+      });
+
+      if (currentVal) {
+        select.value = currentVal;
+      }
+    }
+
+    private setupGlobalListeners() {
+      document.addEventListener('mousemove', (e: MouseEvent) => {
+        if (this.settings.readingGuide && this.readingGuideEl) {
+          this.readingGuideEl.style.top = `${e.clientY}px`;
+        }
+      });
+
+      document.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.altKey && e.key.toLowerCase() === 'a') {
+          e.preventDefault();
+          this.toggle();
+        } else if (e.key === 'Escape' && this.isOpen) {
+          this.toggle(false);
+        }
+      });
+    }
+
+    private render() {
+      this.shadow.innerHTML = `
+      <style>
+        :host {
+          position: fixed;
+          bottom: 102px;
+          right: 24px;
+          z-index: 999998;
+          pointer-events: none;
+          font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .panel-wrapper {
+          width: 350px;
+          max-width: calc(100vw - 32px);
+          max-height: calc(100vh - 130px);
+          background: #FFFFFF;
+          color: #1C2826;
+          border-radius: 16px;
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22), 0 0 0 2px #008040;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+          pointer-events: none;
+          transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .panel-wrapper.open {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          pointer-events: auto;
+        }
+
+        .panel-header {
+          background: linear-gradient(135deg, #008040 0%, #00592D 100%);
+          color: #FFFFFF;
+          padding: 14px 18px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 3px solid #F2C94C;
+        }
+
+        .header-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 700;
+          font-size: 16px;
+          letter-spacing: 0.3px;
+        }
+
+        .star-icon {
+          color: #EB5757;
+          background: white;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+        }
+
+        .close-btn {
+          background: rgba(255, 255, 255, 0.15);
+          border: none;
+          color: white;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        .panel-body {
+          padding: 16px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .section-title {
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.8px;
+          color: #5C6B64;
+          font-weight: 700;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .voice-card {
+          background: #F4F9F6;
+          border: 1px solid #CBE5D6;
+          border-radius: 12px;
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .voice-status-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 12px;
+          color: #00592D;
+          font-weight: 600;
+        }
+
+        #reader-preview {
+          display: none;
+          font-size: 12px;
+          background: #FFFFFF;
+          padding: 8px 10px;
+          border-radius: 8px;
+          border-left: 3px solid #F2C94C;
+          color: #333;
+          font-style: italic;
+          line-height: 1.4;
+        }
+
+        .voice-controls-row {
+          display: flex;
+          gap: 6px;
+        }
+
+        .btn-voice-main {
+          flex: 1;
+          background: #008040;
+          color: white;
+          border: none;
+          padding: 10px 12px;
+          border-radius: 8px;
+          font-weight: 700;
+          font-size: 13px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-voice-main:hover {
+          background: #006633;
+        }
+
+        .btn-voice-main.active-reading {
+          background: #D97706;
+        }
+
+        .btn-voice-icon {
+          background: #FFFFFF;
+          border: 1px solid #CBE5D6;
+          color: #1C2826;
+          width: 38px;
+          height: 38px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .btn-voice-icon:hover {
+          background: #E6F2EC;
+          border-color: #008040;
+        }
+
+        .speed-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 12px;
+          padding-top: 4px;
+        }
+
+        .stepper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #FFFFFF;
+          padding: 3px 6px;
+          border-radius: 8px;
+          border: 1px solid #D1DBD6;
+        }
+
+        .stepper button {
+          background: #E8F0EC;
+          border: none;
+          width: 26px;
+          height: 26px;
+          border-radius: 6px;
+          font-weight: bold;
+          cursor: pointer;
+          color: #00592D;
+        }
+
+        .stepper button:hover {
+          background: #008040;
+          color: white;
+        }
+
+        .voice-select-row select {
+          width: 100%;
+          padding: 6px 8px;
+          border-radius: 6px;
+          border: 1px solid #CBE5D6;
+          font-size: 12px;
+          background: white;
+          color: #1C2826;
+        }
+
+        .features-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+
+        .feature-btn {
+          background: #F8FAF9;
+          border: 1.5px solid #E2ECE7;
+          border-radius: 10px;
+          padding: 10px 8px;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #2A3B34;
+          transition: all 0.2s ease;
+          text-align: center;
+        }
+
+        .feature-btn:hover {
+          border-color: #008040;
+          background: #F0F7F3;
+        }
+
+        .feature-btn.active {
+          background: #008040;
+          color: #FFFFFF;
+          border-color: #00592D;
+          box-shadow: 0 3px 10px rgba(0, 128, 64, 0.25);
+        }
+
+        .feature-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 22px;
+          height: 22px;
+          color: #008040;
+          transition: color 0.2s ease;
+        }
+
+        .feature-icon svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        .feature-btn.active .feature-icon {
+          color: #FFFFFF;
+        }
+
+        .font-control-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #F8FAF9;
+          border: 1.5px solid #E2ECE7;
+          border-radius: 10px;
+          padding: 8px 12px;
+        }
+
+        .panel-footer {
+          padding: 10px 16px;
+          background: #F4F6F5;
+          border-top: 1px solid #E2ECE7;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 11px;
+          color: #607068;
+        }
+
+        .reset-btn {
+          background: none;
+          border: none;
+          color: #D9383A;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 11px;
+          text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+          :host {
+            right: 12px;
+            bottom: 92px;
+          }
+          .panel-wrapper {
+            width: calc(100vw - 24px);
+          }
+        }
+      </style>
+
+      <div class="panel-wrapper" role="dialog" aria-label="Painel de Acessibilidade Acre-Acessível">
+        <div class="panel-header">
+          <div class="header-title">
+            <span class="star-icon">★</span>
+            <span>Acre-Acessível · Capi</span>
+          </div>
+          <button class="close-btn" id="btn-close" aria-label="Fechar painel">${ICONS.close}</button>
+        </div>
+
+        <div class="panel-body">
+          <div>
+            <div class="section-title">${ICONS.speaker}<span>Leitor de Voz da Capi (PT-BR)</span></div>
+            <div class="voice-card">
+              <div class="voice-status-row">
+                <span id="reader-status-text">Pronto para ler</span>
+              </div>
+              <div id="reader-preview"></div>
+
+              <div class="voice-controls-row">
+                <button class="btn-voice-icon" id="btn-prev" title="Parágrafo anterior" aria-label="Parágrafo anterior">${ICONS.prev}</button>
+                <button class="btn-voice-main" id="btn-play-pause">${ICONS.play}<span>Ouvir Página</span></button>
+                <button class="btn-voice-icon" id="btn-next" title="Próximo parágrafo" aria-label="Próximo parágrafo">${ICONS.next}</button>
+                <button class="btn-voice-icon" id="btn-stop" title="Parar leitura" aria-label="Parar leitura">${ICONS.stop}</button>
+              </div>
+
+              <div class="speed-row">
+                <span>Velocidade da Voz:</span>
+                <div class="stepper">
+                  <button id="btn-rate-down" aria-label="Diminuir velocidade">-</button>
+                  <span id="speech-rate-label">1.1x</span>
+                  <button id="btn-rate-up" aria-label="Aumentar velocidade">+</button>
+                </div>
+              </div>
+
+              <div class="voice-select-row">
+                <select id="voice-select" aria-label="Selecionar voz em português">
+                  <option value="">Voz Padrão do Sistema (PT-BR)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-title">${ICONS.type}<span>Tamanho da Letra</span></div>
+            <div class="font-control-bar">
+              <span style="font-size: 13px; font-weight: 600;">Escala do Texto</span>
+              <div class="stepper">
+                <button id="btn-font-down" aria-label="Diminuir letra">A-</button>
+                <span id="font-scale-label" style="min-width: 42px; text-align: center; font-weight: 700; font-size: 13px;">100%</span>
+                <button id="btn-font-up" aria-label="Aumentar letra">A+</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-title">${ICONS.eye}<span>Ajustes Visuais e Leitura</span></div>
+            <div class="features-grid">
+              <button class="feature-btn" id="btn-hover-read">
+                <span class="feature-icon">${ICONS.touch}</span>
+                <span>Tocar/Apontar p/ Ouvir</span>
+              </button>
+              <button class="feature-btn" id="btn-contrast">
+                <span class="feature-icon">${ICONS.contrast}</span>
+                <span>Alto Contraste</span>
+              </button>
+              <button class="feature-btn" id="btn-dark">
+                <span class="feature-icon">${ICONS.moon}</span>
+                <span>Modo Escuro</span>
+              </button>
+              <button class="feature-btn" id="btn-dyslexic">
+                <span class="feature-icon">${ICONS.dyslexic}</span>
+                <span>Fonte Dislexia</span>
+              </button>
+              <button class="feature-btn" id="btn-spacing">
+                <span class="feature-icon">${ICONS.spacing}</span>
+                <span>Espaçamento</span>
+              </button>
+              <button class="feature-btn" id="btn-links">
+                <span class="feature-icon">${ICONS.links}</span>
+                <span>Destacar Links</span>
+              </button>
+              <button class="feature-btn" id="btn-guide">
+                <span class="feature-icon">${ICONS.ruler}</span>
+                <span>Guia de Leitura</span>
+              </button>
+              <button class="feature-btn" id="btn-animations">
+                <span class="feature-icon">${ICONS.pauseMotion}</span>
+                <span>Pausar Animações</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <span>Atalho: <strong>Alt + A</strong></span>
+          <button class="reset-btn" id="btn-reset">Restaurar Padrão</button>
+        </div>
+      </div>
+    `;
+
+      this.bindPanelEvents();
+    }
+
+    private bindPanelEvents() {
+      const q = (sel: string) => this.shadow.querySelector(sel);
+
+      q('#btn-close')?.addEventListener('click', () => this.toggle(false));
+
+      q('#btn-play-pause')?.addEventListener('click', () => {
+        if (!this.voiceReader) return;
+        const st = this.voiceReader.getStatus();
+        if (!st.isReading) {
+          this.voiceReader.startPageReading(true);
+        } else if (st.isPaused) {
+          this.voiceReader.resume();
+        } else {
+          this.voiceReader.pause();
+        }
+      });
+
+      q('#btn-stop')?.addEventListener('click', () => this.voiceReader?.stop());
+      q('#btn-prev')?.addEventListener('click', () => this.voiceReader?.previousElement());
+      q('#btn-next')?.addEventListener('click', () => this.voiceReader?.nextElement());
+
+      q('#btn-rate-down')?.addEventListener('click', () => {
+        this.settings.speechRate = Math.max(0.6, +(this.settings.speechRate - 0.1).toFixed(1));
+        this.applySettingsToPage();
+      });
+
+      q('#btn-rate-up')?.addEventListener('click', () => {
+        this.settings.speechRate = Math.min(2.0, +(this.settings.speechRate + 0.1).toFixed(1));
+        this.applySettingsToPage();
+      });
+
+      q('#voice-select')?.addEventListener('change', (e: Event) => {
+        const val = (e.target as HTMLSelectElement).value;
+        if (val && this.voiceReader) {
+          this.voiceReader.setVoiceByName(val);
+        }
+      });
+
+      q('#btn-font-down')?.addEventListener('click', () => {
+        this.settings.fontScale = Math.max(0.8, +(this.settings.fontScale - 0.1).toFixed(2));
+        this.applySettingsToPage();
+      });
+
+      q('#btn-font-up')?.addEventListener('click', () => {
+        this.settings.fontScale = Math.min(1.6, +(this.settings.fontScale + 0.1).toFixed(2));
+        this.applySettingsToPage();
+      });
+
+      q('#btn-hover-read')?.addEventListener('click', () => {
+        this.settings.readOnHover = !this.settings.readOnHover;
+        this.applySettingsToPage();
+      });
+
+      q('#btn-contrast')?.addEventListener('click', () => {
+        this.settings.highContrast = !this.settings.highContrast;
+        if (this.settings.highContrast) this.settings.darkMode = false;
+        this.applySettingsToPage();
+      });
+
+      q('#btn-dark')?.addEventListener('click', () => {
+        this.settings.darkMode = !this.settings.darkMode;
+        if (this.settings.darkMode) this.settings.highContrast = false;
+        this.applySettingsToPage();
+      });
+
+      q('#btn-dyslexic')?.addEventListener('click', () => {
+        this.settings.dyslexicFont = !this.settings.dyslexicFont;
+        this.applySettingsToPage();
+      });
+
+      q('#btn-spacing')?.addEventListener('click', () => {
+        this.settings.lineSpacing = !this.settings.lineSpacing;
+        this.applySettingsToPage();
+      });
+
+      q('#btn-links')?.addEventListener('click', () => {
+        this.settings.highlightLinks = !this.settings.highlightLinks;
+        this.applySettingsToPage();
+      });
+
+      q('#btn-guide')?.addEventListener('click', () => {
+        this.settings.readingGuide = !this.settings.readingGuide;
+        this.applySettingsToPage();
+      });
+
+      q('#btn-animations')?.addEventListener('click', () => {
+        this.settings.stopAnimations = !this.settings.stopAnimations;
+        this.applySettingsToPage();
+      });
+
+      q('#btn-reset')?.addEventListener('click', () => {
+        this.settings = { ...DEFAULT_SETTINGS };
+        this.applySettingsToPage();
+        this.voiceReader?.stop();
+      });
+    }
+  }
+
+  customElements.define('acre-accessibility-panel', AcreAccessibilityPanel);
+}
