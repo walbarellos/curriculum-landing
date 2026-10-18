@@ -525,10 +525,6 @@ const content: Record<"en" | "he", Overlay> = {
         kind: "Cultural Preservation",
         summary: "Public archive of endangered indigenous languages of Acre.",
       },
-      cracklab: {
-        kind: "Education · Reverse Engineering",
-        summary: "Reverse engineering challenges on 64-bit Linux, with write-ups.",
-      },
       "kite-game": {
         kind: "Game · PC and Android",
         summary: "Multiplayer kite-fighting game. In development.",
@@ -558,10 +554,10 @@ const content: Record<"en" | "he", Overlay> = {
         desc: "Creation of the platform, research and analysis of public budget data, and infrastructure development.",
       },
       {
-        date: "2026 — Present",
-        title: "Systems for Internet — IFAC",
-        sub: "Federal Institute of Acre · Rio Branco Campus · 2nd term",
-        desc: "Enrolled in 2026. Studying networks, development and matrix algebra, while building real systems alongside the course.",
+        date: "2026",
+        title: "LexNode — Public Data & TJAC",
+        sub: "Web & CLI · Python & FastAPI",
+        desc: "Interface and structured search engine for public data from the Acre Court of Justice (TJAC).",
       },
       {
         date: "2026",
@@ -570,16 +566,16 @@ const content: Record<"en" | "he", Overlay> = {
         desc: "System to audit and map digital and physical accessibility in public agencies and spaces in Acre, under the LBI (Brazilian Inclusion Law) and with open data.",
       },
       {
+        date: "2026 — Present",
+        title: "Systems for Internet — IFAC",
+        sub: "Federal Institute of Acre · Rio Branco Campus · 2nd term",
+        desc: "Enrolled in 2026. Studying networks, development and matrix algebra, while building real systems alongside the course.",
+      },
+      {
         date: "2026",
         title: "Fala Comigo v0.3.0 — Production",
         sub: "Android AAC app · GPL-3.0 · VirusTotal 0/72",
         desc: "Communication app for non-verbal people. Educational fork by a partner in Rio de Janeiro. Proposal selected in Phase 1 of the Centelha Program (FAPEAC/FINEP).",
-      },
-      {
-        date: "2026",
-        title: "CrackLab — Reversing Platform",
-        sub: "crack-lab.vercel.app · 10 challenges · C + Python",
-        desc: "Reverse engineering learning platform with binaries written from scratch and detailed write-ups.",
       },
       {
         date: "2024",
@@ -781,10 +777,6 @@ const content: Record<"en" | "he", Overlay> = {
         kind: "שימור תרבותי",
         summary: "ארכיון ציבורי של שפות ילידיות באקרי הנמצאות בסכנת הכחדה.",
       },
-      cracklab: {
-        kind: "חינוך · הנדסה לאחור",
-        summary: "אתגרי הנדסה לאחור על לינוקס 64-ביט, עם כתבי פתרון.",
-      },
       "kite-game": {
         kind: "משחק · מחשב ואנדרואיד",
         summary: "משחק רב-משתתפים של קרבות עפיפונים. בפיתוח.",
@@ -814,10 +806,10 @@ const content: Record<"en" | "he", Overlay> = {
         desc: "הקמת הפלטפורמה, תחקיר וניתוח של נתוני תקציב ציבוריים ופיתוח התשתית.",
       },
       {
-        date: "2026 — הווה",
-        title: "מערכות לאינטרנט — IFAC",
-        sub: "המכון הפדרלי של אקרי · קמפוס ריו ברנקו · סמסטר 2",
-        desc: "התחלתי ב-2026. לומד רשתות, פיתוח ואלגברה מטריציונית, ובמקביל בונה מערכות אמיתיות.",
+        date: "2026",
+        title: "LexNode — נתונים ציבוריים ו-TJAC",
+        sub: "ווב ו-CLI · Python ו-FastAPI",
+        desc: "ממשק ומנוע חיפוש מובנה לנתונים ציבוריים מבית המשפט של אקרי (TJAC).",
       },
       {
         date: "2026",
@@ -826,16 +818,16 @@ const content: Record<"en" | "he", Overlay> = {
         desc: "מערכת לביקורת ולמיפוי של נגישות דיגיטלית ופיזית בגופים ובמרחבים ציבוריים באקרי, לפי חוק ההכללה הברזילאי (LBI) ובאמצעות נתונים פתוחים.",
       },
       {
+        date: "2026 — הווה",
+        title: "מערכות לאינטרנט — IFAC",
+        sub: "המכון הפדרלי של אקרי · קמפוס ריו ברנקו · סמסטר 2",
+        desc: "התחלתי ב-2026. לומד רשתות, פיתוח ואלגברה מטריציונית, ובמקביל בונה מערכות אמיתיות.",
+      },
+      {
         date: "2026",
         title: "Fala Comigo v0.3.0 — בייצור",
         sub: "אפליקציית AAC לאנדרואיד · GPL-3.0 · VirusTotal 0/72",
         desc: "אפליקציית תקשורת לאנשים שאינם דוברים. פורק חינוכי שיצר שותף בריו דה ז'ניירו. ההצעה נבחרה בשלב 1 של תוכנית Centelha‏ (FAPEAC/FINEP).",
-      },
-      {
-        date: "2026",
-        title: "CrackLab — פלטפורמת הנדסה לאחור",
-        sub: "crack-lab.vercel.app · 10 אתגרים · C + Python",
-        desc: "פלטפורמת לימוד להנדסה לאחור, עם בינאריים שנכתבו מאפס וכתבי פתרון מפורטים.",
       },
       {
         date: "2024",
