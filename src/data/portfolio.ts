@@ -506,7 +506,7 @@ export const bioInfo = {
   responseTime: "Resposta em até 24h · UTC−5",
   links: {
     github: "https://github.com/walbarellos",
-    linkedin: "https://www.linkedin.com/in/willian-albarello-b96361103/",
+    ataacre: "https://ataacre.netlify.app",
     lattes: "http://lattes.cnpq.br/1326474169012655",
     publishedPage: "https://walbarellos.is-a.dev",
     cracklab: "https://crack-lab.vercel.app/",

@@ -767,7 +767,7 @@ export function Portfolio() {
 
   const socials: { label: string; handle: string; href: string }[] = [
     { label: "GitHub", handle: "github.com/walbarellos", href: bioInfo.links.github },
-    { label: "LinkedIn", handle: "willian-albarello", href: bioInfo.links.linkedin },
+    { label: "ATA Acre", handle: "ataacre.netlify.app", href: bioInfo.links.ataacre },
     { label: "Lattes", handle: "ID 1326474169012655", href: bioInfo.links.lattes },
     { label: "Mastodon", handle: "@walbarellos", href: bioInfo.links.mastodon },
     { label: "CrackLab", handle: "crack-lab.vercel.app", href: bioInfo.links.cracklab },
