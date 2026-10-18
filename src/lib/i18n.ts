@@ -464,6 +464,12 @@ const content: Record<"en" | "he", Overlay> = {
       gamedev: "Gamedev & Graphics",
     },
     projects: {
+      "ata-acre": {
+        kind: "Investigative Journalism · Transparency",
+        summary:
+          "Documentary newsroom investigating public budgets and open data in Acre. Integrates the Acre-Acessibilidade neural screen reader with the Capi mascot.",
+        highlight: "Data Journalism",
+      },
       "fala-comigo": {
         kind: "Android · AAC · GPL-3.0",
         summary:
@@ -716,11 +722,17 @@ const content: Record<"en" | "he", Overlay> = {
       gamedev: "פיתוח משחקים וגרפיקה",
     },
     projects: {
+      "ata-acre": {
+        kind: "עיתונות חוקרת · שקיפות ציבורית",
+        summary:
+          "כלי תקשורת תיעודי על ביקורת תקציבית ונתונים פתוחים באקרי. משלב את קורא המסך העצבי של Acre-Acessibilidade עם הקמע קפי.",
+        highlight: "עיתונות נתונים",
+      },
       "fala-comigo": {
         kind: "אנדרואיד · AAC · GPL-3.0",
         summary:
-          "אפליקציית תקשורת לאנשים שאינם דוברים, לאנשים על הספקטרום האוטיסטי ולאנשי חינוך. פועלת במלואה ללא חיבור לאינטרנט, חינמית ובקוד פתוח. שותף בריו דה ז'ניירו יצר ממנה פורק (fork) לשימוש חינוכי, והמערכת אושרה בתוכנית Centelha‏ (FAPEAC/FINEP).",
-        highlight: "v0.3.0 · Centelha שלב 2",
+          "אפליקציית תקשורת לאנשים שאינם דוברים, לאנשים על הספקטרום האוטיסטי ולאנשי חינוך. פועלת במלואה ללא חיבור לאינטרנט, חינמית ובקוד פתוח. שותף בריו דה ז'ניירו יצר ממנה פורק (fork) לשימוש חינוכי, וההצעה נבחרה בשלב 1 של תוכנית Centelha‏ (FAPEAC/FINEP).",
+        highlight: "v0.3.0 · Centelha שלב 1",
       },
       sentinela: {
         kind: "שקיפות ציבורית",
@@ -797,6 +809,12 @@ const content: Record<"en" | "he", Overlay> = {
     timeline: [
       {
         date: "2026 — הווה",
+        title: "ATA Acre — עיתונות נתונים ושקיפות",
+        sub: "מייסד ומתחזק · ataacre.netlify.app",
+        desc: "הקמת כלי התקשורת, תחקיר וניתוח של נתוני תקציב ציבוריים, כתיבה תיעודית ופיתוח כלל התשתית.",
+      },
+      {
+        date: "2026 — הווה",
         title: "מערכות לאינטרנט — IFAC",
         sub: "המכון הפדרלי של אקרי · קמפוס ריו ברנקו · סמסטר 2",
         desc: "התחלתי ב-2026. לומד רשתות, פיתוח ואלגברה מטריציונית, ובמקביל בונה מערכות אמיתיות.",
@@ -811,7 +829,7 @@ const content: Record<"en" | "he", Overlay> = {
         date: "2026",
         title: "Fala Comigo v0.3.0 — בייצור",
         sub: "אפליקציית AAC לאנדרואיד · GPL-3.0 · VirusTotal 0/72",
-        desc: "אפליקציית תקשורת לאנשים שאינם דוברים. פורק חינוכי שיצר שותף בריו דה ז'ניירו. אושרה בתוכנית Centelha‏ (FAPEAC/FINEP).",
+        desc: "אפליקציית תקשורת לאנשים שאינם דוברים. פורק חינוכי שיצר שותף בריו דה ז'ניירו. ההצעה נבחרה בשלב 1 של תוכנית Centelha‏ (FAPEAC/FINEP).",
       },
       {
         date: "2026",
