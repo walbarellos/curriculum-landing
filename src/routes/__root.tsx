@@ -37,6 +37,69 @@ const STRUCTURED_DATA = {
         "http://lattes.cnpq.br/1326474169012655",
         "https://mastodon.social/@walbarellos",
       ],
+      creatorOf: [
+        {
+          "@type": "SoftwareApplication",
+          name: "Fala Comigo",
+          applicationCategory: "AccessibilityApplication",
+          operatingSystem: "Android",
+          url: "https://github.com/walbarellos/FalaComigo",
+          description:
+            "App de comunicação alternativa e aumentativa (CAA) para pessoas não verbais e autistas. 100% offline-first, open-source, selecionado na fase 1 do Programa Centelha (FAPEAC/FINEP).",
+        },
+        {
+          "@type": "SoftwareApplication",
+          name: "KDE Connect Omarchy",
+          applicationCategory: "SystemApplication",
+          operatingSystem: "Linux",
+          url: "https://github.com/walbarellos/kdeconnect-omarchy",
+          description:
+            "Módulo de engenharia de sistemas em C++20 integrando o KDE Connect ao ecossistema desktop Linux sob Wayland.",
+        },
+        {
+          "@type": "SoftwareApplication",
+          name: "Sentinela",
+          applicationCategory: "PublicTransparencyApplication",
+          operatingSystem: "Linux",
+          url: "https://github.com/walbarellos/Sentinela",
+          description:
+            "Monitor autônomo de contratos públicos e licitações municipais com análise de anomalias orçamentárias em DuckDB e alertas automatizados.",
+        },
+        {
+          "@type": "SoftwareApplication",
+          name: "LexNode",
+          applicationCategory: "LegalTechApplication",
+          operatingSystem: "Cross-platform",
+          url: "https://github.com/walbarellos/LexNode",
+          description:
+            "Interface e motor de pesquisa estruturada para dados abertos do Tribunal de Justiça do Estado do Acre (TJAC).",
+        },
+        {
+          "@type": "WebApplication",
+          name: "ATA Acre",
+          url: "https://ataacre.netlify.app",
+          description:
+            "Plataforma documental e independente de fiscalização orçamentária e transparência pública no Acre com leitor assistivo neural integrado.",
+        },
+        {
+          "@type": "SoftwareApplication",
+          name: "wErpy",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Cross-platform",
+          url: "https://github.com/walbarellos/wErpy",
+          description:
+            "ERP modular de gestão de vendas, estoque e fluxo financeiro auditável com backend nativo em Rust e PostgreSQL.",
+        },
+        {
+          "@type": "SoftwareApplication",
+          name: "GlyphWave",
+          applicationCategory: "GraphicsApplication",
+          operatingSystem: "Web",
+          url: "https://github.com/walbarellos/GlyphWave",
+          description:
+            "Engine procedural de renderização e geração de assets visuais para Canvas 2D em JavaScript puro.",
+        },
+      ],
       hasOccupation: [
         {
           "@type": "Occupation",
