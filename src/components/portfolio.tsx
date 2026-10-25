@@ -788,12 +788,14 @@ export function Portfolio() {
           aria-label={t.a11yBarAria}
           className="accessibility-bar border-b border-line/20 bg-surface/90 sticky top-0 z-40 backdrop-blur-md"
         >
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-2 text-sm flex-wrap md:flex-nowrap">
-            {/* Esquerda: Seletor de Idioma */}
-            <LangSwitch lang={lang} onChange={changeLang} />
+          <div className="mx-auto flex max-w-5xl items-center justify-center gap-3 px-4 py-2 text-sm flex-wrap">
+            {/* Seletor de Idioma */}
+            <div className="w-full sm:w-auto flex items-center justify-center">
+              <LangSwitch lang={lang} onChange={changeLang} />
+            </div>
 
-            {/* Direita: Controles integrados em uma única linha harmoniosa */}
-            <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap justify-end">
+            {/* Controles integrados: Leitor de Voz, Tema, Impressão */}
+            <div className="w-full sm:w-auto flex items-center justify-center gap-1.5 flex-wrap">
               {/* Leitor de Voz Capi */}
               {readingState === "idle" ? (
                 <button
