@@ -935,81 +935,82 @@ export function Portfolio() {
           {/* Hero */}
           <header
             id="topo"
-            className="grid grid-cols-1 items-end gap-10 border-b border-line pb-12 md:grid-cols-[1fr_auto]"
+            className="flex flex-col items-center border-b border-line pb-12 pt-2 text-center"
           >
-            <div>
-              <div className="mb-5 flex flex-wrap items-center gap-2.5 reveal">
-                {bioInfo.badges.map((b, idx) => {
-                  const isLocation = idx === 0;
-                  return (
+            {/* Badges do Topo (Rio Branco, Acre & IFAC 2º Período) */}
+            <div className="mb-6 flex flex-wrap items-center justify-center gap-2.5 reveal">
+              {bioInfo.badges.map((b, idx) => {
+                const isLocation = idx === 0;
+                return (
+                  <span
+                    key={b}
+                    tabIndex={0}
+                    role="status"
+                    className={`badge-interactive ${
+                      isLocation ? "badge-interactive-location" : "badge-interactive-academic"
+                    }`}
+                    title={isLocation ? "Localizacao atual · Amazonia Ocidental" : "Instituto Federal do Acre · Formacao academica"}
+                  >
                     <span
-                      key={b}
-                      tabIndex={0}
-                      role="status"
-                      className={`badge-interactive ${
-                        isLocation ? "badge-interactive-location" : "badge-interactive-academic"
+                      className={`badge-indicator-dot ${
+                        isLocation
+                          ? "bg-emerald-600 dark:bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                          : "bg-amber-600 dark:bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
                       }`}
-                      title={isLocation ? "Localizacao atual · Amazonia Ocidental" : "Instituto Federal do Acre · Formacao academica"}
-                    >
-                      <span
-                        className={`badge-indicator-dot ${
-                          isLocation
-                            ? "bg-emerald-600 dark:bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                            : "bg-amber-600 dark:bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
-                        }`}
-                        aria-hidden="true"
-                      />
-                      <span>{b}</span>
-                    </span>
-                  );
-                })}
-              </div>
-
-              <h1 className="hero-title" aria-label={bioInfo.name}>
-                {bioInfo.name.split(" ").map((word, i) => (
-                  <span key={word} className="mask-line" aria-hidden="true">
-                    <span style={delay(120 + i * 140)}>{word}</span>
+                      aria-hidden="true"
+                    />
+                    <span>{b}</span>
                   </span>
-                ))}
-              </h1>
-
-              <p className="sec-sub mt-5 reveal" style={delay(500)}>
-                {bioInfo.role}
-              </p>
-              <p className="mt-3 font-mono text-sm reveal" style={delay(560)}>
-                <span className="sr-only">{t.systemsFor} {t.heroWords.join(", ")}.</span>
-                <span aria-hidden="true">{t.systemsFor} </span>
-                <RotatingWord words={t.heroWords} />
-              </p>
-              <p className="mt-4 max-w-xl text-muted leading-relaxed reveal" style={delay(620)}>
-                {bioInfo.summary}
-              </p>
-
-              <div className="no-print mt-7 flex flex-wrap items-center gap-3 reveal" style={delay(700)}>
-                <a className="btn btn-primary" data-magnet href="#projetos">
-                  {t.viewSystems} <span className="arrow" aria-hidden="true">↓</span>
-                </a>
-                <a className="btn btn-ghost" data-magnet href="#contato">
-                  {t.talk} <span className="arrow" aria-hidden="true">↗</span>
-                </a>
-                <a
-                  className="btn btn-ghost"
-                  data-magnet
-                  href="/assets/pdf/Willian_Albarello_Curriculo.pdf"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {t.resumePdf} <span className="arrow" aria-hidden="true">↗</span>
-                </a>
-              </div>
+                );
+              })}
             </div>
 
-            <div className="flex flex-col items-start md:items-center">
+            {/* Container da Foto Centralizado */}
+            <div className="mb-8 flex flex-col items-center justify-center reveal" style={delay(80)}>
               <HeroPortrait
                 alt={t.photoAlt(bioInfo.name)}
                 className="h-56 w-48 sm:h-72 sm:w-56 md:h-80 md:w-60"
               />
               <span className="mt-2 text-[11px] text-muted font-mono">{t.lattes}: 1326474169012655</span>
+            </div>
+
+            {/* Nome e Apresentação */}
+            <h1 className="hero-title text-center" aria-label={bioInfo.name}>
+              {bioInfo.name.split(" ").map((word, i) => (
+                <span key={word} className="mask-line" aria-hidden="true">
+                  <span style={delay(120 + i * 140)}>{word}</span>
+                </span>
+              ))}
+            </h1>
+
+            <p className="sec-sub mt-5 text-center reveal" style={delay(500)}>
+              {bioInfo.role}
+            </p>
+            <p className="mt-3 font-mono text-sm text-center reveal" style={delay(560)}>
+              <span className="sr-only">{t.systemsFor} {t.heroWords.join(", ")}.</span>
+              <span aria-hidden="true">{t.systemsFor} </span>
+              <RotatingWord words={t.heroWords} />
+            </p>
+            <p className="mt-4 max-w-xl mx-auto text-muted leading-relaxed text-center reveal" style={delay(620)}>
+              {bioInfo.summary}
+            </p>
+
+            <div className="no-print mt-7 flex flex-wrap items-center justify-center gap-3 reveal" style={delay(700)}>
+              <a className="btn btn-primary" data-magnet href="#projetos">
+                {t.viewSystems} <span className="arrow" aria-hidden="true">↓</span>
+              </a>
+              <a className="btn btn-ghost" data-magnet href="#contato">
+                {t.talk} <span className="arrow" aria-hidden="true">↗</span>
+              </a>
+              <a
+                className="btn btn-ghost"
+                data-magnet
+                href="/assets/pdf/Willian_Albarello_Curriculo.pdf"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t.resumePdf} <span className="arrow" aria-hidden="true">↗</span>
+              </a>
             </div>
           </header>
 

@@ -20,7 +20,7 @@ echo "✓ Build concluído!"
 
 echo ""
 echo "▶ [3/3] Publicando pasta 'dist' no Netlify..."
-netlify deploy --prod --dir=dist
+netlify deploy --prod --dir=dist --skip-functions-cache
 
 echo ""
 echo "=========================================="
