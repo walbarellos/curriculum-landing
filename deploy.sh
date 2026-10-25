@@ -9,9 +9,10 @@ echo " ★ CURRICULUM — DEPLOY UNIFICADO & SEGURO"
 echo "=========================================="
 
 echo ""
-echo "▶ [1/3] Enviando código para o Codeberg..."
+echo "▶ [1/3] Enviando código para Codeberg e GitHub..."
 git push -u origin main
-echo "✓ Codeberg atualizado!"
+git push github main
+echo "✓ Repositórios atualizados!"
 
 echo ""
 echo "▶ [2/3] Gerando build de produção limpo..."
