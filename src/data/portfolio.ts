@@ -138,6 +138,19 @@ export const projects: Project[] = [
     highlight: "Backend em Rust",
   },
   {
+    id: "volt-steth",
+    name: "VoltSteth",
+    href: "https://github.com/walbarellos/volt-steth",
+    category: "sistemas-reversa",
+    categoryLabel: "Sistemas & Reversing",
+    kind: "Sistemas · DSP · C++20",
+    summary:
+      "Estetoscópio elétrico e de integridade física para Linux. Mapeia a topologia de hardware (ALSA, xHCI, PCIe AER), detecta loops de terra via algoritmo de Goertzel (60Hz/120Hz com janela de Hann) e correlação de ruído EMI com UI nativa em GTK4/Libadwaita.",
+    stack: ["C++20", "DSP", "GTK4 / Libadwaita", "Linux Kernel", "ALSA"],
+    featured: true,
+    highlight: "C++20, DSP & GTK4",
+  },
+  {
     id: "kdeconnect-omarchy",
     name: "KDE Connect Omarchy",
     href: "https://github.com/walbarellos/kdeconnect-omarchy",

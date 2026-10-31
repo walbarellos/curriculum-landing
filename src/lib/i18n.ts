@@ -510,6 +510,12 @@ const content: Record<"en" | "he", Overlay> = {
           "ERP for sales, inventory and finance with separate access profiles for company and platform, and auditable workflows.",
         highlight: "Rust backend",
       },
+      "volt-steth": {
+        kind: "Systems · DSP · C++20",
+        summary:
+          "Low-level hardware electrical & physical stethoscope for Linux. Maps hardware topology (ALSA, xHCI, PCIe AER), detects ground loops via Goertzel algorithm (60Hz/120Hz with Hann window), and EMI noise correlation with native GTK4/Libadwaita GUI.",
+        highlight: "C++20, DSP & GTK4",
+      },
       "kdeconnect-omarchy": {
         kind: "Systems · C++ · Linux",
         summary: "Native module that integrates KDE Connect into the Linux desktop under Wayland.",
@@ -761,6 +767,12 @@ const content: Record<"en" | "he", Overlay> = {
         summary:
           "מערכת ERP למכירות, מלאי וכספים, עם פרופילי גישה נפרדים לחברה ולפלטפורמה ותהליכים הניתנים לביקורת.",
         highlight: "Backend ב-Rust",
+      },
+      "volt-steth": {
+        kind: "מערכות · DSP · C++20",
+        summary:
+          "סטתוסקופ חשמלי ופיזי ברמה נמוכה עבור לינוקס. ממפה טופולוגיית חומרה (ALSA, xHCI, PCIe AER), מזהה לולאות הארקה באמצעות אלגוריתם גרצל (60Hz/120Hz עם חלון האן), וקורלציית רעשי EMI עם ממשק GTK4/Libadwaita נייטיב.",
+        highlight: "C++20, DSP ו-GTK4",
       },
       "kdeconnect-omarchy": {
         kind: "מערכות · C++ · לינוקס",
